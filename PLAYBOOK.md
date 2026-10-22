@@ -24,6 +24,8 @@
 9. **QC bắt buộc**: `python3 tools/analyze_video.py beat.mp4 --out qa/` rồi xem `qa/report.txt`, `qa/energy.png`, `qa/contact.png`.
    Phải PASS jitter; không khung chết > 1.2s (trừ nhịp thở có chủ đích ≤1.5s); không trống sự kiện > 3.5s. Nghe lại mix.
 
+- Nhớ: mỗi beat cân nhắc chen VIDEO (cảnh hành động, 25–35% thời lượng) giữa các ảnh tĩnh — xem mục "Trộn VIDEO với ẢNH TĨNH" trong `EDITORIAL-PATTERNS.md`.
+
 ## Lỗi hay gặp → cách sửa
 | Triệu chứng | Nguyên nhân | Sửa |
 |---|---|---|

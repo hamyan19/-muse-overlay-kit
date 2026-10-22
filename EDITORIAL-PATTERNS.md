@@ -25,5 +25,21 @@ Lấy mốc bằng `tools/word_times.py wordts.json --auto`. Bảng dưới là 
 6. **Hai cảnh liền nhau không dùng cùng kiểu**: sau chuỗi lower_third thì chuyển sang strike/ticker/highlight.
 7. **Đọc lời trước, thiết kế sau**: nghe/đọc VO, gạch chân từ khoá, rồi mới viết spec.
 
+## Trộn VIDEO với ẢNH TĨNH trong cùng một video (mặc định nên làm)
+Mục tiêu: ảnh tĩnh làm xương sống (rẻ, đồng nhất), video chỉ chen vào đúng chỗ cần chuyển động THẬT. Phim "sống" hơn mà không phải làm toàn video.
+**Chọn khi nào dùng video thay vì ảnh:**
+| Dùng video (6–10s) | Dùng ảnh tĩnh + fx |
+|---|---|
+| Cảnh đang hành động: rơi, chạy, lội nước, cháy, nổ, máy bay bay | Cảnh tư liệu/bối cảnh, thẻ thông tin, bản đồ, chân dung |
+| Cú ngoặt/đỉnh cảm xúc cần "phá nhịp" (thường 1 cảnh / 20–30s) | Nhịp chậm, hồi tưởng, trích dẫn, nhịp im lặng |
+| Cảnh mở màn / cảnh cuối cần ấn tượng | Cảnh dài hơn 10s (lặp video dễ lộ) |
+**Công thức nhịp:** ảnh, ảnh, VIDEO, ảnh, ảnh, VIDEO… (video ≈ 25–35% thời lượng). Không để 2 video liền nhau; chuyển ảnh↔video bằng dissolve 0.5s trong khoảng lặng như mọi cảnh khác.
+**Cách trộn trong spec:**
+- Cảnh video: `{"id":"D","video":"video/clip.mp4","start":..,"camera":{..}}` — đi qua cùng camera/grain/vignette/preset màu như ảnh nên đồng nhất. Clip ngắn hơn cảnh tự lặp; tốt nhất cắt clip đúng độ dài cảnh.
+- Lớp video chồng lên ảnh (sương, mưa, khói, lửa, tia sáng): `video_overlay` `blend:"screen"` nền đen → trong suốt, opacity 0.2–0.4.
+- Âm thanh của clip KHÔNG dùng (chỉ lấy hình); tiếng lấy từ sfx/VO để kiểm soát mix.
+**Yêu cầu khi nhờ Muse tìm/sinh video:** cùng style bible với ảnh (cùng màu, cùng nhân vật), 16:9 ≥1280x720, không chữ/logo, camera ổn định (tránh rung tay), 6–10s. Đặt tên `video/<id>.mp4`. Trong `asset_plan.xlsx` cột LOẠI NGUYÊN LIỆU ghi "footage/AI video (tuỳ chọn)" ở cảnh hành động: anh duyệt OK thì Muse làm, BỎ thì dùng ảnh + fx.
+**Lint/QC:** `lint_spec.py` và `analyze_video.py` chạy như thường; kiểm clip lặp không bị giật tại điểm nối.
+
 ## Chọn phong cách cho từng video (đa dạng giữa các tập)
 Đừng dùng cùng một preset cho mọi tập. Gợi ý: tập về quá khứ/ký ức → `newsreel`; tập cảm xúc, ít dữ kiện → `cinematic`; tập nhiều số liệu/nhịp nhanh → `kinetic` hoặc mặc định. Trong một video dài có thể đổi giữa các beat, nhưng GIỮ MỘT phong cách trong cùng một beat.

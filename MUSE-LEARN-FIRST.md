@@ -19,3 +19,4 @@ Thứ tự học (≈10 phút):
 
 Cam kết khi nộp: đính kèm mp4 + spec.json + qa/report.txt; nói rõ sfx nào còn là placeholder (_TAM).
 Nếu môi trường của Muse không chạy được Python/ffmpeg/OpenCV, hãy báo ngay để người dùng biết, đừng tự đổi kỹ thuật.
+6. Mặc định TRỘN video + ảnh tĩnh trong một video (ảnh làm nền, video 6–10s ở cảnh hành động, ~25–35% thời lượng): đọc mục "Trộn VIDEO với ẢNH TĨNH" trong `EDITORIAL-PATTERNS.md`.
