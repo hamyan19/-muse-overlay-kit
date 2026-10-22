@@ -7,6 +7,10 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 |---|---|
 | `overlay_engine.py` | Engine: đọc `spec.json` → render MP4 (hình + mix tiếng). 20 loại phần tử, camera easing/shake, dissolve, grain/vignette |
 | `tools/find_gaps.py` | Từ `wordts.json` (Whisper) → danh sách câu + khoảng lặng để đặt điểm cắt/dissolve |
+| `tools/word_times.py` | Tra mốc cụm từ + bảng "mệnh đề → hiệu ứng gợi ý" (phủ định, số, tên riêng, trích dẫn) |
+| `tools/lint_spec.py` | **Kiểm spec trước render**: trống sự kiện, overlay tĩnh, thiếu t_out, chữ nhỏ, chồng thẻ, cảnh tối, đơn điệu |
+| `EDITORIAL-PATTERNS.md` | Ngữ pháp biên tập: mệnh đề lời đọc → sự kiện hình |
+| `LESSONS.md` | Nhật ký bài học (Muse tự cập nhật mỗi beat) |
 | `tools/analyze_video.py` | **Máy chấm từng khung hình**: jitter camera, khung chết, khoảng trống sự kiện, kiểu chuyển cảnh |
 | `examples/koepcke_hook.json` | Spec thật của Hook Koepcke 28s (tái tạo pixel-identical bản đã duyệt) |
 | `examples/beat1_lansa.json` | Spec Beat 1 thật (85s, 6 cảnh từ 4 ảnh, mưa, sương, tối dần) |

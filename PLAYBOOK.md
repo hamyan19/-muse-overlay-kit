@@ -9,18 +9,19 @@
 5. **Thẻ căn giữa, nền thẻ đậm 0.8–0.85**, viền kem, chữ có stroke đen → đọc được trên mọi ảnh. Vàng = điểm nhấn, đỏ = loại bỏ/nguy hiểm.
 6. **Grain + vignette + tint ấm áp lên NỀN trước khi chồng overlay** (overlay giữ sắc nét). Grain seed theo số khung → không nhấp nháy giả.
 7. **Nhãn trung thực**: cảnh dựng lại luôn có "RECONSTRUCTION". Số liệu/sự kiện đã fact-check mới được lên màn hình.
-8. Âm thanh: VO là chuẩn (~ -15 LUFS); nhạc nền -21…-25 dB; sfx nhấn mạnh -5…-6 dB đúng khung hình nổ. Mục tiêu cuối -14 LUFS.
+8. Âm thanh: VO là chuẩn (~ -15 LUFS); nhạc nền -21…-25 dB; sfx nhấn mạnh -5…-6 dB đúng khung hình nổ. Engine tự `loudnorm` về -14 LUFS (đổi bằng `--lufs`).
 
 ## Quy trình 8 bước cho mỗi beat
 1. **Lấy tài nguyên**: ảnh 2560x1440 (`stills/`), VO + `wordts.json`, sfx, font.
-2. **Chia câu & khoảng lặng**: `python3 tools/find_gaps.py vo/wordts.json` → ghi bảng câu/khoảng lặng.
+2. **Chia câu & khoảng lặng**: `python3 tools/find_gaps.py vo/wordts.json`, rồi `python3 tools/word_times.py vo/wordts.json --auto` → bảng mệnh đề + gợi ý hiệu ứng (phủ định/số/tên riêng/trích dẫn). Đọc `EDITORIAL-PATTERNS.md`.
 3. **Gán cảnh**: mỗi câu/cụm 3–8s một cảnh; điểm đổi cảnh = đầu khoảng lặng ≥0.5s. Ảnh thiếu → làm mờ/tối ảnh có sẵn (`blur`, `brightness`).
 4. **Thiết kế camera** cho từng cảnh (hướng đẩy vào cái người xem phải nhìn; cuối cảnh đẩy mạnh hơn = "punch-in").
 5. **Gán hiệu ứng theo lời** (xem `EFFECTS.md`): từ khoá/số/câu hỏi trong VO → phần tử, `t_in` = thời điểm từ đó bắt đầu (từ wordts) ±0.05s.
    Lấp mọi đoạn trống > 3.5s. Twist/cú đập → `flash` hoặc `shake` + sfx cùng khung.
-6. **Viết `spec.json`** (copy `examples/koepcke_hook.json`), xem nhanh: `--frames t1,t2,...` ở các mốc (đầu/giữa/cuối mỗi cảnh, đúng lúc mỗi hiệu ứng nổ).
+6. **Viết `spec.json` rồi chạy `python3 tools/lint_spec.py spec.json --root res`** — sửa hết ERR và xem xét WARN TRƯỚC khi render (vài giây). Sau đó (copy `examples/koepcke_hook.json`), xem nhanh: `--frames t1,t2,...` ở các mốc (đầu/giữa/cuối mỗi cảnh, đúng lúc mỗi hiệu ứng nổ).
 7. **Render**: `--out beat.mp4 --jobs 4`.
-8. **QC bắt buộc**: `python3 tools/analyze_video.py beat.mp4 --out qa/` rồi xem `qa/report.txt`, `qa/energy.png`, `qa/contact.png`.
+8. **Học**: so sánh với bản tham chiếu (nếu có), ghi mục mới vào `LESSONS.md` theo khuôn.
+9. **QC bắt buộc**: `python3 tools/analyze_video.py beat.mp4 --out qa/` rồi xem `qa/report.txt`, `qa/energy.png`, `qa/contact.png`.
    Phải PASS jitter; không khung chết > 1.2s (trừ nhịp thở có chủ đích ≤1.5s); không trống sự kiện > 3.5s. Nghe lại mix.
 
 ## Lỗi hay gặp → cách sửa

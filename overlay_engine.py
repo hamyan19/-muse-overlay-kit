@@ -673,6 +673,7 @@ def main():
     ap.add_argument("--video-only", action="store_true")
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     ap.add_argument("--crf", type=int, default=24)
+    ap.add_argument("--lufs", type=float, default=-14.0, help="chuẩn hoá âm lượng master (0 = tắt)")
     a = ap.parse_args()
     root = a.root or os.path.dirname(os.path.abspath(a.spec))
     spec = json.load(open(a.spec, encoding="utf-8"))
@@ -695,7 +696,7 @@ def main():
         wav = os.path.join(tmp, "mix.wav")
         build_audio(spec, root, wav)
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", vid, "-i", wav, "-map", "0:v",
-                        "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k",
+                        "-map", "1:a", "-c:v", "copy"] + (["-af", f"loudnorm=I={a.lufs}:TP=-1.5:LRA=11"] if a.lufs else []) + ["-c:a", "aac", "-b:a", "160k",
                         "-movflags", "+faststart", "-t", str(C.DUR), a.out], check=True)
     print("xong:", a.out)
 
