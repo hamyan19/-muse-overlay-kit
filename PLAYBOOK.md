@@ -26,6 +26,8 @@
 
 - Nhớ: mỗi beat cân nhắc chen VIDEO (cảnh hành động, 25–35% thời lượng) giữa các ảnh tĩnh — xem mục "Trộn VIDEO với ẢNH TĨNH" trong `EDITORIAL-PATTERNS.md`.
 
+- Trước khi xuất: lượt duyệt chống lặp motif (mục "ĐỔI NHỊP THEO DIỄN BIẾN" trong `EDITORIAL-PATTERNS.md`); mỗi beat chọn một motif nhịp riêng.
+
 ## Lỗi hay gặp → cách sửa
 | Triệu chứng | Nguyên nhân | Sửa |
 |---|---|---|

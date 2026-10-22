@@ -27,6 +27,8 @@ Toạ độ màn hình 1280x720. Toạ độ "src" = toạ độ trên ảnh ngu
 | `captions` | Phụ đề điện ảnh theo mệnh đề từ `wordts.json`, từ đã đọc sáng/chưa đọc mờ; `replace` sửa lỗi chính tả Whisper | `wordts,replace,font,size,y,karaoke,max_width` |
 | `kinetic` | Từ khoá bật to đúng lúc được nói (`tools/make_kinetic.py` sinh danh sách) | `words[{text,t_in,t_out,pos,size,color}]` |
 
+Cảnh có `"hold": true` = nhịp để hình tự nói (không phần tử mới, ≤9s) — `lint_spec.py` không báo trống sự kiện.
+
 Camera (`scenes[].camera`): `t0,t1,scale[a,b],cx[a,b],cy[a,b],ease` với ease = `linear | smooth | pow:2.2`,
 tuỳ chọn `shake{t0,t1,amp,hz}` (rung mượt tắt dần cho cú đập). Cảnh: `blur`, `brightness` để tạo nền mờ/tối từ chính ảnh.
 Global: `dissolve`, `grain`, `vignette`, `warm`, `flicker`.

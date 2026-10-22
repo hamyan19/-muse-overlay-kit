@@ -32,8 +32,14 @@ for e in E:
     for x in e.get("events", []): ev.append(x["t"])
     if e["type"] == "counter_down": ev.append(e["hit"])
 ev = sorted(set(round(x, 2) for x in ev))
+def _hold(p, q):   # cảnh đánh dấu "hold": true = nhịp để hình tự nói (có chủ đích, tối đa 9s)
+    for k, sc in enumerate(SC):
+        e_ = SC[k+1]["start"] if k+1 < len(SC) else dur
+        if sc.get("hold") and sc["start"] - 0.01 <= p and q <= e_ + 0.01 and q - p <= 9: return True
+    return False
 for p, q in zip(ev, ev[1:]):
-    if q - p > a.max_gap: errs.append(f"TRỐNG SỰ KIỆN {p:.1f}–{q:.1f}s ({q-p:.1f}s > {a.max_gap}s): thêm 1 phần tử/hiệu ứng ở giữa")
+    if q - p > a.max_gap and _hold(p, q): infos.append(f"NHỊP HÌNH TỰ NÓI {p:.1f}–{q:.1f}s (scene hold) — chủ đích")
+    elif q - p > a.max_gap: errs.append(f"TRỐNG SỰ KIỆN {p:.1f}–{q:.1f}s ({q-p:.1f}s > {a.max_gap}s): thêm 1 phần tử/hiệu ứng ở giữa")
 infos.append(f"{len(ev)-2} mốc sự kiện / {dur:.0f}s = 1 mỗi {dur/max(len(ev)-2,1):.1f}s")
 
 # --- 2. overlay tĩnh + quên t_out
@@ -117,6 +123,22 @@ if len(E) >= 6 and tn / len(E) > 0.4: warns.append(f"ĐƠN ĐIỆU: '{top}' chi�
 if dur > 45 and len(cnt) < 7: warns.append(f"chỉ {len(cnt)} kiểu hiệu ứng cho {dur:.0f}s (mục tiêu ≥ 7)")
 if dur > 20 and not any(e["type"] in ("rain", "mist") for e in E): infos.append("chưa dùng chuyển động trong khung (rain/mist): cân nhắc cho cảnh tĩnh dài")
 if not any(e["type"] == "strike_cards" for e in E): infos.append("chưa có motif phủ định (strike_cards) — xem EDITORIAL-PATTERNS.md")
+
+# --- 7. lặp motif (nhịp dựng phải đổi theo diễn biến)
+def _dir(c):
+    dz = c["scale"][1] - c["scale"][0]
+    return "in" if dz > 0.04 else "out" if dz < -0.04 else "pan"
+dirs = [_dir(s["camera"]) for s in SC]
+for k in range(len(dirs) - 2):
+    if dirs[k] == dirs[k+1] == dirs[k+2] and dirs[k] != "pan":
+        warns.append(f"LẶP CAMERA: cảnh {SC[k]['id']}–{SC[k+2]['id']} cùng đẩy {dirs[k]} 3 lần liền — đổi 1 cảnh sang lùi/pan/tĩnh")
+        break
+acc = [t for t in (S.get("audio", {}).get("tracks", [])) if "accent" in t.get("file", "")]
+if len(acc) > 4: warns.append(f"ÂM NHẤN: {len(acc)} lần dùng cùng tiếng 'accent' — chọn tối đa 3–4 mốc thật sự quan trọng (và 1 lần mạnh nhất ở cú ngoặt)")
+if dur > 30 and not any(s.get("hold") for s in SC): infos.append("chưa có cảnh 'hold': true — cân nhắc 1 nhịp để hình tự nói (không chữ/hiệu ứng) sau câu quan trọng")
+tpos = [tuple(e.get("pos", ())) for e in E if e["type"] in ("label", "badge_pop", "stamp") and e.get("pos")]
+for k in range(len(tpos) - 3):
+    if len(set(tpos[k:k+4])) == 1: warns.append(f"LẶP VỊ TRÍ CHỮ: 4 thẻ liền cùng vị trí {tpos[k]} — đổi chỗ/kiểu"); break
 
 print(f"SPEC {a.spec}: {len(E)} phần tử, {len(SC)} cảnh, {dur}s, kiểu: {dict(cnt)}")
 for x in infos: print("INFO ", x)

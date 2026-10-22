@@ -25,6 +25,30 @@ Lấy mốc bằng `tools/word_times.py wordts.json --auto`. Bảng dưới là 
 6. **Hai cảnh liền nhau không dùng cùng kiểu**: sau chuỗi lower_third thì chuyển sang strike/ticker/highlight.
 7. **Đọc lời trước, thiết kế sau**: nghe/đọc VO, gạch chân từ khoá, rồi mới viết spec.
 
+## ĐỔI NHỊP THEO DIỄN BIẾN (chống lặp motif — slideshow đẹp mà đều tay)
+Giữ NHẬN DIỆN chung (nét vẽ, màu, font); ĐỔI nhịp theo từng beat. Mỗi lần đổi cách dựng phải gắn với một bước ngoặt của câu chuyện (thông tin mới, nguy hiểm tăng, nhân vật nhận ra điều gì).
+**Mỗi beat chọn MỘT motif nhịp riêng (ví dụ):**
+| Loại beat | Motif | Cách dựng |
+|---|---|---|
+| Hook | thiết lập → tiết lộ → khoảng trống | bố cục gọn; chỉ 1–2 thông tin mạnh bật chữ ("92 ABOARD" → "1 SURVIVOR"); sau điểm nhấn GIỮ HÌNH một nhịp cho ngấm |
+| Giới thiệu / bối cảnh | quan sát → nhận ra chi tiết → bất an | luân phiên rộng–vừa–cận; có cảnh giữ 5–7s, cảnh khác 2–3s; tiếng mưa/máy bay vào TRƯỚC khi đổi hình; chữ chỉ tên/nơi/ngày |
+| Hành động / rơi | tăng tốc → đứt nhịp → yên lại | cắt ngắn dần, xen rộng–chi tiết; âm nhấn tiết chế, MỘT lần thật mạnh ở va chạm, rồi giữ một khung lâu, giảm chuyển động; đoạn yên làm phần hỗn loạn có sức nặng |
+| Nhịp trầm / cô độc | chậm, nhiều im lặng | ít chữ, sương, cảnh `hold` dài; chữ chỉ ở cú ngoặt |
+**Bốn cách dẫn sự chú ý (xen kẽ, đừng lặp "ảnh mới → zoom → chữ bật → âm nhấn → chuyển cảnh"):**
+1. Hình dẫn: lời đọc tiếp tục, hình giữ nguyên cho người xem quan sát.
+2. Âm dẫn: nghe tiếng của cảnh sau trước khi thấy cảnh đó.
+3. Chi tiết dẫn: cắt từ toàn cảnh vào một vật/cử chỉ có ý nghĩa.
+4. Khoảng nghỉ dẫn: sau câu quan trọng, ngưng thêm chữ và hiệu ứng.
+**Cảnh `hold`:** thêm `"hold": true` vào cảnh = nhịp để hình tự nói (không chữ/hiệu ứng, tối đa 9s); lint không báo "trống sự kiện" cho cảnh này. Mỗi video >30s nên có ít nhất 1.
+**Âm nhấn:** tối đa 3–4 mốc thật sự quan trọng/video, MỘT tiếng mạnh nhất ở cú ngoặt; đừng "đùng" ở mọi con số/phủ định.
+**Lượt duyệt chống lặp (trước khi xuất, xem liền các beat):**
+- 3 cảnh gần nhau có cùng kiểu zoom, cùng vị trí chữ, cùng âm nhấn không? (lint báo LẶP CAMERA / LẶP VỊ TRÍ CHỮ / ÂM NHẤN)
+- Cảnh nào chuyển động chỉ để khỏi bị coi là đứng hình?
+- Cao trào có mạnh hơn đoạn trước không, hay cả video căng như nhau?
+- Bỏ hiệu ứng này thì ý nghĩa/cảm xúc có giảm không? Không giảm → bỏ.
+- Khung đứng có chủ đích vẫn phải giữ; cảnh báo tự động chỉ để tìm chỗ cần xem lại, quyết định cuối theo sức kể.
+**Khi lập nguyên liệu:** lên ý đồ nhịp từng beat TRƯỚC, rồi mới hỏi nguyên liệu — đừng mỗi câu một ảnh (đổi độ dài cảnh 2–3s / 5–7s, dùng ảnh cận cắt từ ảnh rộng khi đủ độ phân giải).
+
 ## Trộn VIDEO với ẢNH TĨNH trong cùng một video (mặc định nên làm)
 Mục tiêu: ảnh tĩnh làm xương sống (rẻ, đồng nhất), video chỉ chen vào đúng chỗ cần chuyển động THẬT. Phim "sống" hơn mà không phải làm toàn video.
 **Chọn khi nào dùng video thay vì ảnh:**
