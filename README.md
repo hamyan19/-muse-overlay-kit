@@ -6,12 +6,12 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 ## BẮT ĐẦU Ở ĐÂY — đọc `QUY-TRINH.md` (Muse làm chính, 2 cổng duyệt) — 6 bước
 1. **Script** — kịch bản kèm ghi chú rõ theo `SCRIPT-NOTES.md`: câu nào cần hình gì (không lặp), mỗi chương là *bình thường* hay *sôi nổi*, phong cách tiếng và **âm thanh phụ trợ** gì (nền, tiếng động, nhạc, im lặng).
 2. **Character sheet (một lần, đầu dự án)** — nhân vật, đạo cụ, bối cảnh, phong cách + ảnh master, anh duyệt rồi khóa (`CHARACTER-SHEET.md`).
-3. **Tạo hình** — ảnh tĩnh theo kế hoạch đã duyệt (một bên làm: Muse *hoặc* GPT).
+3. **Tạo hình** — ảnh tĩnh theo kế hoạch đã duyệt (Muse làm).
 4. **Tìm footage nếu có** — video chỉ khi script cần, ghi rõ cảnh nào, để làm gì.
 5. **Voice** — thu giọng đọc theo beat, xuất mốc thời gian từng từ.
 6. **Dựng** — Claude dựng từ ảnh + voice + âm thanh, anh xem bản cuối.
 
-**Ai làm gì:** Muse làm script, voice, hình, tìm footage và âm thanh (và cập nhật `SOUND-LIBRARY.md`). Dựng do Muse **hoặc** GPT/Claude, anh chọn.
+**Ai làm gì:** Muse làm script, voice, hình, tìm footage và âm thanh (và cập nhật `SOUND-LIBRARY.md`). Dựng do Muse **hoặc** Claude, anh chọn.
 **Làm tuần tự theo chương:** xong NGUYÊN LIỆU của một chương (script, hình, footage, voice, âm thanh, đã QC và anh duyệt) rồi mới sang chương tiếp theo. Không làm song song nhiều chương.
 
 Mọi thứ khác trong repo (plan_assets, lint, QC, cổng duyệt...) là công cụ chạy ngầm phục vụ 5 bước này, không phải việc thêm cho anh.

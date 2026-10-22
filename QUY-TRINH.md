@@ -4,7 +4,7 @@ Các file khác (PIPELINE, PLAYBOOK, EDITORIAL-PATTERNS, EFFECTS...) là **tham 
 
 ## Ai làm gì
 - **Muse (chính):** script, character sheet, hình, tìm footage, voice, âm thanh (và cập nhật `SOUND-LIBRARY.md`), QC các nguyên liệu này.
-- **Dựng:** Muse hoặc GPT/Claude, anh chọn (dùng `overlay_engine.py` + `EDITORIAL-PATTERNS.md`).
+- **Dựng:** Muse hoặc Claude, anh chọn (dùng `overlay_engine.py` + `EDITORIAL-PATTERNS.md`).
 - **Anh:** duyệt ở 2 cổng.
 
 ## 6 bước (làm TUẦN TỰ theo chương: xong chương này mới sang chương sau)
