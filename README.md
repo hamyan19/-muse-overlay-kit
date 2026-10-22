@@ -3,12 +3,13 @@
 Bộ công cụ + quy trình để một AI producer (Muse) hoặc người dựng tạo video documentary từ **ảnh tĩnh + giọng đọc**,
 với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ hoạ chồng theo đúng nhịp lời đọc.
 
-## BẮT ĐẦU Ở ĐÂY — quy trình chỉ có 5 bước
+## BẮT ĐẦU Ở ĐÂY — quy trình 6 bước
 1. **Script** — kịch bản kèm ghi chú rõ theo `SCRIPT-NOTES.md`: câu nào cần hình gì (không lặp), mỗi chương là *bình thường* hay *sôi nổi*, phong cách tiếng và **âm thanh phụ trợ** gì (nền, tiếng động, nhạc, im lặng).
-2. **Tạo hình** — ảnh tĩnh theo kế hoạch đã duyệt (một bên làm: Muse *hoặc* GPT).
-3. **Tìm footage nếu có** — video chỉ khi script cần, ghi rõ cảnh nào, để làm gì.
-4. **Voice** — thu giọng đọc theo beat, xuất mốc thời gian từng từ.
-5. **Dựng** — Claude dựng từ ảnh + voice + âm thanh, anh xem bản cuối.
+2. **Character sheet (một lần, đầu dự án)** — nhân vật, đạo cụ, bối cảnh, phong cách + ảnh master, anh duyệt rồi khóa (`CHARACTER-SHEET.md`).
+3. **Tạo hình** — ảnh tĩnh theo kế hoạch đã duyệt (một bên làm: Muse *hoặc* GPT).
+4. **Tìm footage nếu có** — video chỉ khi script cần, ghi rõ cảnh nào, để làm gì.
+5. **Voice** — thu giọng đọc theo beat, xuất mốc thời gian từng từ.
+6. **Dựng** — Claude dựng từ ảnh + voice + âm thanh, anh xem bản cuối.
 
 **Ai làm gì:** Muse làm script, voice, hình, tìm footage và âm thanh (và cập nhật `SOUND-LIBRARY.md`). Dựng do Muse **hoặc** GPT/Claude, anh chọn.
 **Làm tuần tự theo chương:** xong NGUYÊN LIỆU của một chương (script, hình, footage, voice, âm thanh, đã QC và anh duyệt) rồi mới sang chương tiếp theo. Không làm song song nhiều chương.
@@ -27,6 +28,7 @@ Mọi thứ khác trong repo (plan_assets, lint, QC, cổng duyệt...) là côn
 | `tools/word_times.py` | Tra mốc cụm từ + bảng "mệnh đề → hiệu ứng gợi ý" (phủ định, số, tên riêng, trích dẫn) |
 | `tools/lint_spec.py` | **Kiểm spec trước render**: trống sự kiện, overlay tĩnh, thiếu t_out, chữ nhỏ, chồng thẻ, cảnh tối, đơn điệu |
 | `SOUND-LIBRARY.md` | **Thư viện âm thanh dùng lại** — Muse cập nhật mỗi khi có âm thanh mới |
+| `CHARACTER-SHEET.md` | **Character sheet** làm đầu dự án, áp dụng xuyên suốt mọi chương |
 | `SCRIPT-NOTES.md` | **Ghi chú script**: hình theo từng câu (không lặp), phong cách tiếng theo chương, tránh bị quét nội dung lặp |
 | `EDITORIAL-PATTERNS.md` | Ngữ pháp biên tập: mệnh đề lời đọc → sự kiện hình |
 | `LESSONS.md` | Nhật ký bài học (Muse tự cập nhật mỗi beat) |
