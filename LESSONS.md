@@ -22,3 +22,9 @@ theo đúng khuôn. Mục tiêu: lần sau mắc lỗi cũ thì `lint_spec.py` h
 - `highlight_box` PANGUANA nằm yên 8s; nhãn "HER MOTHER'S LAST WORDS" nằm 5,5s.
 - Ảnh sân bay dùng hai lần (chỉ đổi góc cắt) vì gói chỉ có 4 ảnh → nên xin thêm ảnh hoặc dùng `blur/brightness` tạo biến thể.
 - Chữ phụ badge 20–24px (dưới ngưỡng 26px).
+
+## Beat 2 "The Fall" (cinematic, 58s) — 22/10/2026
+- Preset cinematic: phụ đề 2 dòng bị cắt bởi dải đen → size 38, y 552, max_width 1120; lower_third đặt phía trên (y 110) để không đè phụ đề.
+- Whisper nghe sai ("summary") và tên riêng: dùng `replace` trong captions, key KHÔNG có dấu phẩy.
+- Kết quả: jitter P75 0.036 (PASS), −14.9 LUFS, render 0.5s/khung (2 jobs).
+- Lỗi nguyên liệu cần bắt sớm: ảnh Beat 2 vẽ áo hoodie olive trong khi kịch bản ghi váy không tay → khoá mô tả nhân vật trong style bible TRƯỚC khi sinh ảnh.
