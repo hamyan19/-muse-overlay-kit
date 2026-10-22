@@ -1,6 +1,8 @@
 # GỬI MUSE — đọc `QUY-TRINH.md` đầu tiên
 Repo: https://github.com/hamyan19/-muse-overlay-kit
 
+**Trước mỗi dự án:** đọc `MUSE-MISTAKES.md` (sổ lỗi). **Sau mỗi lần giao:** ghi thêm lỗi mới vào sổ.
+
 Muse là người làm chính: script, character sheet, hình, footage, voice, âm thanh. Làm TUẦN TỰ từng chương, dừng ở 2 cổng anh duyệt:
 
 1. Đầu dự án: lập character sheet (`CHARACTER-SHEET.md`), gửi anh duyệt, khóa.

@@ -195,8 +195,13 @@ def finish_bg(img, idx):
             img = img * (1 - g["bw"]) + gray * g["bw"]
         if g.get("tint"):
             img = img * np.array(g["tint"], np.float32)
+        if g.get("sat") is not None:   # bão hoà màu: <1 nhạt (hoài niệm), >1 rực (truyện tranh)
+            gray = (img @ np.array([0.299, 0.587, 0.114], np.float32))[..., None]
+            img = gray + (img - gray) * g["sat"]
         if g.get("contrast"):
             img = (img - 128.0) * g["contrast"] + 128.0
+        if g.get("lift"):   # nâng vùng tối -> đen bạc màu như ảnh cũ
+            img = img * (1 - g["lift"] / 255.0) + g["lift"]
     if C.flicker > 0:   # nhấp nháy sáng rất nhẹ như phim cũ (tuỳ chọn)
         img = img * (1 + C.flicker * (math.sin(idx * 0.9) + 0.5 * math.sin(idx * 2.3 + 1)))
     if C.grain > 0:
@@ -853,6 +858,24 @@ def post(arr, idx):
             ov = arr.copy(); x = int(rng.integers(0, C.W)); y0 = int(rng.integers(0, C.H // 2)); y1 = y0 + int(rng.integers(120, C.H // 2))
             cv2.line(ov, (x, y0), (x + int(rng.integers(-3, 4)), y1), (235, 230, 215), 1, cv2.LINE_AA)
             arr = cv2.addWeighted(ov, 0.45, arr, 0.55, 0)
+    if st.get("paper"):   # vân giấy tĩnh (tạo 1 lần), nhân vào khung -> cảm giác tranh in
+        if getattr(C, "_paper", None) is None or C._paper.shape[:2] != (C.H, C.W):
+            rng = np.random.default_rng(7)
+            n = rng.normal(0, 1, (C.H // 2, C.W // 2)).astype(np.float32)
+            n = cv2.GaussianBlur(n, (0, 0), 1.2) + 0.6 * cv2.GaussianBlur(rng.normal(0, 1, (C.H // 2, C.W // 2)).astype(np.float32), (0, 0), 9)
+            n = cv2.resize(n, (C.W, C.H)); n = n / (np.abs(n).max() + 1e-6)
+            C._paper = (1 + st["paper"] * n)[..., None]
+        arr = np.clip(arr.astype(np.float32) * C._paper, 0, 255).astype(np.uint8)
+    if st.get("border"):   # viền ảnh in (kiểu ảnh kỷ niệm): {"w": px, "color": [r,g,b]}
+        b = st["border"]; w = int(b.get("w", 18)); col = tuple(int(c) for c in b.get("color", [240, 232, 214]))
+        arr[:w] = col; arr[-w:] = col; arr[:, :w] = col; arr[:, -w:] = col
+        if b.get("shadow", True):
+            ov = arr.copy(); cv2.rectangle(ov, (w, w), (C.W - w - 1, C.H - w - 1), (60, 50, 40), 2, cv2.LINE_AA)
+            arr = cv2.addWeighted(ov, 0.35, arr, 0.65, 0)
+    if st.get("ink_frame"):   # khung mực kiểu ô truyện tranh: {"w": độ dày nét, "margin": lề}
+        f = st["ink_frame"]; m = int(f.get("margin", 14)); th = int(f.get("w", 5))
+        arr[:m] = 245; arr[-m:] = 245; arr[:, :m] = 245; arr[:, -m:] = 245
+        cv2.rectangle(arr, (m, m), (C.W - m - 1, C.H - m - 1), (18, 16, 14), th, cv2.LINE_AA)
     if st.get("letterbox"):
         h = int((C.H - C.W / st["letterbox"]) / 2)
         if h > 0:
@@ -886,6 +909,19 @@ PRESETS = {
                   "grade": {"contrast": 1.08}},
     # chữ chạy theo lời: nền tối hơn, chữ to bật lên đúng từ khoá
     "kinetic": {"grain": 3.0, "vignette": 0.5, "grade": {"contrast": 1.1}},
+    # sách truyện: tông ấm, màu dịu, vân giấy nhẹ — hợp ảnh minh hoạ hoạt hình, kể chuyện chậm
+    "storybook": {"grain": 0.8, "vignette": 0.22, "warm": [1.03, 1.0, 0.95], "flicker": 0.0,
+                  "grade": {"sat": 0.92, "contrast": 1.04, "lift": 6}, "style": {"paper": 0.06}},
+    # kỷ niệm / hoài niệm (khán giả 55+): màu bạc nhẹ, đen nâng, hạt mịn, viền ảnh in màu kem
+    "memory": {"grain": 2.6, "vignette": 0.35, "warm": [1.06, 1.0, 0.9], "flicker": 0.008,
+               "grade": {"sat": 0.78, "contrast": 0.98, "lift": 16},
+               "style": {"border": {"w": 18, "color": [238, 230, 212]}}},
+    # truyện tranh: màu rực hơn, tương phản, khung mực quanh ô hình, vân giấy
+    "comic": {"grain": 0.6, "vignette": 0.12, "flicker": 0.0,
+              "grade": {"sat": 1.15, "contrast": 1.12}, "style": {"ink_frame": {"w": 5, "margin": 14}, "paper": 0.04}},
+    # tài liệu sạch: màu trung tính, gần như không hạt/vignette — để thẻ tư liệu, bản đồ, số liệu nói
+    "documentary": {"grain": 0.4, "vignette": 0.15, "warm": [1.0, 1.0, 1.0], "flicker": 0.0,
+                    "grade": {"sat": 0.96, "contrast": 1.03}},
 }
 
 def apply_preset(spec):

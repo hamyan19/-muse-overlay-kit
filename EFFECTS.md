@@ -40,8 +40,25 @@ Global: `dissolve`, `grain`, `vignette`, `warm`, `flicker`.
 | `newsreel` | Phim/bản tin xưa | đen trắng ngả nâu, hạt thô, nhấp nháy, bụi + xước phim, khung 4:3, màu thẻ ngả giấy cũ | Hoài niệm, lịch sử, đời sống quá khứ (niche 55+) |
 | `cinematic` | Điện ảnh tối giản | full khung 16:9 (không dải đen), ít hạt, màu tự nhiên; dùng `captions` font serif thay thẻ | Kể chuyện cảm xúc, ít chữ |
 | `kinetic` | Chữ chạy theo lời | nền tối, `kinetic` chữ to bật theo từ | Số liệu, câu chốt, nhịp nhanh |
+| `storybook` | Sách truyện | tông ấm, màu dịu (sat 0.92), đen nâng nhẹ, vân giấy | Ảnh minh hoạ hoạt hình, chương kể chậm, hồi ức gia đình |
+| `memory` | Ảnh kỷ niệm / hoài niệm | màu bạc (sat 0.78), đen nâng (lift 16), ấm, hạt mịn, nhấp nháy rất nhẹ, **viền ảnh in màu kem** | Hồi ức, "ngày xưa", khán giả 55+, đoạn kết cảm động |
+| `comic` | Truyện tranh | màu rực (sat 1.15), tương phản, **khung mực quanh ô hình**, vân giấy | Ảnh hoạt hình nét đậm, chương nhịp nhanh/vui, giải thích cơ chế |
+| `documentary` | Tài liệu sạch | màu trung tính, gần như không hạt/vignette | Đoạn bản đồ, số liệu, thẻ tư liệu, mốc thời gian |
+
+### Mỗi preset đi kèm một NGỮ PHÁP DỰNG (không chỉ là màu)
+| preset | Nhịp cảnh | Chuyển cảnh | Chữ trên hình | Âm |
+|---|---|---|---|---|
+| `cinematic` | dài 5–9s, camera chậm | dissolve 0.5s | ít; phụ đề serif, nhãn mono nhỏ | nền dày, nhạc thấp, nhấn ≤ 3 |
+| `kinetic` | ngắn 2–4s, cắt nhanh | cắt thẳng / flash | nhiều; từ khoá to, badge, ticker số | nhấn theo nhịp, whoosh |
+| `newsreel` | 4–6s | cắt thẳng | thẻ tư liệu máy chữ, con dấu | tiếng máy chiếu, nhạc cũ |
+| `storybook` | 6–10s, đẩy/lùi rất chậm | dissolve dài 0.8s | nhãn serif ở góc như chú thích tranh, ít thẻ | nhạc nhẹ (piano/đàn dây), nền thưa |
+| `memory` | 6–10s, có cảnh `hold` | dissolve dài, có thể nháy trắng nhẹ | ngày tháng, tên người dạng lower_third; không badge | nhạc hoài niệm, tiếng phòng/đồng hồ |
+| `comic` | 3–5s, pan ngang theo hướng đọc | cắt thẳng, flash trắng ngắn | stamp, badge_pop, strike_cards; chữ IN HOA đậm | nhấn rõ, sfx hoạt hình nhẹ |
+| `documentary` | 4–7s | dissolve ngắn 0.3s | lower_third, timeline, ticker, highlight_box trên bản đồ | nền trung tính, ít nhạc |
+
+**Chống lặp:** hai chương liền nhau không dùng cùng preset. Một video nên dùng 2–4 preset theo diễn biến (ví dụ: Hook `kinetic` → kể chuyện `storybook`/`cinematic` → giải thích `documentary`/`comic` → kết `memory`).
 Lưu ý: `pillarbox` cắt mất 2 bên (≈147px mỗi bên ở 720p) nên đặt thẻ trong vùng giữa (lower_third có tham số `x`). Font thêm: Lora (serif, `fonts/Lora-Variable.ttf#Bold`), Poppins. Dùng `"fonts": {"serif": "..."}`.
-Ví dụ: `examples/styles/{newsreel,cinematic,kinetic}.json` — cùng một đoạn 14s của Beat 1 dựng ba kiểu.
+Ví dụ: `examples/styles/{newsreel,cinematic,kinetic}.json` (cùng một đoạn 14s của Beat 1 dựng ba kiểu); `examples/styles/preset_grid.jpg` (cùng một ảnh qua 8 preset).
 
 ## CHUYỂN ĐỘNG BÊN TRONG ẢNH TĨNH ("nhìn như phim mà không cần cảnh quay")
 Ba lớp kỹ thuật, dùng chồng lên nhau trên cùng một ảnh:

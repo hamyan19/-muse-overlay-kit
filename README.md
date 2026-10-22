@@ -27,6 +27,7 @@ Mọi thứ khác trong repo (plan_assets, lint, QC, cổng duyệt...) là côn
 | `tools/check_assets.py` | Kiểm nguyên liệu Muse giao (kích thước, độ sáng, trùng) → `asset_review.xlsx` có ảnh thu nhỏ để duyệt lần 2 |
 | `tools/word_times.py` | Tra mốc cụm từ + bảng "mệnh đề → hiệu ứng gợi ý" (phủ định, số, tên riêng, trích dẫn) |
 | `tools/lint_spec.py` | **Kiểm spec trước render**: trống sự kiện, overlay tĩnh, thiếu t_out, chữ nhỏ, chồng thẻ, cảnh tối, đơn điệu |
+| `MUSE-MISTAKES.md` | **Sổ lỗi của Muse**: lỗi đã mắc + luật để không lặp; đọc trước mỗi dự án |
 | `QUY-TRINH.md` | **ĐỌC ĐẦU TIÊN** — quy trình chung gọn: ai làm gì, 6 bước, 2 cổng |
 | `SOUND-LIBRARY.md` | **Thư viện âm thanh dùng lại** — Muse cập nhật mỗi khi có âm thanh mới |
 | `CHARACTER-SHEET.md` | **Character sheet** làm đầu dự án, áp dụng xuyên suốt mọi chương |

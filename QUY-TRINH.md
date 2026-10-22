@@ -37,5 +37,5 @@ Chi tiết từng lệnh: `PIPELINE.md`.
 ## Luật cứng
 1. Không tự duyệt; không làm dòng CHỜ.
 2. Mọi ảnh bám character sheet; ảnh sai kích thước (không phải 2560×1440) phải báo thẳng, không phóng lớn rồi gọi là gốc.
-3. Cuối mỗi chương ghi bài học vào `LESSONS.md` và cập nhật `SOUND-LIBRARY.md` / character sheet nếu có đổi.
+3. Muse đọc `MUSE-MISTAKES.md` trước mỗi dự án và ghi lỗi mới vào sau mỗi lần giao. Cuối mỗi chương ghi bài học dựng vào `LESSONS.md` và cập nhật `SOUND-LIBRARY.md` / character sheet nếu có đổi.
 4. Mỗi chương một phong cách hình/tiếng khác chương liền kề (tránh lặp, tránh bị quét nội dung lặp).
