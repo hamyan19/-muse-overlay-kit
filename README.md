@@ -10,6 +10,7 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 | `MUSE-COMMANDS.md`, `PIPELINE.md` | **Lệnh cho Muse + quy trình 3 cổng duyệt**: plan_assets → anh duyệt xlsx → sinh nguyên liệu → check_assets → anh duyệt ảnh → dựng |
 | `tools/plan_assets.py` | Từ `wordts.json` liệt kê TOÀN BỘ nguyên liệu cần (ảnh theo cảnh, overlay, sfx) → `asset_plan.xlsx` có cột DUYỆT (OK/SỬA/BỎ) |
 | `tools/apply_approval.py` | Đọc sheet đã duyệt → `MUSE-TODO.md` (chỉ làm OK/SỬA, không đụng CHỜ) |
+| `tools/qc_assets.py` + `QC-ASSETS.md` | **QC CỨNG** ảnh/video/âm thanh (độ nét, đen/cháy, viền, ám màu, mặt, chữ/logo, đứng hình, cắt ngầm, rung, LUFS...) + bảng kiểm mắt 12 mục. Muse chạy TRƯỚC khi gửi anh duyệt |
 | `tools/check_assets.py` | Kiểm nguyên liệu Muse giao (kích thước, độ sáng, trùng) → `asset_review.xlsx` có ảnh thu nhỏ để duyệt lần 2 |
 | `tools/word_times.py` | Tra mốc cụm từ + bảng "mệnh đề → hiệu ứng gợi ý" (phủ định, số, tên riêng, trích dẫn) |
 | `tools/lint_spec.py` | **Kiểm spec trước render**: trống sự kiện, overlay tĩnh, thiếu t_out, chữ nhỏ, chồng thẻ, cảnh tối, đơn điệu |
