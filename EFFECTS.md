@@ -38,7 +38,7 @@ Global: `dissolve`, `grain`, `vignette`, `warm`, `flicker`.
 |---|---|---|---|
 | (mặc định) | Hồ sơ điều tra: tối, thẻ viền kem, vàng/đỏ | — | Documentary căng thẳng |
 | `newsreel` | Phim/bản tin xưa | đen trắng ngả nâu, hạt thô, nhấp nháy, bụi + xước phim, khung 4:3, màu thẻ ngả giấy cũ | Hoài niệm, lịch sử, đời sống quá khứ (niche 55+) |
-| `cinematic` | Điện ảnh tối giản | dải đen 2.39:1, ít hạt, màu tự nhiên; dùng `captions` font serif thay thẻ | Kể chuyện cảm xúc, ít chữ |
+| `cinematic` | Điện ảnh tối giản | full khung 16:9 (không dải đen), ít hạt, màu tự nhiên; dùng `captions` font serif thay thẻ | Kể chuyện cảm xúc, ít chữ |
 | `kinetic` | Chữ chạy theo lời | nền tối, `kinetic` chữ to bật theo từ | Số liệu, câu chốt, nhịp nhanh |
 Lưu ý: `pillarbox` cắt mất 2 bên (≈147px mỗi bên ở 720p) nên đặt thẻ trong vùng giữa (lower_third có tham số `x`). Font thêm: Lora (serif, `fonts/Lora-Variable.ttf#Bold`), Poppins. Dùng `"fonts": {"serif": "..."}`.
 Ví dụ: `examples/styles/{newsreel,cinematic,kinetic}.json` — cùng một đoạn 14s của Beat 1 dựng ba kiểu.

@@ -24,7 +24,8 @@ theo đúng khuôn. Mục tiêu: lần sau mắc lỗi cũ thì `lint_spec.py` h
 - Chữ phụ badge 20–24px (dưới ngưỡng 26px).
 
 ## Beat 2 "The Fall" (cinematic, 58s) — 22/10/2026
-- Preset cinematic: phụ đề 2 dòng bị cắt bởi dải đen → size 38, y 552, max_width 1120; lower_third đặt phía trên (y 110) để không đè phụ đề.
+- Preset cinematic: ĐÃ BỎ dải đen letterbox (nó cắt mất phần trên/dưới ảnh 16:9 và cắt chữ đặt cao). Full khung 16:9. Phụ đề size 34–38, y ~552, max_width ~1120–1180; nhãn đặt y ≥ 110.
+- Đường dẫn thư mục chứa ký tự `#` làm hỏng đọc font (`font.ttf#Variant`) → chép tài nguyên sang thư mục đường dẫn sạch trước khi render.
 - Whisper nghe sai ("summary") và tên riêng: dùng `replace` trong captions, key KHÔNG có dấu phẩy.
 - Kết quả: jitter P75 0.036 (PASS), −14.9 LUFS, render 0.5s/khung (2 jobs).
 - Lỗi nguyên liệu cần bắt sớm: ảnh Beat 2 vẽ áo hoodie olive trong khi kịch bản ghi váy không tay → khoá mô tả nhân vật trong style bible TRƯỚC khi sinh ảnh.

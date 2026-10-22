@@ -880,9 +880,10 @@ PRESETS = {
                  "style": {"scratches": True, "pillarbox": 1.37},
                  "colors": {"yellow": [236, 214, 160], "red": [170, 60, 50], "cream": [240, 228, 200],
                             "edge": [210, 198, 165], "card": [24, 20, 14]}},
-    # điện ảnh tối giản: dải đen 2.39:1, phụ đề serif, ít hạt, màu gần tự nhiên
+    # điện ảnh tối giản: full khung 16:9 (KHÔNG dải đen), phụ đề serif, ít hạt, màu gần tự nhiên
+    # (muốn dải đen thì tự thêm "style": {"letterbox": 2.39} vào spec — mặc định tắt)
     "cinematic": {"grain": 2.4, "vignette": 0.32, "warm": [1.02, 1.0, 0.98], "flicker": 0.0,
-                  "grade": {"contrast": 1.08}, "style": {"letterbox": 2.39}},
+                  "grade": {"contrast": 1.08}},
     # chữ chạy theo lời: nền tối hơn, chữ to bật lên đúng từ khoá
     "kinetic": {"grain": 3.0, "vignette": 0.5, "grade": {"contrast": 1.1}},
 }
