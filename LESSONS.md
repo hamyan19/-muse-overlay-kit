@@ -29,3 +29,12 @@ theo đúng khuôn. Mục tiêu: lần sau mắc lỗi cũ thì `lint_spec.py` h
 - Whisper nghe sai ("summary") và tên riêng: dùng `replace` trong captions, key KHÔNG có dấu phẩy.
 - Kết quả: jitter P75 0.036 (PASS), −14.9 LUFS, render 0.5s/khung (2 jobs).
 - Lỗi nguyên liệu cần bắt sớm: ảnh Beat 2 vẽ áo hoodie olive trong khi kịch bản ghi váy không tay → khoá mô tả nhân vật trong style bible TRƯỚC khi sinh ảnh.
+
+## Dựng cả phim Koepcke 8 chương một lượt (22/10/2026)
+- **Lỗi gói phổ biến nhất** (không phải lỗi ảnh): manifest nhiều định dạng (covers dạng chuỗi, thiếu `type`); covers không khớp voice (Beat 3 manifest 70,9s, voice 66,9s; Beat 2 ảnh xếp lệch lời); thiếu file âm thanh mà ghi chú có nhắc (làm hỏng cả lần mix âm). → thêm **Lớp 3 kiểm gói giao** vào QC-ASSETS.md.
+- **Whisper nghe sai tên riêng** làm thẻ chữ không tìm được mốc (Tournavista, Pucallpa, Bavarian, "fourteen"). → Muse sửa chữ trong wordts trước khi giao; người dựng kiểm thẻ nào bị bỏ.
+- **Âm nền ngắn** (5–12s) phải lặp cho đủ đoạn: engine có `"loop": true` cho track âm thanh; chỗ nối vòng có thể nghe thấy → ưu tiên file nền ≥ 30s.
+- **Beat chủ đích thở** (chậm, nặng): đặt `"calm": true` trong spec → lint nới ngưỡng trống sự kiện lên 9s và không đòi ≥2 phần tử/cảnh. Không dùng `calm` cho beat nhịp nhanh.
+- **Nhãn từ khóa tự lấp chỗ trống** giúp qua lint nhưng chọn từ theo độ dài, không theo ý nghĩa → người dựng phải xem lại, bỏ nhãn vô nghĩa.
+- **Mix từng chương riêng** làm âm lượng chênh khi ghép phim → chạy loudnorm cho bản ghép cuối, thêm khoảng thở/chuyển cảnh giữa các chương.
+- **Render trên cloud 2 nhân chậm** (≈10 phút / 1 phút video). Cả phim nên render local.

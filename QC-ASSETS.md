@@ -45,6 +45,16 @@ Mỗi ảnh/clip một dòng: `ID | đạt/không | ghi chú`. Mở ảnh 100% (
 | A4 | Ghi rõ file nào là **TEMP/tổng hợp tạm** | giấu bản tạm |
 | A5 | Có thật hay giả: nguồn/giấy phép nếu lấy từ thư viện | không rõ nguồn |
 
+## Lớp 3: kiểm GÓI GIAO trước khi gửi (bắt buộc, bài học từ dựng cả phim Koepcke)
+Lỗi gói làm bản dựng thiếu hoặc lệch, dù từng ảnh đều đạt. Kiểm 7 mục trước khi gửi:
+1. **Manifest một định dạng:** `{"id", "file": "stills/<tên>.png", "type": "image|video", "covers": [bắt_đầu, kết_thúc]}`. `covers` là SỐ GIÂY dạng mảng, không phải chuỗi "0.0–13.5s".
+2. **Covers khớp wordts THẬT** của voice đang giao. Đổi voice thì cập nhật covers. Không có khoảng hở hay chồng nhau, và cảnh cuối kết thúc đúng thời lượng voice.
+3. **Mỗi đoạn lời đọc có hình.** Đoạn nào chưa có ảnh riêng thì ghi rõ trong SCRIPT-NOTES là "giữ cảnh X" hay "thiếu ảnh". Không để trống mà không báo.
+4. **Đủ mọi file âm thanh mà SCRIPT-NOTES nhắc tới.** Tên trong ghi chú phải trùng tên file trong `sfx/`. Thiếu file thì bản dựng mất lớp âm đó.
+5. **Sửa tên riêng trong `wordts.json`** (giữ timing, sửa chữ): Koepcke, LANSA, Pucallpa, Tournavista, Panguana, Bavarian... Whisper nghe sai thì thẻ chữ không bám được mốc và phụ đề sai chính tả.
+6. **Đường dẫn sạch:** tên thư mục/file không có `#`, không dấu tiếng Việt, không khoảng trắng đầu/cuối. Ký tự `#` làm hỏng đọc font.
+7. **File TẠM ghi rõ:** đuôi `_TAM` hoặc liệt kê trong README. Chương nào còn file TẠM thì báo trong báo cáo.
+
 ## Báo cáo cho anh (bắt buộc cuối mỗi lần giao)
 1. Kết quả `qc/QC-REPORT.md` (FAIL=0; liệt kê WARN đã xử lý/giữ vì sao).
 2. Bảng kiểm mắt đã điền (cả 12 mục cho từng ảnh; V1–V6 cho clip; A1–A5 cho âm thanh).
