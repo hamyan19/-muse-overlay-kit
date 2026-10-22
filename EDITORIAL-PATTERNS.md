@@ -61,6 +61,19 @@ Mục tiêu: ảnh tĩnh làm xương sống (rẻ, đồng nhất), video chỉ
 | Cú ngoặt/đỉnh cảm xúc cần "phá nhịp" (thường 1 cảnh / 20–30s) | Nhịp chậm, hồi tưởng, trích dẫn, nhịp im lặng |
 | Cảnh mở màn / cảnh cuối cần ấn tượng | Cảnh dài hơn 10s (lặp video dễ lộ) |
 **Công thức nhịp:** ảnh, ảnh, VIDEO, ảnh, ảnh, VIDEO… (video ≈ 25–35% thời lượng). Không để 2 video liền nhau; chuyển ảnh↔video bằng dissolve 0.5s trong khoảng lặng như mọi cảnh khác.
+### BRIEF VIDEO — bắt buộc cụ thể (không có brief thì Muse KHÔNG tự làm video)
+Video luôn là **nguyên liệu thô để dựng chung với ảnh**, không phải thành phẩm: không chữ, không chuyển cảnh, không nhạc, không cắt ghép bên trong clip. Mỗi clip phải có 1 brief:
+| Trường | Nội dung |
+|---|---|
+| ID / tên file | `video/<beat>_V01_<scene>.mp4` |
+| **Mục đích** | **A. Cảnh video** (thay một ảnh ở đúng khoảng thời gian cảnh, đi qua camera/màu/hạt của engine) · **B. Lớp chồng** (sương/mưa/tia sáng nền đen, `video_overlay blend screen`, chồng lên ảnh) |
+| Cảnh & khung giờ | cảnh nào, bao nhiêu giây trong beat, câu lời đọc đi kèm |
+| Vì sao cần video (không dùng ảnh+fx được) | chuyển động THẬT là ý nghĩa của cảnh (vật bay qua, nước, lội) |
+| Khung đầu | ảnh đã duyệt dùng làm khung đầu (image-to-video để nhân vật/màu khớp ảnh) |
+| Chuyển động cho phép / cấm | cho: camera trôi rất chậm, mưa, sương, nước, lá; cấm: người biến dạng, cử động tay mặt, cắt cảnh, zoom gắt |
+| Thông số | 16:9, ≥1280x720 (ưu tiên 1920x1080), 24–30fps, 8–10s (dư ~2s để cắt), không âm thanh cần thiết |
+**Nên làm video:** vật/lực chuyển động là trọng tâm (máy bay bay qua tán rừng, bước xuống dòng suối, đoàn thuyền, lửa, thác). **KHÔNG làm video cho:** nhịp im lặng/hold, cận mặt/tay người (AI dễ méo), cảnh có chữ, cảnh chỉ cần ảnh + sương/mưa/glow (rẻ hơn, ổn định hơn).
+**Ngân sách:** video ≈ 20–30% thời lượng beat (beat 60–70s thường 2 clip cảnh + 0–1 lớp chồng).
 **Cách trộn trong spec:**
 - Cảnh video: `{"id":"D","video":"video/clip.mp4","start":..,"camera":{..}}` — đi qua cùng camera/grain/vignette/preset màu như ảnh nên đồng nhất. Clip ngắn hơn cảnh tự lặp; tốt nhất cắt clip đúng độ dài cảnh.
 - Lớp video chồng lên ảnh (sương, mưa, khói, lửa, tia sáng): `video_overlay` `blend:"screen"` nền đen → trong suốt, opacity 0.2–0.4.

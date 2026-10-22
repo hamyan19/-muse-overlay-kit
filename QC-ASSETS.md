@@ -26,7 +26,7 @@ Mỗi ảnh/clip một dòng: `ID | đạt/không | ghi chú`. Mở ảnh 100% (
 | 11 | **Khác nhau giữa các cảnh liền nhau** | hai ảnh liền gần như cùng một khung |
 | 12 | **Khớp lời đọc/ý đồ cảnh** (đọc dòng "HÌNH GỢI Ý" và lời) | hình nói điều khác lời |
 
-### Riêng VIDEO (thêm)
+### Riêng VIDEO (thêm) — chỉ kiểm clip có BRIEF (xem "BRIEF VIDEO" trong EDITORIAL-PATTERNS.md); clip không có brief = không làm
 | # | Kiểm | Không đạt khi |
 |---|---|---|
 | V1 | Một cảnh liền 6–10s, không cắt ngầm | có cắt/đổi bối cảnh giữa chừng |
