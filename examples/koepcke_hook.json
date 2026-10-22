@@ -1,0 +1,42 @@
+{
+ "meta": {"width":1280,"height":720,"fps":30,"duration":28.4},
+ "colors": {"yellow":[255,209,26],"red":[235,50,40],"cream":[255,240,200],"edge":[230,225,200],"card":[10,12,10],"white":[255,255,255]},
+ "fonts": {"sans":"fonts/DejaVuSans-Bold.ttf","mono":"fonts/DejaVuSansMono-Bold.ttf"},
+ "dissolve":0.5,"grain":3.2,"vignette":0.38,"warm":[1.035,1.0,0.955],
+ "scenes": [
+  {"id":"S1","image":"stills/H1_bench.png","start":0.0,"camera":{"t0":0,"t1":8.4,"ease":"pow:2.2","scale":[1,1.58],"cx":[1280,1640],"cy":[720,700]}},
+  {"id":"S3","image":"stills/H3_canopy.png","start":7.90,"camera":{"t0":7.9,"t1":12.5,"scale":[1,1.12],"cx":[1280,1400],"cy":[720,740]}},
+  {"id":"S4","image":"stills/H3_canopy.png","blur":30,"brightness":0.30,"start":12.00,"camera":{"t0":12.0,"t1":18.05,"scale":[1,1.05],"cx":[1300,1400],"cy":[730,730]}},
+  {"id":"S5","image":"stills/H5_river_mist.png","start":17.55,"camera":{"t0":17.55,"t1":25.3,"scale":[1,1.10],"cx":[1280,1400],"cy":[720,760]}},
+  {"id":"S6","image":"stills/H6_dark_trees.png","start":24.78,"camera":{"t0":24.78,"t1":28.4,"scale":[1,1.38],"cx":[1450,1590],"cy":[720,720]}}
+ ],
+ "elements": [
+  {"type":"typed_card","t_in":0.10,"t_out":7.85,"fade_in":0.2,"fade_out":0.4,"box":[36,32,500,152],"cursor_until":3.2,
+   "lines":[{"text":"LANSA FLIGHT 508","pos":[60,70],"size":38,"font":"mono","color":"cream","start":0.25,"cps":16},
+            {"text":"24 DEC 1971","pos":[60,120],"size":25,"font":"mono","color":"edge","start":1.40,"cps":14}]},
+  {"type":"badge_pop","t_in":4.30,"t_out":7.85,"text":"≈3,000 m","pos":[1244,92],"size":96,"anchor":"rm","sub":"ABOVE THE FOREST","sub_pos":[1244,156],"sub_size":22},
+  {"type":"gauge","t_in":4.30,"t_out":7.85,"x":1150,"y0":220,"y1":610,"max":3000,"ticks":[[3000,"3,000"],[1500,"1,500"],[0,"0"]],"drop":[4.40,7.70],"power":1.7},
+  {"type":"anchored_circle","t_in":8.60,"t_out":11.90,"scene":"S3","src":[1630,760],"r":300,"draw":[8.65,9.45],
+   "label":{"t_in":9.30,"text":"IMPACT POINT — RECONSTRUCTION","half_width":250}},
+  {"type":"counter_down","t_in":12.55,"t_out":17.45,"run":[12.60,15.05],"hit":15.05,"from":92,"to":1,"power":2.2,
+   "labels":{"count":"ABOARD","end":"CAME HOME","sub":"92 ABOARD"}},
+  {"type":"label","t_in":18.35,"t_out":24.60,"text":"THE QUESTION","pos":[640,110],"size":30,"underline":[520,760,140]},
+  {"type":"strike_cards","t_in":21.00,"t_out":24.70,"cards":[
+     {"text":"THE FALL","y":290,"t_in":21.00,"t_strike":22.45},
+     {"text":"THE JUNGLE","y":450,"t_in":23.05,"t_strike":24.45}]},
+  {"type":"question_card","t_in":25.60,"box":[490,190,790,490]},
+  {"type":"day_ticker","run":[26.30,27.85],"from":1,"to":11,"x_start":450,"step":38,"y":640}
+ ],
+ "audio": {
+  "total":28.4,
+  "vo":{"file":"vo/VO_hook_warm-pebble.wav"},
+  "tracks":[
+   {"file":"sfx/wind_rising_TAM.wav","start":0,"trim_end":8.4,"fade_out":[8.3,0.1],"volume_db":-16},
+   {"file":"sfx/ambience_rain_forest_TAM.wav","start":8.7,"fade_in":0.8,"volume_db":-29},
+   {"file":"sfx/accent_hit_number1_TAM.wav","start":15.05,"volume_db":-6},
+   {"file":"sfx/scratch_1_TAM.wav","start":22.45,"volume_db":-5},
+   {"file":"sfx/scratch_2_TAM.wav","start":24.45,"volume_db":-5},
+   {"file":"sfx/music_tense_one_note_TAM.wav","start":0,"fade_out":[3.8,1.1],"volume_db":-21},
+   {"file":"sfx/music_suspense_drone_TAM.wav","start":19.4,"fade_in":3,"fade_out":[8.3,0.7],"volume_db":-25}
+  ]}
+}

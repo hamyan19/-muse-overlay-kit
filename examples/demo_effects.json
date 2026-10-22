@@ -1,0 +1,21 @@
+{
+ "meta": {"width":1280,"height":720,"fps":30,"duration":6.0},
+ "colors": {"yellow":[255,209,26],"red":[235,50,40],"cream":[255,240,200],"edge":[230,225,200],"card":[10,12,10],"white":[255,255,255]},
+ "fonts": {"sans":"fonts/DejaVuSans-Bold.ttf","mono":"fonts/DejaVuSansMono-Bold.ttf"},
+ "flicker": 0.01,
+ "scenes": [
+  {"id":"A","image":"stills/H3_canopy.png","start":0,"camera":{"t0":0,"t1":6,"scale":[1.05,1.25],"cx":[1280,1500],"cy":[720,700],"ease":"smooth",
+    "shake":{"t0":2.0,"t1":2.8,"amp":14,"hz":9}}}
+ ],
+ "elements": [
+  {"type":"lower_third","t_in":0.2,"t_out":2.6,"title":"JULIANE KOEPCKE","sub":"Sole survivor, LANSA 508"},
+  {"type":"spotlight","t_in":0.4,"t_out":3.0,"scene":"A","src":[1630,760],"r":260,"from_mult":2.2,"dim":0.7},
+  {"type":"highlight_box","t_in":0.9,"t_out":3.0,"scene":"A","src_box":[1400,600,1860,920],"label":"WRECKAGE (reconstruction)"},
+  {"type":"flash","t_in":2.0,"dur":0.25},
+  {"type":"stamp","t_in":2.0,"t_out":4.2,"text":"RECONSTRUCTION","pos":[640,360],"size":64},
+  {"type":"timeline","t_in":3.2,"t_out":6.0,"draw":[3.2,4.4],"x0":160,"x1":1120,"y":600,
+   "events":[{"t":3.4,"pos":0.0,"label":"1971","sub":"crash"},{"t":4.0,"pos":0.35,"label":"DAY 3","sub":"stream"},{"t":4.6,"pos":0.75,"label":"DAY 10","sub":"hut"},{"t":5.2,"pos":1.0,"label":"DAY 11","sub":"rescued"}]},
+  {"type":"ticker","t_in":3.0,"t_out":6.0,"run":[3.0,4.8],"from":0,"to":3000,"suffix":" m","pos":[640,250],"size":120,"label":"ALTITUDE"},
+  {"type":"redact","t_in":4.5,"t_out":6.0,"boxes":[[100,100,420,150],[100,170,360,220]]}
+ ]
+}
