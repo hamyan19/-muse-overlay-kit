@@ -1,0 +1,36 @@
+FILE /home/claude/beat2/out/BEAT2-FALL-v1.mp4  khung=1740  fps=30.00  dài=58.00s
+
+[1] JITTER CAMERA (nhiễu tần số cao của chuyển động nền, px ở 640x360)
+  thời gian camera chuyển động: 55.9s
+  jitter (P75): 0.036 px/khung   |  tỉ lệ jitter/tốc độ: 0.10
+  KẾT LUẬN: PASS (mượt)
+
+[2] KHUNG CHẾT (> 1.2s nền đứng yên + overlay không đổi)
+  không có
+  KẾT LUẬN: PASS
+
+[3] SỰ KIỆN THỊ GIÁC mới (chữ hiện, thẻ, vòng, dissolve...): 36  (≈ 1 mỗi 1.6s; mục tiêu <= 3.5s)
+  trống  10.30- 25.70s (15.4s)
+  trống  25.70- 31.57s (5.9s)
+  trống  32.10- 37.30s (5.2s)
+  trống  37.30- 42.23s (4.9s)
+  trống  45.73- 58.00s (12.3s)
+  (lưu ý: chỉ đếm sự kiện RỜI RẠC; hoạt ảnh liên tục như đếm số/thang đo/zoom không tính — nhìn energy.png để đánh giá)
+  KẾT LUẬN: XEM LẠI — chèn phần tử/hiệu ứng trong các đoạn trống
+
+[4] ĐỔI CẢNH
+  CẮT CỨNG hoặc CHỚP TRẮNG tại 3.90s
+  CẮT CỨNG hoặc CHỚP TRẮNG tại 6.50s
+  CẮT CỨNG hoặc CHỚP TRẮNG tại 45.70s
+  (có thể là) dissolve/chuyển động mạnh ~0.17s dài 1.87s
+  (có thể là) dissolve/chuyển động mạnh ~2.10s dài 1.73s
+  (có thể là) dissolve/chuyển động mạnh ~4.00s dài 0.70s
+  (có thể là) dissolve/chuyển động mạnh ~4.73s dài 0.70s
+  (có thể là) dissolve/chuyển động mạnh ~5.47s dài 0.97s
+  (có thể là) dissolve/chuyển động mạnh ~6.60s dài 0.73s
+  (có thể là) dissolve/chuyển động mạnh ~7.37s dài 2.33s
+  (có thể là) dissolve/chuyển động mạnh ~9.73s dài 0.70s
+  (có thể là) dissolve/chuyển động mạnh ~10.50s dài 0.33s
+  (có thể là) dissolve/chuyển động mạnh ~11.23s dài 0.40s
+  (có thể là) dissolve/chuyển động mạnh ~25.43s dài 0.40s
+  (có thể là) dissolve/chuyển động mạnh ~32.50s dài 0.37s
