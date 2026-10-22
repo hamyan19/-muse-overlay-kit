@@ -18,7 +18,7 @@ Mọi thứ khác trong repo (plan_assets, lint, QC, cổng duyệt...) là côn
 
 | File | Việc |
 |---|---|
-| `overlay_engine.py` | Engine: đọc `spec.json` → render MP4 (hình + mix tiếng). 24 loại phần tử, 4 fx chuyển-động-trong-ảnh-tĩnh (ripple/sway/glow/parallax), cảnh video + 3 preset phong cách, camera easing/shake, dissolve, grain/vignette |
+| `overlay_engine.py` | Engine: đọc `spec.json` → render MP4 (hình + mix tiếng). 29 loại phần tử (thêm photo_pin, marker, clipping, speech_box, route), 4 fx chuyển-động-trong-ảnh-tĩnh (ripple/sway/glow/parallax), cảnh video + 3 preset phong cách, camera easing/shake, dissolve, grain/vignette |
 | `tools/find_gaps.py` | Từ `wordts.json` (Whisper) → danh sách câu + khoảng lặng để đặt điểm cắt/dissolve |
 | `MUSE-COMMANDS.md`, `PIPELINE.md` | **Lệnh cho Muse + quy trình 3 cổng duyệt**: plan_assets → anh duyệt xlsx → sinh nguyên liệu → check_assets → anh duyệt ảnh → dựng |
 | `tools/plan_assets.py` | Từ `wordts.json` liệt kê TOÀN BỘ nguyên liệu cần (ảnh theo cảnh, overlay, sfx) → `asset_plan.xlsx` có cột DUYỆT (OK/SỬA/BỎ) |

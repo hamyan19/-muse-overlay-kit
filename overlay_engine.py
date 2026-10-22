@@ -14,7 +14,7 @@ Yêu cầu: python3, numpy, opencv-python-headless, pillow, ffmpeg.
 import os, sys, json, math, argparse, subprocess, tempfile
 import numpy as np
 import cv2
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 # ------------------------------------------------------------------ tiện ích
 def clamp(x, a=0.0, b=1.0):
@@ -829,7 +829,196 @@ def el_video_overlay(t, e):
     lay = np.dstack([fr, (al * 255).astype(np.uint8)])
     return apply_alpha(Image.fromarray(lay, "RGBA"), f)
 
+
+# ------------------------------------------------------------------ NHÓM CHỒNG LỚP "SỔ TAY / TƯ LIỆU / TRUYỆN TRANH"
+_IMG_CACHE = {}
+def _rgba_img(path, crop=None):
+    key = (path, tuple(crop) if crop else None)
+    if key not in _IMG_CACHE:
+        im = Image.open(os.path.join(C.root, path)).convert("RGBA")
+        if crop:
+            sx, sy = im.width / 2560.0, im.height / 1440.0   # crop theo toạ độ nguồn 2560x1440
+            im = im.crop((int(crop[0] * sx), int(crop[1] * sy), int(crop[2] * sx), int(crop[3] * sy)))
+        _IMG_CACHE[key] = im
+    return _IMG_CACHE[key]
+
+def _place(lay, piece, cx, cy, angle=0.0, alpha=1.0, scale=1.0, shadow=True):
+    """Dán một mảnh RGBA (đã vẽ sẵn) vào layer: xoay, co giãn, đổ bóng mềm."""
+    if scale != 1.0:
+        piece = piece.resize((max(1, int(piece.width * scale)), max(1, int(piece.height * scale))), Image.LANCZOS)
+    if angle:
+        piece = piece.rotate(angle, resample=Image.BICUBIC, expand=True)
+    if shadow:
+        sh = Image.new("RGBA", piece.size, (0, 0, 0, 0))
+        sh.putalpha(piece.getchannel("A").point(lambda v: int(v * 0.45)))
+        sh = sh.filter(ImageFilter.GaussianBlur(7))
+        lay.alpha_composite(apply_alpha(sh, alpha), (int(cx - piece.width / 2 + 6), int(cy - piece.height / 2 + 9)))
+    lay.alpha_composite(apply_alpha(piece, alpha), (int(cx - piece.width / 2), int(cy - piece.height / 2)))
+    return lay
+
+def _drop(t, e, d=0.45):
+    """hiệu ứng thả xuống bàn: to hơn + nghiêng hơn rồi đặt xuống."""
+    p = ss(A(t, e["t_in"], e["t_in"] + d))
+    return p, 1.0 + 0.18 * (1 - p), e.get("angle", -4) + 6 * (1 - p)
+
+def el_photo_pin(t, e):
+    """Ảnh in (polaroid) ghim/dán băng keo lên khung: ảnh khác hoặc crop cận từ ảnh nguồn.
+    {src, crop?[x0,y0,x1,y1 nguồn 2560x1440], pos[x,y], w, angle, caption?, tape?:true}"""
+    f = vis(t, e, 0.2, e.get("fade_out", 0.4))
+    if f <= 0:
+        return None
+    im = _rgba_img(e["src"], e.get("crop"))
+    w = int(e.get("w", 360)); h = int(w * im.height / im.width)
+    m, mb = int(w * 0.05), int(w * (0.20 if e.get("caption") else 0.05))
+    pc = Image.new("RGBA", (w + 2 * m, h + m + mb), (246, 242, 232, 255))
+    pc.alpha_composite(im.resize((w, h), Image.LANCZOS), (m, m))
+    d = ImageDraw.Draw(pc)
+    if e.get("caption"):
+        text(d, (pc.width / 2, h + m + mb / 2), e["caption"], e.get("font", "serif"), int(mb * 0.42), (60, 52, 44))
+    if e.get("tape", True):
+        tp = Image.new("RGBA", (int(w * 0.32), int(w * 0.09)), (232, 222, 190, 190))
+        pc2 = Image.new("RGBA", (pc.width, pc.height + tp.height // 2), (0, 0, 0, 0))
+        pc2.alpha_composite(pc, (0, tp.height // 2)); pc2.alpha_composite(tp, (pc.width // 2 - tp.width // 2, 0))
+        pc = pc2
+    p, sc_, ang = _drop(t, e)
+    return _place(new_layer(), pc, *e["pos"], angle=ang, alpha=f * p, scale=sc_)
+
+def _wobble_ellipse(cx, cy, rx, ry, n=90, turns=1.12, seed=3):
+    rng = np.random.default_rng(seed); pts = []
+    for i in range(n + 1):
+        a = -math.pi / 2 + 2 * math.pi * turns * i / n
+        r = 1 + 0.035 * math.sin(i * 0.31 + seed) + 0.02 * rng.normal()
+        pts.append((cx + rx * r * math.cos(a), cy + ry * r * math.sin(a)))
+    return pts
+
+def el_marker(t, e):
+    """Nét bút dạ vẽ tay tự hiện ra: kind circle | arrow | underline.
+    circle: {box[x0,y0,x1,y1]}; arrow: {from[x,y], to[x,y]}; underline: {from, to}. Toạ độ màn hình 1280x720,
+    hoặc thêm "scene" để toạ độ là ảnh nguồn (bám camera)."""
+    f = vis(t, e, 0.05, e.get("fade_out", 0.4))
+    if f <= 0:
+        return None
+    p = ss(A(t, e["t_in"], e["t_in"] + e.get("draw", 0.6)))
+    def S(x, y):
+        if e.get("scene"):
+            a, b, _ = to_screen(C.scene_by_id[e["scene"]], t, x, y); return a, b
+        return x, y
+    c = col(color_of(e, "color", "red")) + (235,)
+    w = int(e.get("width", 7))
+    lay = new_layer(); d = ImageDraw.Draw(lay)
+    k = e.get("kind", "circle")
+    if k == "circle":
+        x0, y0 = S(*e["box"][:2]); x1, y1 = S(*e["box"][2:])
+        pts = _wobble_ellipse((x0 + x1) / 2, (y0 + y1) / 2, abs(x1 - x0) / 2 * 1.12, abs(y1 - y0) / 2 * 1.18, seed=e.get("seed", 3))
+        pts = pts[:max(2, int(len(pts) * p))]
+    else:
+        (ax, ay), (bx, by) = S(*e["from"]), S(*e["to"])
+        n = 40; bend = e.get("bend", 0.12 if k == "arrow" else 0.02)
+        nx, ny = -(by - ay) * bend, (bx - ax) * bend
+        pts = [(ax + (bx - ax) * i / n + nx * math.sin(math.pi * i / n), ay + (by - ay) * i / n + ny * math.sin(math.pi * i / n)) for i in range(n + 1)]
+        pts = pts[:max(2, int(len(pts) * p))]
+    d.line(pts, fill=c, width=w, joint="curve")
+    if k == "arrow" and p > 0.97:
+        (x1, y1), (x0, y0) = pts[-1], pts[-4]
+        ang = math.atan2(y1 - y0, x1 - x0); L = w * 4.2
+        for s_ in (2.55, -2.55):
+            d.line((x1, y1, x1 + L * math.cos(ang + s_), y1 + L * math.sin(ang + s_)), fill=c, width=w)
+    if e.get("label") and p > 0.9:
+        lx, ly = e.get("label_pos", pts[-1])
+        text(d, (lx, ly), e["label"], e.get("font", "sans"), e.get("size", 30), color_of(e, "color", "red"), "mm", stroke=3)
+    return apply_alpha(lay, f)
+
+def _torn(w, h, seed=5, jag=5):
+    rng = np.random.default_rng(seed); pts = []
+    for x in range(0, w + 1, 9): pts.append((x, rng.integers(0, jag)))
+    for y in range(0, h + 1, 9): pts.append((w - rng.integers(0, jag), y))
+    for x in range(w, -1, -9): pts.append((x, h - rng.integers(0, jag)))
+    for y in range(h, -1, -9): pts.append((rng.integers(0, jag), y))
+    return [(int(a), int(b)) for a, b in pts]
+
+def el_clipping(t, e):
+    """Mẩu báo cắt / giấy tư liệu mép rách: {pos, w, headline, sub?, lines?(số dòng chữ giả), angle, kind: news|note}"""
+    f = vis(t, e, 0.2, e.get("fade_out", 0.4))
+    if f <= 0:
+        return None
+    w = int(e.get("w", 420)); kind = e.get("kind", "news")
+    hs = int(e.get("size", 34)); lines = e.get("lines", 4 if kind == "news" else 0)
+    hl = e["headline"].split("\n")
+    h = int(24 + len(hl) * hs * 1.15 + (30 if e.get("sub") else 0) + lines * 15 + 24)
+    paper = (240, 234, 216, 255) if kind == "news" else (252, 236, 140, 255)
+    pc = Image.new("RGBA", (w, h), (0, 0, 0, 0)); d = ImageDraw.Draw(pc)
+    d.polygon(_torn(w, h, e.get("seed", 5)), fill=paper)
+    y = 18
+    for ln in hl:
+        text(d, (w / 2, y + hs * 0.55), ln, e.get("font", "serif"), hs, (30, 26, 22)); y += hs * 1.15
+    if e.get("sub"):
+        text(d, (w / 2, y + 14), e["sub"], "mono", 18, (95, 85, 70)); y += 30
+    if kind == "news":
+        d.line((22, y + 4, w - 22, y + 4), fill=(60, 52, 44, 255), width=2); y += 14
+        rng = np.random.default_rng(e.get("seed", 5))
+        for i in range(lines):
+            ww = w - 44 - (rng.integers(0, w // 3) if i == lines - 1 else 0)
+            d.rectangle((22, y, 22 + ww, y + 6), fill=(150, 140, 125, 255)); y += 15
+    p, sc_, ang = _drop(t, e)
+    return _place(new_layer(), pc, *e["pos"], angle=ang, alpha=f * p, scale=sc_)
+
+def el_speech_box(t, e):
+    """Ô lời dẫn kiểu truyện tranh: khung mực đen, nền vàng nhạt, chữ IN HOA; tail?[x,y] chỉ vào nhân vật."""
+    f = vis(t, e, 0.12, e.get("fade_out", 0.3))
+    if f <= 0:
+        return None
+    size = int(e.get("size", 30)); fnt = font(e.get("font", "sans"), size)
+    lines = e["text"].split("\n"); tw = max(fnt.getlength(l) for l in lines)
+    pad = 18; w, h = int(tw + 2 * pad), int(len(lines) * size * 1.2 + 2 * pad)
+    x, y = e["pos"]; x0, y0 = x - w / 2, y - h / 2
+    lay = new_layer(); d = ImageDraw.Draw(lay)
+    p = ss(A(t, e["t_in"], e["t_in"] + 0.2)); sc_ = 0.85 + 0.15 * p
+    bw, bh = w * sc_, h * sc_; x0, y0 = x - bw / 2, y - bh / 2
+    fill = tuple(e.get("fill", [255, 244, 190])) + (255,); ink = (18, 16, 14, 255)
+    if e.get("tail"):
+        tx, ty = e["tail"]
+        d.polygon([(x - bw * 0.12, y + bh / 2 - 2), (x + bw * 0.06, y + bh / 2 - 2), (tx, ty)], fill=fill, outline=ink)
+    d.rectangle((x0, y0, x0 + bw, y0 + bh), fill=fill, outline=ink, width=4)
+    if e.get("tail"):
+        d.line((x - bw * 0.12 + 3, y + bh / 2 - 2, x + bw * 0.06 - 3, y + bh / 2 - 2), fill=fill, width=5)
+    for i, l in enumerate(lines):
+        text(d, (x, y0 + pad * sc_ + (i + 0.5) * size * 1.2 * sc_), l, e.get("font", "sans"), int(size * sc_), (18, 16, 14))
+    return apply_alpha(lay, f * p)
+
+def el_route(t, e):
+    """Đường đi trên bản đồ/ảnh tự vẽ ra (nét đứt) + chấm mốc + nhãn. {points[[x,y],...], labels?[...], scene?, draw}"""
+    f = vis(t, e, 0.1, e.get("fade_out", 0.5))
+    if f <= 0:
+        return None
+    P = e["points"]
+    if e.get("scene"):
+        P = [to_screen(C.scene_by_id[e["scene"]], t, x, y)[:2] for x, y in P]
+    seg = [math.dist(P[i], P[i + 1]) for i in range(len(P) - 1)]; tot = sum(seg) or 1
+    p = ss(A(t, e["t_in"], e["t_in"] + e.get("draw", 1.6))) * tot
+    lay = new_layer(); d = ImageDraw.Draw(lay)
+    c = col(color_of(e, "color", "yellow")) + (255,); w = int(e.get("width", 5)); dash = 16
+    run = 0.0
+    for i, L in enumerate(seg):
+        (ax, ay), (bx, by) = P[i], P[i + 1]
+        k = 0.0
+        while k < L and run + k < p:
+            k2 = min(k + dash, L, p - run)
+            d.line((ax + (bx - ax) * k / L, ay + (by - ay) * k / L, ax + (bx - ax) * k2 / L, ay + (by - ay) * k2 / L), fill=c, width=w)
+            k += dash * 1.7
+        run += L
+    run = 0.0
+    labels = e.get("labels", [])
+    for i, (x, y) in enumerate(P):
+        if p + 0.5 >= run:
+            d.ellipse((x - 9, y - 9, x + 9, y + 9), fill=c, outline=(20, 18, 16, 255), width=3)
+            if i < len(labels) and labels[i]:
+                text(d, (x, y - 26), labels[i], "mono", 22, C.colors["cream"], "mm", stroke=3)
+        if i < len(seg): run += seg[i]
+    return apply_alpha(lay, f)
+
 TYPES = {
+    "photo_pin": el_photo_pin, "marker": el_marker, "clipping": el_clipping,
+    "speech_box": el_speech_box, "route": el_route,
     "particles": el_particles, "video_overlay": el_video_overlay,
     "captions": el_captions, "kinetic": el_kinetic,
     "rain": el_rain, "mist": el_mist, "dim": el_dim,

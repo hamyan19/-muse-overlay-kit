@@ -60,6 +60,27 @@ Global: `dissolve`, `grain`, `vignette`, `warm`, `flicker`.
 Lưu ý: `pillarbox` cắt mất 2 bên (≈147px mỗi bên ở 720p) nên đặt thẻ trong vùng giữa (lower_third có tham số `x`). Font thêm: Lora (serif, `fonts/Lora-Variable.ttf#Bold`), Poppins. Dùng `"fonts": {"serif": "..."}`.
 Ví dụ: `examples/styles/{newsreel,cinematic,kinetic}.json` (cùng một đoạn 14s của Beat 1 dựng ba kiểu); `examples/styles/preset_grid.jpg` (cùng một ảnh qua 8 preset).
 
+## BỘ CHỒNG LỚP THEO PHONG CÁCH (style edit = cách CHỒNG LỚP, không phải màu)
+Preset ở trên chỉ đổi màu/khung. **Phong cách dựng thật sự nằm ở loại lớp chồng.** 5 phần tử mới + 4 bộ phong cách:
+
+| Phần tử | Là gì | Tham số chính |
+|---|---|---|
+| `photo_pin` | Ảnh in kiểu polaroid dán băng keo, thả xuống khung (ảnh khác hoặc crop cận từ ảnh nguồn) | `src`, `crop?[x0,y0,x1,y1 nguồn]`, `pos`, `w`, `angle`, `caption?`, `tape` |
+| `marker` | Nét bút dạ vẽ tay tự hiện: `kind` circle / arrow / underline | `box` (circle) hoặc `from`,`to`; `color`, `width`, `draw`, `label?`, `scene?` (bám camera) |
+| `clipping` | Mẩu báo cắt mép rách (`kind: news`) hoặc giấy note vàng (`kind: note`), thả xuống | `pos`, `w`, `headline` (xuống dòng bằng `\n`), `sub?`, `lines`, `angle`, `size` |
+| `speech_box` | Ô lời dẫn truyện tranh, viền mực, có đuôi chỉ vào nhân vật | `pos`, `text`, `size`, `tail?[x,y]`, `fill` |
+| `route` | Đường đi nét đứt tự vẽ trên bản đồ/ảnh, chấm mốc + nhãn | `points`, `labels?`, `draw`, `color`, `scene?` |
+
+| Bộ phong cách | Lớp chồng dùng | Hợp với |
+|---|---|---|
+| **Sổ tay điều tra** | `marker` circle/arrow khoanh chi tiết, `clipping` news, `photo_pin` ảnh phụ, `stamp` | Bí ẩn, điều tra, "chuyện gì thật sự đã xảy ra" |
+| **Album kỷ niệm** | `photo_pin` có caption ngày tháng, `clipping` note, `lower_third` tên người; preset `memory` | Hồi ức, gia đình, đoạn kết cảm động (55+) |
+| **Truyện tranh** | `speech_box` lời dẫn, `badge_pop`, `strike_cards`, `marker` arrow; preset `comic` | Ảnh hoạt hình, nhịp nhanh, giải thích cơ chế |
+| **Bản đồ / giải thích** | `route`, `marker` arrow + label, `ticker` số, `timeline`, `clipping` note quy tắc; preset `documentary` | Hành trình, địa lý, số liệu, "làm sao mà…" |
+
+**Luật:** mỗi chương chọn MỘT bộ chính (có thể mượn 1 phần tử của bộ khác); hai chương liền nhau không dùng cùng bộ. Mỗi cảnh tối đa 2 lớp chồng cùng lúc + phụ đề.
+Demo: `examples/demo_overlay_styles.json` + `examples/styles/overlay_styles_grid.jpg` (Beat 4 Koepcke: album, bản đồ, truyện tranh, note).
+
 ## CHUYỂN ĐỘNG BÊN TRONG ẢNH TĨNH ("nhìn như phim mà không cần cảnh quay")
 Ba lớp kỹ thuật, dùng chồng lên nhau trên cùng một ảnh:
 
