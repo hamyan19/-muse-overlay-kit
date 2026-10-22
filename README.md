@@ -3,6 +3,15 @@
 Bộ công cụ + quy trình để một AI producer (Muse) hoặc người dựng tạo video documentary từ **ảnh tĩnh + giọng đọc**,
 với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ hoạ chồng theo đúng nhịp lời đọc.
 
+## BẮT ĐẦU Ở ĐÂY — quy trình chỉ có 5 bước
+1. **Script** — kịch bản kèm ghi chú rõ: mỗi chương là *bình thường* hay *sôi nổi* (năng lượng, nhịp), và cần **âm thanh phụ trợ** gì (nền, tiếng động, nhạc, im lặng).
+2. **Tạo hình** — ảnh tĩnh theo kế hoạch đã duyệt (một bên làm: Muse *hoặc* GPT).
+3. **Tìm footage nếu có** — video chỉ khi script cần, ghi rõ cảnh nào, để làm gì.
+4. **Voice** — thu giọng đọc theo beat, xuất mốc thời gian từng từ.
+5. **Dựng** — Claude dựng từ ảnh + voice + âm thanh, anh xem bản cuối.
+
+Mọi thứ khác trong repo (plan_assets, lint, QC, cổng duyệt...) là công cụ chạy ngầm phục vụ 5 bước này, không phải việc thêm cho anh.
+
 | File | Việc |
 |---|---|
 | `overlay_engine.py` | Engine: đọc `spec.json` → render MP4 (hình + mix tiếng). 24 loại phần tử, 4 fx chuyển-động-trong-ảnh-tĩnh (ripple/sway/glow/parallax), cảnh video + 3 preset phong cách, camera easing/shake, dissolve, grain/vignette |
