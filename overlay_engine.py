@@ -52,7 +52,11 @@ C = Ctx()
 def font(kind, size):
     key = (kind, int(size))
     if key not in C.fonts:
-        C.fonts[key] = ImageFont.truetype(C.font_paths[kind], int(size))
+        path, _, var = C.font_paths[kind].partition("#")
+        f_ = ImageFont.truetype(path, int(size))
+        if var:
+            f_.set_variation_by_name(var)
+        C.fonts[key] = f_
     return C.fonts[key]
 
 def new_layer():
@@ -89,6 +93,9 @@ def color_of(e, key, default):
 
 # ------------------------------------------------------------------ nền + camera
 def load_scene(sc, root):
+    if "video" in sc:      # cảnh là clip video (lặp lại nếu ngắn hơn cảnh); ảnh poster tuỳ chọn
+        sc["_vpath"] = os.path.join(root, sc["video"])
+        return None
     im = cv2.imread(os.path.join(root, sc["image"]), cv2.IMREAD_COLOR)
     if im is None:
         raise FileNotFoundError(sc["image"])
@@ -117,10 +124,46 @@ def cam(sc, t):
     cy = clamp(cy, 720 / s, 1440 - 720 / s)
     return s, cx, cy
 
+def video_frame(path, tl, speed=1.0, loop=True):
+    """Khung video tại thời điểm tl (giây) — mở capture riêng cho từng tiến trình, đọc tuần tự khi có thể."""
+    key = ("vid", path)
+    if key not in C.cache:
+        cap = cv2.VideoCapture(path)
+        C.cache[key] = [cap, cap.get(cv2.CAP_PROP_FPS) or 30, int(cap.get(cv2.CAP_PROP_FRAME_COUNT)), -2]
+    cap, vfps, n, last = C.cache[key]
+    idx = int(max(tl, 0) * speed * vfps)
+    idx = idx % n if loop else min(idx, n - 1)
+    if idx != last + 1:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+    ok, fr = cap.read()
+    if not ok:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, 0); ok, fr = cap.read(); idx = 0
+    C.cache[key][3] = idx
+    return cv2.cvtColor(fr, cv2.COLOR_BGR2RGB)
+
+def scene_src(sc, t):
+    """Ảnh nguồn 2560x1440 của cảnh tại t: ảnh tĩnh hoặc khung video, rồi áp các fx 'chuyển động trong ảnh tĩnh'."""
+    if "_vpath" in sc:
+        im = video_frame(sc["_vpath"], t - sc["start"], sc.get("speed", 1.0))
+        im = cv2.resize(im, (2560, 1440), interpolation=cv2.INTER_CUBIC)
+        if sc.get("brightness") is not None:
+            im = (im.astype(np.float32) * float(sc["brightness"])).clip(0, 255).astype(np.uint8)
+    else:
+        im = sc["_img"]
+    fxs = sc.get("fx")
+    if not fxs:
+        return im
+    im = im.copy()
+    for fx in fxs:
+        if t < fx.get("t0", -1e9) or t > fx.get("t1", 1e9):
+            continue
+        im = FX[fx["type"]](im, fx, t - sc["start"])
+    return im
+
 def render_scene(sc, t):
     s, cx, cy = cam(sc, t)
     M = np.float32([[s, 0, 1280 - s * cx], [0, s, 720 - s * cy]])
-    big = cv2.warpAffine(sc["_img"], M, (2560, 1440), flags=cv2.INTER_LANCZOS4,
+    big = cv2.warpAffine(scene_src(sc, t), M, (2560, 1440), flags=cv2.INTER_LANCZOS4,
                          borderMode=cv2.BORDER_REPLICATE)          # render ở 2560x1440
     return cv2.resize(big, (C.W, C.H), interpolation=cv2.INTER_AREA).astype(np.float32)
 
@@ -145,6 +188,15 @@ def background(t):
 
 def finish_bg(img, idx):
     img = img * C.VIG * C.WARM
+    g = C.grade
+    if g:
+        if g.get("bw"):
+            gray = (img @ np.array([0.299, 0.587, 0.114], np.float32))[..., None]
+            img = img * (1 - g["bw"]) + gray * g["bw"]
+        if g.get("tint"):
+            img = img * np.array(g["tint"], np.float32)
+        if g.get("contrast"):
+            img = (img - 128.0) * g["contrast"] + 128.0
     if C.flicker > 0:   # nhấp nháy sáng rất nhẹ như phim cũ (tuỳ chọn)
         img = img * (1 + C.flicker * (math.sin(idx * 0.9) + 0.5 * math.sin(idx * 2.3 + 1)))
     if C.grain > 0:
@@ -420,7 +472,7 @@ def el_lower_third(t, e):
         return None
     p = ss(A(t, e["t_in"], e["t_in"] + 0.4))
     w = max(font("sans", 34).getlength(e["title"]), font("mono", 22).getlength(e.get("sub", ""))) + 90
-    x0, y0 = 60 - (1 - p) * (w + 80), e.get("y", 560)
+    x0, y0 = e.get("x", 60) - (1 - p) * (w + 80), e.get("y", 560)
     lay = new_layer(); d = ImageDraw.Draw(lay)
     card(d, (x0, y0, x0 + w, y0 + 92), 0.85, 6, 2)
     d.rectangle((x0, y0, x0 + 9, y0 + 92), fill=col(C.colors["yellow"]) + (255,))
@@ -565,7 +617,216 @@ def el_dim(t, e):
         return None
     return Image.new("RGBA", (C.W, C.H), col(e.get("color", [0, 0, 0])) + (int(255 * a),))
 
+def _clauses(e):
+    key = ("cap", id(e))
+    if key not in C.cache:
+        import re
+        W_ = json.load(open(os.path.join(C.root, e["wordts"]), encoding="utf-8"))
+        rep = e.get("replace", {})
+        gap = e.get("gap", 0.35)
+        out, cur = [], []
+        for k, (a, b, w) in enumerate(W_):
+            w = w.strip()
+            base = re.sub(r"[^A-Za-z0-9']", "", w)
+            if base in rep:
+                w = w.replace(base, rep[base])
+            cur.append((w, a, b))
+            if k + 1 == len(W_) or W_[k + 1][0] - b >= gap:
+                out.append((cur[0][1], cur[-1][2], cur)); cur = []
+        C.cache[key] = out
+    return C.cache[key]
+
+def el_captions(t, e):
+    """Phụ đề điện ảnh theo mệnh đề của lời đọc; từ đã đọc sáng, từ chưa đọc mờ (karaoke nhẹ)."""
+    for t0, t1, words in _clauses(e):
+        if t0 - 0.08 <= t < t1 + 0.4:
+            break
+    else:
+        return None
+    f = min(A(t, t0 - 0.08, t0 + 0.12), 1 - A(t, t1 + 0.1, t1 + 0.4))
+    if f <= 0:
+        return None
+    kind, size = e.get("font", "serif"), e.get("size", 40)
+    fnt = font(kind, size)
+    maxw = e.get("max_width", 980)
+    lines, cur, w = [], [], 0.0
+    sp = fnt.getlength(" ")
+    for item in words:
+        wl = fnt.getlength(item[0])
+        if cur and w + sp + wl > maxw:
+            lines.append((cur, w)); cur, w = [], 0.0
+        w += (sp if cur else 0) + wl; cur.append((item, wl))
+    lines.append((cur, w))
+    lay = new_layer(); d = ImageDraw.Draw(lay)
+    bar = int((C.H - C.W / C.style["letterbox"]) / 2) if C.style.get("letterbox") else 0
+    y = e.get("y", C.H - bar - 90) - (len(lines) - 1) * size * 0.6
+    for ln, lw in lines:
+        x = C.W / 2 - lw / 2
+        for (wd, a, b), wl in ln:
+            al = 255 if (not e.get("karaoke", True) or t >= a - 0.02) else 120
+            d.text((x, y), wd, font=fnt, fill=col(color_of(e, "color", "white")) + (al,), anchor="lm",
+                   stroke_width=e.get("stroke", 3), stroke_fill=(0, 0, 0, int(al * 0.9)))
+            x += wl + sp
+        y += size * 1.2
+    return apply_alpha(lay, f)
+
+def el_kinetic(t, e):
+    """Từ khoá bật to đúng lúc được nói (scale-pop), tự biến mất. words:[{text,t_in,t_out,pos,size,color}]"""
+    lay = None
+    for w in e["words"]:
+        if not (w["t_in"] <= t < w["t_out"] + 0.2):
+            continue
+        p = A(t, w["t_in"], w["t_in"] + 0.18)
+        f = p * (1 - A(t, w["t_out"], w["t_out"] + 0.2))
+        size = w.get("size", e.get("size", 120)) * (1 + 0.55 * (1 - ss(p)) ** 1.5)
+        l2 = new_layer(); d2 = ImageDraw.Draw(l2)
+        text(d2, w.get("pos", [640, 360]), w["text"], w.get("font", e.get("font", "sans")), size,
+             color_of(w, "color", "white"), "mm", stroke=w.get("stroke", 5))
+        l2 = apply_alpha(l2, f)
+        lay = l2 if lay is None else comp(lay, l2)
+    return lay
+
+# ---------- FX: chuyển động BÊN TRONG ảnh tĩnh (áp lên ảnh nguồn 2560x1440 trước camera -> bám đúng ảnh) ----------
+def _grid(h, w):
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    return xx, yy
+
+def _feather(h, w, fe):
+    m = np.zeros((h, w), np.float32)
+    fe = int(min(fe, h // 3, w // 3))
+    m[fe:h - fe, fe:w - fe] = 1.0
+    return cv2.GaussianBlur(m, (0, 0), max(fe / 2.0, 1))
+
+def fx_ripple(im, fx, tl):
+    """Mặt nước gợn: ripple ngang + lung linh, mạnh dần về phía gần camera. box=[x0,y0,x1,y1] theo ảnh nguồn."""
+    x0, y0, x1, y1 = fx["box"]
+    key = ("rip", id(fx))
+    if key not in C.cache:
+        h, w = y1 - y0, x1 - x0
+        xx, yy = _grid(h, w)
+        C.cache[key] = (xx, yy, _feather(h, w, fx.get("feather", 60)), 0.35 + 0.65 * yy / h)
+    xx, yy, m, pr = C.cache[key]
+    amp, wl, sp = fx.get("amp", 5), fx.get("wavelength", 80), fx.get("speed", 1.0)
+    dy = amp * pr * np.sin(2 * np.pi * (yy / (wl * pr) - sp * tl))
+    dx = 0.6 * amp * pr * np.sin(2 * np.pi * (xx / (1.7 * wl) + 0.7 * sp * tl + yy / (3 * wl)))
+    roi = im[y0:y1, x0:x1]
+    im[y0:y1, x0:x1] = cv2.remap(roi, xx + dx * m, yy + dy * m, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT101)
+    return im
+
+def fx_sway(im, fx, tl):
+    """Tán lá/cỏ đung đưa trong gió: vùng box dịch ngang, mạnh dần lên phía trên (gốc đứng yên ở đáy box)."""
+    x0, y0, x1, y1 = fx["box"]
+    key = ("sway", id(fx))
+    if key not in C.cache:
+        h, w = y1 - y0, x1 - x0
+        xx, yy = _grid(h, w)
+        C.cache[key] = (xx, yy, _feather(h, w, fx.get("feather", 80)), ((h - yy) / h) ** 1.5)
+    xx, yy, m, wg = C.cache[key]
+    amp, f = fx.get("amp", 8), fx.get("freq", 0.35)
+    dx = amp * wg * (np.sin(2 * np.pi * f * tl + xx / fx.get("spatial", 260)) +
+                     0.5 * np.sin(2 * np.pi * 1.9 * f * tl + xx / 140 + 1.3))
+    roi = im[y0:y1, x0:x1]
+    im[y0:y1, x0:x1] = cv2.remap(roi, xx - dx * m, yy - 0.25 * dx * m, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT101)
+    return im
+
+def fx_glow(im, fx, tl):
+    """Quầng sáng cộng thêm (đèn, lửa, nắng, tia sét): nhịp thở pulse_hz + nhấp nháy ngẫu nhiên mượt flicker."""
+    cx, cy = fx["pos"]; r = fx.get("r", 220)
+    key = ("glow", id(fx))
+    if key not in C.cache:
+        x0, y0 = int(max(cx - 3 * r, 0)), int(max(cy - 3 * r, 0))
+        x1, y1 = int(min(cx + 3 * r, 2560)), int(min(cy + 3 * r, 1440))
+        xx, yy = _grid(y1 - y0, x1 - x0)
+        d2 = ((xx + x0 - cx) ** 2 + (yy + y0 - cy) ** 2) / (r * r)
+        C.cache[key] = (x0, y0, x1, y1, np.exp(-d2)[..., None].astype(np.float32))
+    x0, y0, x1, y1, m = C.cache[key]
+    k = fx.get("strength", 0.5) * (1 + fx.get("pulse", 0.2) * math.sin(2 * math.pi * fx.get("pulse_hz", 0.5) * tl) +
+                                    fx.get("flicker", 0.0) * (math.sin(tl * 13.1) + 0.5 * math.sin(tl * 29.7 + 1)) / 1.5)
+    k = max(k, 0.0)
+    c = np.array(fx.get("color", [255, 200, 120]), np.float32)
+    im[y0:y1, x0:x1] = np.clip(im[y0:y1, x0:x1].astype(np.float32) + m * c * k * 255 / 255.0 * 0.6, 0, 255).astype(np.uint8)
+    return im
+
+def fx_parallax(im, fx, tl):
+    """Thị sai 2.5D: dịch từng điểm ảnh theo ĐỘ SÂU (gần dịch nhiều, xa dịch ít) -> máy quay như đi xuyên khung.
+    depth: 'auto_ground' (đáy ảnh = gần, đỉnh = xa; hợp phong cảnh) hoặc đường dẫn ảnh xám (trắng = gần)."""
+    key = ("par", id(fx))
+    if key not in C.cache:
+        H_, W_ = im.shape[:2]
+        xx, yy = _grid(H_, W_)
+        dsp = fx.get("depth", "auto_ground")
+        if dsp == "auto_ground":
+            d = ss_arr(yy / H_)
+        else:
+            g = cv2.imread(os.path.join(C.root, dsp), cv2.IMREAD_GRAYSCALE)
+            d = cv2.resize(g, (W_, H_), interpolation=cv2.INTER_AREA).astype(np.float32) / 255.0
+            d = cv2.GaussianBlur(d, (0, 0), 6)
+        C.cache[key] = (xx, yy, d - fx.get("focus", 0.5))
+    xx, yy, d = C.cache[key]
+    per = fx.get("period", 9.0)
+    s1 = math.sin(2 * math.pi * tl / per)
+    s2 = math.sin(2 * math.pi * tl / (per * 1.4) + 1.0)
+    a = fx.get("amp", 28)
+    return cv2.remap(im, xx + a * d * s1, yy + 0.35 * a * d * s2, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+
+def ss_arr(x):
+    x = np.clip(x, 0, 1)
+    return x * x * (3 - 2 * x)
+
+FX = {"ripple": fx_ripple, "sway": fx_sway, "glow": fx_glow, "parallax": fx_parallax}
+
+def el_particles(t, e):
+    """Hạt chuyển động trong khung: dust (bụi sáng trôi), embers (tàn lửa bay lên), snow (tuyết/tro rơi). 3 độ sâu."""
+    f = vis(t, e, e.get("fade_in", 1.0), e.get("fade_out", 1.0))
+    if f <= 0:
+        return None
+    key = ("prt", id(e))
+    n = int(e.get("n", 80))
+    if key not in C.cache:
+        rng = np.random.default_rng(e.get("seed", 3))
+        C.cache[key] = (rng.random(n), rng.random(n), rng.random(n), rng.random(n))
+    rx, ry, z, ph = C.cache[key]
+    kind = e.get("kind", "dust")
+    base = e.get("alpha", 0.55)
+    lay = np.zeros((C.H, C.W, 4), np.uint8)
+    cr = col(color_of(e, "color", [255, 230, 170] if kind != "embers" else [255, 140, 50]))
+    for i in range(n):
+        k = 0.4 + 0.6 * z[i]
+        if kind == "dust":
+            x = (rx[i] * C.W + e.get("speed", 10) * k * t + 14 * math.sin(t * 0.5 + ph[i] * 6.28)) % C.W
+            y = (ry[i] * C.H - e.get("rise", 6) * k * t) % C.H
+            r = 1.0 + 2.6 * z[i]; a = base * (0.35 + 0.65 * z[i]) * (0.65 + 0.35 * math.sin(t * 0.9 + ph[i] * 6.28))
+        elif kind == "embers":
+            x = (rx[i] * C.W + 30 * math.sin(t * 1.3 + ph[i] * 6.28) + e.get("drift", 12) * t) % C.W
+            y = (ry[i] * C.H - e.get("rise", 70) * k * t) % C.H
+            r = 1.0 + 2.2 * z[i]; a = base * (0.5 + 0.5 * math.sin(t * 7 + ph[i] * 20))
+        else:   # snow
+            x = (rx[i] * C.W + 22 * math.sin(t * 0.9 + ph[i] * 6.28) + e.get("drift", -10) * t) % C.W
+            y = (ry[i] * C.H + e.get("fall", 55) * k * t) % C.H
+            r = 1.2 + 2.8 * z[i]; a = base * (0.4 + 0.6 * z[i])
+        a = max(0.0, min(1.0, a))
+        cv2.circle(lay, (int(x), int(y)), int(r * 2.4) + 1, cr + (int(255 * a * 0.22),), -1, cv2.LINE_AA)   # quầng
+        cv2.circle(lay, (int(x), int(y)), max(int(r), 1), cr + (int(255 * a),), -1, cv2.LINE_AA)
+    return apply_alpha(Image.fromarray(lay, "RGBA"), f)
+
+def el_video_overlay(t, e):
+    """Chồng một clip video (sương, khói, mưa, bụi...) lên khung. blend: screen (nền đen->trong suốt) | normal."""
+    f = vis(t, e, e.get("fade_in", 0.8), e.get("fade_out", 0.8))
+    if f <= 0:
+        return None
+    fr = video_frame(os.path.join(C.root, e["file"]), t - e["t_in"], e.get("speed", 1.0))
+    fr = cv2.resize(fr, (C.W, C.H), interpolation=cv2.INTER_LINEAR)
+    op = e.get("opacity", 0.5)
+    if e.get("blend", "screen") == "screen":
+        al = fr.max(axis=2).astype(np.float32) / 255.0 * op
+    else:
+        al = np.full((C.H, C.W), op, np.float32)
+    lay = np.dstack([fr, (al * 255).astype(np.uint8)])
+    return apply_alpha(Image.fromarray(lay, "RGBA"), f)
+
 TYPES = {
+    "particles": el_particles, "video_overlay": el_video_overlay,
+    "captions": el_captions, "kinetic": el_kinetic,
     "rain": el_rain, "mist": el_mist, "dim": el_dim,
     "spotlight": el_spotlight, "highlight_box": el_highlight_box, "stamp": el_stamp,
     "lower_third": el_lower_third, "flash": el_flash, "redact": el_redact,
@@ -577,6 +838,31 @@ TYPES = {
 }
 
 # ------------------------------------------------------------------ khung hình
+def post(arr, idx):
+    """Hậu kỳ toàn khung (sau overlay): bụi/xước phim, dải đen letterbox, khung 4:3 pillarbox."""
+    st = C.style
+    if not st:
+        return arr
+    arr = np.array(arr)
+    if st.get("scratches"):
+        rng = np.random.default_rng(10_000 + idx // 2)     # đổi mỗi 2 khung -> cảm giác 15fps của phim cũ
+        for _ in range(int(rng.poisson(5))):
+            x, y, r = int(rng.integers(0, C.W)), int(rng.integers(0, C.H)), int(rng.integers(1, 3))
+            cv2.circle(arr, (x, y), r, (25, 22, 18) if rng.random() < 0.6 else (225, 218, 200), -1, cv2.LINE_AA)
+        if rng.random() < 0.28:
+            ov = arr.copy(); x = int(rng.integers(0, C.W)); y0 = int(rng.integers(0, C.H // 2)); y1 = y0 + int(rng.integers(120, C.H // 2))
+            cv2.line(ov, (x, y0), (x + int(rng.integers(-3, 4)), y1), (235, 230, 215), 1, cv2.LINE_AA)
+            arr = cv2.addWeighted(ov, 0.45, arr, 0.55, 0)
+    if st.get("letterbox"):
+        h = int((C.H - C.W / st["letterbox"]) / 2)
+        if h > 0:
+            arr[:h] = 0; arr[-h:] = 0
+    if st.get("pillarbox"):
+        w = int((C.W - C.H * st["pillarbox"]) / 2)
+        if w > 0:
+            arr[:, :w] = 0; arr[:, -w:] = 0
+    return arr
+
 def frame(i):
     t = i / C.FPS
     bg = finish_bg(background(t), i)
@@ -585,16 +871,42 @@ def frame(i):
         lay = TYPES[e["type"]](t, e)
         if lay is not None:
             base = comp(base, lay)
-    return np.asarray(base.convert("RGB"))
+    return post(np.asarray(base.convert("RGB")), i)
+
+PRESETS = {
+    # phim cũ / bản tin xưa: đen trắng ngả nâu, hạt thô, nhấp nháy, vết xước, khung 4:3
+    "newsreel": {"grain": 6.0, "vignette": 0.55, "warm": [1.0, 1.0, 1.0], "flicker": 0.03,
+                 "grade": {"bw": 1.0, "tint": [1.12, 0.98, 0.78], "contrast": 1.15},
+                 "style": {"scratches": True, "pillarbox": 1.37},
+                 "colors": {"yellow": [236, 214, 160], "red": [170, 60, 50], "cream": [240, 228, 200],
+                            "edge": [210, 198, 165], "card": [24, 20, 14]}},
+    # điện ảnh tối giản: dải đen 2.39:1, phụ đề serif, ít hạt, màu gần tự nhiên
+    "cinematic": {"grain": 2.4, "vignette": 0.32, "warm": [1.02, 1.0, 0.98], "flicker": 0.0,
+                  "grade": {"contrast": 1.08}, "style": {"letterbox": 2.39}},
+    # chữ chạy theo lời: nền tối hơn, chữ to bật lên đúng từ khoá
+    "kinetic": {"grain": 3.0, "vignette": 0.5, "grade": {"contrast": 1.1}},
+}
+
+def apply_preset(spec):
+    p = PRESETS.get(spec.get("preset"), {})
+    for k, v in p.items():
+        if isinstance(v, dict):
+            spec[k] = {**v, **spec.get(k, {})}
+        else:
+            spec.setdefault(k, v)
+    return spec
 
 def setup(spec, root):
+    spec = apply_preset(spec)
+    C.grade = spec.get("grade", {})
+    C.style = spec.get("style", {})
     m = spec["meta"]
     C.W, C.H, C.FPS = m.get("width", 1280), m.get("height", 720), m.get("fps", 30)
     C.DUR = m["duration"]
     C.N = int(round(C.DUR * C.FPS))
     C.colors = {k: tuple(v) for k, v in spec["colors"].items()}
-    C.font_paths = {"sans": os.path.join(root, spec["fonts"]["sans"]),
-                    "mono": os.path.join(root, spec["fonts"]["mono"])}
+    C.font_paths = {k: os.path.join(root, v) for k, v in spec["fonts"].items()}
+    C.root = root
     C.fonts = {}
     C.dissolve = spec.get("dissolve", 0.5)
     C.grain = spec.get("grain", 3.2)

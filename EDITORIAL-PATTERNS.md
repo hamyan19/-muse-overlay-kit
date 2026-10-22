@@ -24,3 +24,6 @@ Lấy mốc bằng `tools/word_times.py wordts.json --auto`. Bảng dưới là 
 5. **Cảnh tối**: nếu ảnh gốc tối (độ sáng TB < 38) và không phải nhịp "im lặng" thì nâng `brightness` hoặc thêm `spotlight`.
 6. **Hai cảnh liền nhau không dùng cùng kiểu**: sau chuỗi lower_third thì chuyển sang strike/ticker/highlight.
 7. **Đọc lời trước, thiết kế sau**: nghe/đọc VO, gạch chân từ khoá, rồi mới viết spec.
+
+## Chọn phong cách cho từng video (đa dạng giữa các tập)
+Đừng dùng cùng một preset cho mọi tập. Gợi ý: tập về quá khứ/ký ức → `newsreel`; tập cảm xúc, ít dữ kiện → `cinematic`; tập nhiều số liệu/nhịp nhanh → `kinetic` hoặc mặc định. Trong một video dài có thể đổi giữa các beat, nhưng GIỮ MỘT phong cách trong cùng một beat.

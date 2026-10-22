@@ -1,0 +1,31 @@
+{
+ "meta": {"width":1280,"height":720,"fps":30,"duration":16.0},
+ "colors": {"yellow":[255,209,26],"red":[235,50,40],"cream":[255,240,200],"edge":[230,225,200],"card":[10,12,10],"white":[255,255,255]},
+ "fonts": {"sans":"fonts/DejaVuSans-Bold.ttf","mono":"fonts/DejaVuSansMono-Bold.ttf"},
+ "dissolve":0.6,
+ "scenes": [
+  {"id":"A","image":"stills/B1S2_panguana.png","start":0,"camera":{"t0":0,"t1":6.4,"ease":"smooth","scale":[1.08,1.22],"cx":[1250,1330],"cy":[760,720]},
+   "fx":[
+     {"type":"parallax","amp":34,"period":9,"depth":"auto_ground"},
+     {"type":"ripple","box":[0,950,2560,1440],"amp":7,"wavelength":110,"speed":0.6,"feather":90},
+     {"type":"sway","box":[1750,0,2560,820],"amp":11,"freq":0.30},
+     {"type":"glow","pos":[1900,130],"r":520,"color":[255,205,130],"strength":0.45,"pulse":0.25,"pulse_hz":0.15}]},
+  {"id":"B","image":"stills/B1S4_storm_wing.png","start":5.8,"camera":{"t0":5.8,"t1":10.4,"ease":"pow:1.5","scale":[1.0,1.18],"cx":[1280,1450],"cy":[720,740]},
+   "fx":[{"type":"glow","pos":[2040,700],"r":520,"color":[170,200,255],"strength":0.55,"pulse":0.0,"flicker":1.1}]},
+  {"id":"C","image":"stills/B1S6_dark.png","start":9.8,"camera":{"t0":9.8,"t1":14.4,"ease":"smooth","scale":[1.0,1.35],"cx":[1280,1320],"cy":[720,700]},
+   "fx":[{"type":"glow","pos":[1250,900],"r":380,"color":[90,200,120],"strength":0.28,"pulse":0.5,"pulse_hz":0.3},
+         {"type":"sway","box":[0,300,900,1440],"amp":6,"freq":0.22}]},
+  {"id":"D","video":"video/fog_loop.mp4","brightness":0.9,"start":14.0,"camera":{"t0":14.0,"t1":16.0,"scale":[1.0,1.1],"cx":[1280,1280],"cy":[720,720]}}
+ ],
+ "elements": [
+  {"type":"video_overlay","t_in":0.2,"t_out":6.0,"file":"video/fog_loop.mp4","blend":"screen","opacity":0.35},
+  {"type":"particles","kind":"dust","t_in":0,"t_out":6.2,"n":70,"alpha":0.6},
+  {"type":"label","t_in":0.5,"t_out":5.5,"text":"RIPPLE · SWAY · GLOW · PARALLAX · DUST · FOG VIDEO","pos":[640,70],"size":26,"font":"mono"},
+  {"type":"rain","t_in":5.9,"t_out":10.2,"density":300,"alpha":0.4,"angle":16,"speed":1600},
+  {"type":"label","t_in":6.5,"t_out":9.5,"text":"RAIN + LIGHTNING GLOW FLICKER","pos":[640,70],"size":26,"font":"mono"},
+  {"type":"particles","kind":"embers","t_in":9.9,"t_out":14.2,"n":55},
+  {"type":"particles","kind":"dust","t_in":9.9,"t_out":14.2,"n":50,"color":[160,230,170],"alpha":0.5},
+  {"type":"label","t_in":10.4,"t_out":13.8,"text":"EMBERS · EERIE GLOW · FOLIAGE SWAY","pos":[640,70],"size":26,"font":"mono"},
+  {"type":"label","t_in":14.4,"text":"VIDEO AS A SCENE","pos":[640,360],"size":40,"font":"mono"}
+ ]
+}

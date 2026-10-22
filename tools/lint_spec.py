@@ -92,8 +92,15 @@ for i, (e1, b1) in enumerate(bx):
 for k, s in enumerate(SC):
     end = SC[k+1]["start"] if k+1 < len(SC) else dur
     L = end - s["start"]
-    im = cv2.imread(os.path.join(root, s["image"]))
-    if im is None: errs.append(f"không đọc được ảnh {s['image']}"); continue
+    if "image" not in s:   # cảnh video: bỏ qua kiểm độ sáng (không có ảnh tĩnh)
+        im = None
+    else:
+        im = cv2.imread(os.path.join(root, s["image"]))
+        if im is None: errs.append(f"không đọc được ảnh {s['image']}"); continue
+    if im is None:
+        n = sum(1 for e in E if s["start"] - 0.1 <= span(e)[0] < end)
+        if L > 7 and n < 2: errs.append(f"CẢNH {s['id']} ({s['start']}–{end}s) chỉ có {n} phần tử cho {L:.0f}s")
+        continue
     if s.get("blur"): im = cv2.GaussianBlur(im, (0, 0), float(s["blur"]) / 2)
     lum = float(cv2.cvtColor(im, cv2.COLOR_BGR2GRAY).mean()) * float(s.get("brightness", 1.0))
     if lum < 38 and L > 4: warns.append(f"CẢNH {s['id']} ({s['start']}–{end}s): quá tối (độ sáng TB {lum:.0f}/255) trong {L:.0f}s — nếu không chủ đích 'im lặng', tăng brightness hoặc thêm spotlight/mist")

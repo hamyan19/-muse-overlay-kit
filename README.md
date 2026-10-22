@@ -5,7 +5,7 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 
 | File | Việc |
 |---|---|
-| `overlay_engine.py` | Engine: đọc `spec.json` → render MP4 (hình + mix tiếng). 20 loại phần tử, camera easing/shake, dissolve, grain/vignette |
+| `overlay_engine.py` | Engine: đọc `spec.json` → render MP4 (hình + mix tiếng). 24 loại phần tử, 4 fx chuyển-động-trong-ảnh-tĩnh (ripple/sway/glow/parallax), cảnh video + 3 preset phong cách, camera easing/shake, dissolve, grain/vignette |
 | `tools/find_gaps.py` | Từ `wordts.json` (Whisper) → danh sách câu + khoảng lặng để đặt điểm cắt/dissolve |
 | `tools/word_times.py` | Tra mốc cụm từ + bảng "mệnh đề → hiệu ứng gợi ý" (phủ định, số, tên riêng, trích dẫn) |
 | `tools/lint_spec.py` | **Kiểm spec trước render**: trống sự kiện, overlay tĩnh, thiếu t_out, chữ nhỏ, chồng thẻ, cảnh tối, đơn điệu |
@@ -14,6 +14,8 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 | `tools/analyze_video.py` | **Máy chấm từng khung hình**: jitter camera, khung chết, khoảng trống sự kiện, kiểu chuyển cảnh |
 | `examples/koepcke_hook.json` | Spec thật của Hook Koepcke 28s (tái tạo pixel-identical bản đã duyệt) |
 | `examples/beat1_lansa.json` | Spec Beat 1 thật (85s, 6 cảnh từ 4 ảnh, mưa, sương, tối dần) |
+| `examples/styles/*.json` | 3 preset phong cách (phim cũ / điện ảnh tối giản / chữ chạy theo lời) trên cùng một đoạn |
+| `examples/demo_motion.json` + `tools/make_fog_loop.py` | Chuyển động trong ảnh tĩnh: ripple, sway, glow, parallax, bụi/tàn lửa, clip sương chồng, cảnh video |
 | `examples/demo_effects.json` | Demo các hiệu ứng mới (spotlight, highlight_box, stamp, lower_third, timeline, ticker, redact, flash, shake) |
 | `PLAYBOOK.md` | Quy trình làm từng beat + lỗi thường gặp + checklist QC |
 | `EFFECTS.md` | Tham chiếu từng hiệu ứng: tham số + khi nào dùng |
