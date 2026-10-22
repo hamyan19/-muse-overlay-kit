@@ -1,4 +1,7 @@
 # NGỮ PHÁP BIÊN TẬP — mệnh đề lời đọc → sự kiện hình
+
+> **TẠI SAO phải nhiều cách dựng và nhiều motif khác nhau:** người xem (nhất là khán giả 55+) và thuật toán đều nhận ra khuôn mẫu rất nhanh. Nếu mọi beat cùng một công thức (ảnh mới → zoom → chữ bật → âm nhấn → chuyển cảnh) thì sau vài chục giây video thành slideshow đều tay, retention tụt và kênh giống kênh làm hàng loạt (rủi ro "inauthentic content"). Giữ NHẬN DIỆN (nét vẽ, màu, font) nhưng đổi NHỊP, kiểu hình–chữ–âm theo diễn biến câu chuyện: mỗi lần đổi gắn với một bước ngoặt (thông tin mới, nguy hiểm tăng, nhân vật nhận ra điều gì). Đổi nhịp là công cụ kể chuyện, không phải trang trí.
+
 Nguyên tắc: **mỗi mệnh đề của lời đọc (đoạn giữa hai khoảng lặng) có ÍT NHẤT một sự kiện hình riêng**, đặt đúng lúc từ khoá được nói.
 Lấy mốc bằng `tools/word_times.py wordts.json --auto`. Bảng dưới là các "motif" đã chứng minh hiệu quả ở Hook/Beat 1.
 

@@ -21,6 +21,7 @@ ap.add_argument("--style-bible", default="painterly photorealistic, muted natura
 ap.add_argument("--preset", default="", help="dossier|newsreel|cinematic|kinetic (ghi chú phong cách dựng)")
 ap.add_argument("--fix", default="", help="sửa chính tả Whisper: Kupka=Koepcke,Lancer=LANSA,Pucalpa=Pucallpa")
 ap.add_argument("--long-shot", type=float, default=10.0, help="cảnh dài hơn mức này cần thêm ảnh cận/biến thể")
+ap.add_argument("--no-rhythm", action="store_true", help="tắt chia độ dài ảnh theo nhịp (mỗi cảnh chia đôi như bản cũ)")
 a = ap.parse_args()
 os.makedirs(a.out, exist_ok=True)
 
@@ -71,7 +72,7 @@ LEX = {
              "Cảnh tối / cô độc / im lặng", ["particles embers/dust", "glow pulse", "dim (tối dần)"], ["low drone", "near-silence"]),
  "fire":    (["fire","flame","burn","burned","smoke","ember","embers"],
              "Lửa / khói", ["particles embers", "glow flicker", "mist/smoke"], ["fire crackle"]),
- "people":  (["girl","mother","father","family","parents","child","man","woman","villagers","hunters","doctor","rescue","rescuers","woodcutters","she","her"],
+ "people":  (["girl","mother","father","family","parents","child","man","woman","villagers","hunters","doctor","rescue","rescuers","woodcutters","loggers","survivor","passengers"],
              "Con người (silhouette / từ phía sau, KHÔNG thấy rõ mặt)", ["parallax nhẹ", "glow nhẹ"], ["room tone / footsteps nhẹ"]),
  "document":(["investigators","report","ruled","licence","license","law","court","evidence","record","official","cause","conditions","wrote","write"],
              "Tài liệu / hồ sơ / báo cũ / bàn làm việc", ["particles dust", "preset newsreel gợi ý"], ["paper/typewriter nhẹ"]),
@@ -84,6 +85,41 @@ def tags_of(text):
     ws = [norm(w) for w in text.split()]
     sc = {k: sum(1 for w in ws if w in v[0]) for k, v in LEX.items()}
     return sorted([k for k in sc if sc[k] > 0], key=lambda k: -sc[k]) or ["generic"]
+
+# ---------------- 2b. NHỊP ẢNH: độ dài từng ảnh KHÁC NHAU theo loại cảnh (chống slideshow đều tay)
+# vai trò: wide=toàn cảnh (ảnh mới) · mid=trung cảnh/góc khác (ảnh mới) · detail=CẮT SÂU vào chi tiết của ảnh trước (KHÔNG cần ảnh mới)
+#          hold=giữ hình tự nói (ảnh mới, không chữ/hiệu ứng, spec "hold": true)
+PAT = {
+ "dark":     [("hold", 7.0), ("detail", 2.5), ("mid", 4.0)],
+ "storm":    [("wide", 3.5), ("detail", 2.2), ("mid", 3.0), ("detail", 2.2)],
+ "aircraft": [("wide", 3.5), ("detail", 2.2), ("mid", 3.0), ("detail", 2.2)],
+ "fire":     [("wide", 3.5), ("detail", 2.2), ("mid", 3.0)],
+ "people":   [("wide", 5.0), ("detail", 3.0), ("mid", 6.0)],
+ "home":     [("wide", 5.0), ("detail", 3.0), ("mid", 6.0)],
+ "document": [("wide", 5.0), ("detail", 3.0), ("mid", 5.0)],
+ "map":      [("wide", 5.0), ("detail", 3.0), ("mid", 5.0)],
+ "forest":   [("wide", 6.0), ("detail", 2.8), ("mid", 4.5)],
+ "water":    [("wide", 6.0), ("detail", 2.8), ("mid", 4.5)],
+ "_":        [("wide", 5.0), ("detail", 3.0), ("mid", 5.0)],
+}
+def plan_shots(t0, t1, cands, main):
+    L = t1 - t0
+    if a.no_rhythm:
+        return [(t0, t1, "wide")] if L <= a.long_shot else [(t0, t0 + L/2, "wide"), (t0 + L/2, t1, "mid")]
+    if L <= 6.0: return [(t0, t1, "hold" if main == "dark" and L >= 4 else "wide")]
+    pat = PAT.get(main, PAT["_"]); out = []; cur = t0; k = 0
+    while cur < t1 - 0.01:
+        role, tl = pat[k % len(pat)]; k += 1
+        want = cur + tl
+        if t1 - want < 2.0: nxt = t1
+        else:
+            c = [x for x in cands if x > cur + 1.6 and x < t1 - 1.5]
+            nxt = min(c, key=lambda x: abs(x - want)) if c else t1
+            if t1 - nxt < 2.0: nxt = t1
+        out.append((cur, nxt, role)); cur = nxt
+    return out
+DESC = {"wide": "toàn cảnh (wide)", "mid": "trung cảnh / góc khác, CÙNG bối cảnh",
+        "hold": "toàn cảnh tĩnh, HOLD để hình tự nói (không chữ, không hiệu ứng)"}
 
 # ---------------- 3. sự kiện overlay theo từ khoá
 NEG = {"not","no","never","nothing","none","nobody","neither","nor","didn't","wasn't","couldn't","wouldn't","isn't","don't","cannot","can't"}
@@ -107,7 +143,29 @@ for c in clauses:
         events.append((c[0][0], text.split()[0], "TRÍCH DẪN/PHÁN QUYẾT", "label dẫn + typed_card", "nhãn dẫn rồi gõ chữ thường"))
 events.sort()
 
+# ---------------- 3b. QUÉT ÂM THANH THEO TỪ KHOÁ (tiếng một lần / hành động) — ngoài nền theo cảnh
+SFXKW = [
+ (("crash","crashed","hit","broke","broken","tore","burst","snapped","smashed","slammed","landed","struck","collided","exploded"), "va chạm / vỡ / rơi đập (impact)", "impact_hit"),
+ (("walked","walking","steps","footsteps","stepped","ran","running","waded","trudged","stumbled"), "bước chân (đất ẩm / lá / nước nông)", "footsteps_soft"),
+ (("splash","splashed","swam","waded","drowned"), "nước té / lội nước", "water_wade"),
+ (("vulture","bird","birds","owl","parrot","monkey","howler","jaguar","roar","growl","howl","barked","bark"), "tiếng thú / chim (xa)", "animal_call"),
+ (("screamed","shouted","cried","whispered","spoke","called","yelled","voices","voice","sobbed","prayed"), "tiếng người xa / thì thầm / kêu", "voice_distant"),
+ (("door","hut","boat","canoe","motor","engine","outboard","propeller"), "cửa kẹt / thuyền / động cơ nhỏ", "boat_motor_door"),
+ (("heart","heartbeat","breath","breathing","gasped","panting"), "nhịp tim / thở", "heartbeat_breath"),
+ (("planes","aircraft","helicopter","helicopters","airplane","overhead"), "máy bay bay qua ở xa", "plane_distant_overhead"),
+ (("bell","bells","church","radio","telephone","phone","typewriter"), "chuông / radio / điện thoại", "bell_radio"),
+ (("paper","pages","letter","file","document","documents"), "giấy / lật hồ sơ", "paper_rustle"),
+ (("fire","burning","crackling","flames"), "lửa lách tách", "fire_crackle"),
+]
+SFX_ONE = {}      # file -> [(t, từ)]
+SFX_DESC = {}
+for k_, (words_, desc_, fn_) in enumerate(SFXKW):
+    for (st, en, w, n) in toks:
+        if n in words_:
+            SFX_ONE.setdefault(fn_, []).append((st, w)); SFX_DESC[fn_] = desc_
+
 # ---------------- 4. dựng bảng
+SHOT_PLAN = []
 rows_shots, rows_sfx, manifest = [], [], {"beat": a.beat, "duration": DUR, "preset": a.preset, "items": []}
 scene_info = []
 for gi, (i0, i1) in enumerate(groups, 1):
@@ -121,18 +179,35 @@ for gi, (i0, i1) in enumerate(groups, 1):
             fx += [x for x in LEX[t2][2] if x not in fx]; sfx += [x for x in LEX[t2][3] if x not in sfx]
     mood = "căng thẳng, tối" if main in ("storm", "dark") else ("ấm, hoài niệm" if main in ("home", "document") else "tự nhiên, thoáng")
     L = t1 - t0
-    variants = [("A", "toàn cảnh (wide)")] + ([("B", "cận cảnh / góc khác, CÙNG bối cảnh")] if L > a.long_shot else [])
+    cands = []                      # điểm cắt khả dĩ: mọi chỗ ngắt hơi ≥0.2s trong cảnh (dấu phẩy cũng tính)
+    for (p_, n_) in zip(toks, toks[1:]):
+        if n_[0] - p_[1] >= 0.2 and t0 + 1.5 < (p_[1] + n_[0]) / 2 < t1 - 1.5: cands.append(round((p_[1] + n_[0]) / 2, 2))
+    plan = plan_shots(t0, t1, cands, main)
+    SHOT_PLAN.append((gi, plan, main))
     scene_info.append((gi, t0, t1, main, tg))
-    for vi, (v, vdesc) in enumerate(variants):
-        sid = f"{a.beat}-S{gi:02d}{v}"
+    # nhóm: mỗi ảnh MỚI (wide/mid/hold) + các cú cắt sâu (detail) đi kèm ngay sau nó
+    imgs = []
+    for (ts, te, role) in plan:
+        lim = 9.0 if role == "detail" else 8.0      # "mid" ngắn cũng chỉ là cú cắt sâu/đổi khung từ ảnh có sẵn; dài mới cần ảnh mới
+        if role in ("detail", "mid") and imgs and (te - imgs[-1]["start"]) <= lim and (te - ts) <= 4.5:
+            imgs[-1]["end"] = te; imgs[-1]["cuts"].append((ts, te)); continue
+        imgs.append({"start": ts, "end": te, "role": "mid" if role == "detail" else role, "cuts": []})
+    for vi, im_ in enumerate(imgs):
+        v = chr(65 + vi); sid = f"{a.beat}-S{gi:02d}{v}"
         fname = f"stills/{a.beat}_S{gi:02d}{v}.png"
-        covers = f"{t0:.1f}–{t1:.1f}s" if len(variants) == 1 else (f"{t0:.1f}–{t0 + L/2:.1f}s" if v == "A" else f"{t0 + L/2:.1f}–{t1:.1f}s")
-        prompt = (f"{label} ({vdesc}). Gắn với lời: “{text[:120]}…”. Không khí: {mood}. Phong cách: {a.style_bible}. "
+        ts, te = im_["start"], im_["end"]; role = im_["role"]
+        covers = f"{ts:.1f}–{te:.1f}s"
+        stext = " ".join(cl[i][2] for i in range(i0, i1 + 1) if cl[i][1] > ts and cl[i][0] < te) or text
+        vdesc = DESC.get(role, DESC["mid"])
+        prompt = (f"{label} ({vdesc}). Gắn với lời: “{stext[:120]}…”. Không khí: {mood}. Phong cách: {a.style_bible}. "
                   f"16:9, 2560x1440, KHÔNG chữ/logo, không thấy rõ khuôn mặt, khung hình còn chỗ trống cho chữ.")
-        rows_shots.append([sid, gi, covers, round(L if len(variants) == 1 else L / 2, 1), text, f"{label} — {vdesc}",
+        mv = list(fx)
+        if role == "hold": mv = ["HOLD: giữ yên, camera trôi rất chậm; KHÔNG chữ/hiệu ứng (spec: scene \"hold\": true)"] + mv[:2]
+        for (c0, c1) in im_["cuts"]: mv.append(f"CẮT SÂU vào chi tiết {c0:.1f}–{c1:.1f}s (zoom từ chính ảnh này, KHÔNG cần ảnh mới)")
+        rows_shots.append([sid, gi, covers, round(te - ts, 1), stext, f"{label} — {vdesc}",
                            "AI ảnh 2560x1440 (bắt buộc) · footage/AI video 6–10s (tuỳ chọn, nên có cho: " + ("nước/mưa/lửa" if main in ('water','storm','fire') else "cảnh đang hành động") + ")",
-                           prompt, ", ".join(fx), fname, "CHỜ", ""])
-        manifest["items"].append({"id": sid, "kind": "still", "file": fname, "covers": covers, "scene": gi, "approval": "CHỜ"})
+                           prompt, ", ".join(mv), fname, "CHỜ", ""])
+        manifest["items"].append({"id": sid, "kind": "still", "file": fname, "covers": covers, "scene": gi, "role": role, "approval": "CHỜ"})
     for s in sfx:
         ascii_ = unicodedata.normalize("NFKD", s.split("(")[0]).encode("ascii", "ignore").decode().lower()
         fn = f"sfx/{re.sub('[^a-z0-9]+', '_', ascii_).strip('_')}.wav"
@@ -149,6 +224,34 @@ manifest["items"].append({"id": f"{a.beat}-MUS-01", "kind": "sfx", "file": "sfx/
 ACC = [e for e in events if e[2] in ("CON SỐ", "PHỦ ĐỊNH", "TRÍCH DẪN/PHÁN QUYẾT")][:8]
 rows_sfx.append([f"{a.beat}-ACC-01", "—", ", ".join(f"{e[0]:.1f}s" for e in ACC), "nhấn (accent hit)", "1 tiếng nhấn ngắn dùng lại ở các mốc số/phủ định/chốt (không dùng bản tổng hợp tạm nếu có thể)", "sfx/accent_hit.wav", "CHỜ", ""])
 manifest["items"].append({"id": f"{a.beat}-ACC-01", "kind": "sfx", "file": "sfx/accent_hit.wav", "approval": "CHỜ"})
+
+# ---- nhịp HOLD: video >30s phải có ít nhất 1 cảnh để hình tự nói
+if DUR > 30 and not any(it.get("role") == "hold" for it in manifest["items"]):
+    best = None
+    for r_, it in zip(rows_shots, [i for i in manifest["items"] if i["kind"] == "still"]):
+        ts_, te_ = [float(x) for x in r_[2].replace("s", "").split("–")]
+        if te_ - ts_ < 5: continue
+        n_ev = sum(1 for e in events if ts_ <= e[0] < te_)
+        if best is None or n_ev < best[0]: best = (n_ev, r_, it)
+    if best:
+        best[1][8] = "HOLD: giữ yên, camera trôi rất chậm; KHÔNG chữ/hiệu ứng (spec: scene \"hold\": true) · " + best[1][8]
+        best[1][5] += " — HOLD để hình tự nói"; best[2]["role"] = "hold"
+
+# ---- âm thanh một lần theo từ khoá (hành động/vật thể) — gộp theo file
+for fn_, hits in SFX_ONE.items():
+    hits = sorted(hits)
+    ts_ = ", ".join(f"{t:.1f}s('{w.strip('.,;?!')}')" for t, w in hits[:6])
+    sid = f"{a.beat}-ONE{len([r for r in rows_sfx if '-ONE' in r[0]])+1:02d}"
+    rows_sfx.append([sid, "—", ts_, "hiệu ứng một lần", SFX_DESC[fn_] + " — đặt ĐÚNG lúc từ khoá, ngắn, nhỏ; không lặp quá 3–4 lần", f"sfx/{fn_}.wav", "CHỜ", ""])
+    manifest["items"].append({"id": sid, "kind": "sfx", "file": f"sfx/{fn_}.wav", "approval": "CHỜ"})
+
+# ---- ÂM DẪN: tiếng của cảnh sau vào trước khi đổi hình (0.8s)
+for (g0, t0_, t1_, m0, tg0), (g1, u0, u1, m1, tg1) in zip(scene_info, scene_info[1:]):
+    if m1 != m0 and m1 in LEX:
+        nm = LEX[m1][3][0]
+        fn_ = "sfx/" + re.sub("[^a-z0-9]+", "_", unicodedata.normalize("NFKD", nm.split("(")[0]).encode("ascii", "ignore").decode().lower()).strip("_") + ".wav"
+        rows_sfx.append([f"{a.beat}-LEAD{g1:02d}", f"{g0}→{g1}", f"{u0-0.8:.1f}–{u0+0.5:.1f}s", "âm dẫn (vào trước khi đổi hình)",
+                         f"tiếng '{nm}' của cảnh {g1} vào nhỏ trước điểm cắt {u0:.1f}s ~0.8s, rồi lớn dần khi hình đổi (DÙNG LẠI file nền, không cần file mới)", fn_, "CHỜ", ""])
 
 rows_ov = []
 for k, (s, w, kind, eff, note) in enumerate(events, 1):
@@ -212,7 +315,10 @@ n_still = len(rows_shots)
 summ = [["Chỉ số", "Giá trị"],
         ["Thời lượng lời đọc", f"{DUR:.1f}s"], ["Số cảnh", len(groups)], ["Số ảnh AI cần sinh (bắt buộc)", n_still],
         ["Footage / AI video (tuỳ chọn)", sum(1 for _, _, _, m, _ in scene_info if m in ("water", "storm", "fire", "forest"))],
-        ["Số sự kiện overlay đề xuất", len(rows_ov)], ["Số âm thanh cần có", len(rows_sfx)],
+        ["Số sự kiện overlay đề xuất", len(rows_ov)],
+        ["Số cú CẮT SÂU từ ảnh có sẵn (không cần ảnh mới)", sum(len(re.findall("CẮT SÂU", r[8])) for r in rows_shots)],
+        ["Số nhịp HOLD (hình tự nói)", sum(1 for i_ in manifest["items"] if i_.get("role") == "hold")],
+        ["Độ dài ảnh ngắn nhất / dài nhất", f"{min(r[3] for r in rows_shots):.1f}s / {max(r[3] for r in rows_shots):.1f}s"], ["Số âm thanh cần có", len(rows_sfx)],
         ["Mật độ ảnh", f"1 ảnh / {DUR/n_still:.1f}s"], ["", ""], ["Cảnh", "Thời gian · thẻ nội dung"]]
 for g, t0, t1, m, tg in scene_info: summ.append([f"S{g:02d}", f"{t0:.1f}–{t1:.1f}s · {', '.join(tg[:3])}"])
 for r in summ: ws.append(r)

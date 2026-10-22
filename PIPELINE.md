@@ -23,6 +23,9 @@ python3 tools/plan_assets.py res/vo/wordts.json --beat B2 --out plan/ \
         --fix "Kupka=Koepcke,Lancer=LANSA,Pucalpa=Pucallpa" --preset newsreel \
         --style-bible "painterly photorealistic, muted natural palette, soft cinematic light"
 #   -> plan/asset_plan.xlsx (SHOTS, OVERLAYS, SFX, TONG_QUAN) + csv + asset_manifest.json
+#   Nhịp ảnh: độ dài ảnh KHÁC NHAU (2–9s) theo loại cảnh; "CẮT SÂU" = zoom từ ảnh có sẵn (không cần ảnh mới);
+#   "HOLD" = nhịp để hình tự nói. SFX quét thêm: nền theo cảnh + tiếng MỘT LẦN theo từ khoá (va chạm, bước chân,
+#   thú/chim, máy bay...) + ÂM DẪN (tiếng cảnh sau vào ~0.8s trước khi đổi hình). Tắt chia nhịp: --no-rhythm.
 #   Gửi asset_plan.xlsx cho anh. DỪNG. Chờ anh trả lại file đã điền cột DUYỆT.
 
 # LỆNH 2 — đọc sheet đã duyệt
