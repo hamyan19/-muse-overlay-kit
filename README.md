@@ -4,7 +4,7 @@ Bộ công cụ + quy trình để một AI producer (Muse) hoặc người dự
 với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ hoạ chồng theo đúng nhịp lời đọc.
 
 ## BẮT ĐẦU Ở ĐÂY — quy trình chỉ có 5 bước
-1. **Script** — kịch bản kèm ghi chú rõ: mỗi chương là *bình thường* hay *sôi nổi* (năng lượng, nhịp), và cần **âm thanh phụ trợ** gì (nền, tiếng động, nhạc, im lặng).
+1. **Script** — kịch bản kèm ghi chú rõ theo `SCRIPT-NOTES.md`: câu nào cần hình gì (không lặp), mỗi chương là *bình thường* hay *sôi nổi*, phong cách tiếng và **âm thanh phụ trợ** gì (nền, tiếng động, nhạc, im lặng).
 2. **Tạo hình** — ảnh tĩnh theo kế hoạch đã duyệt (một bên làm: Muse *hoặc* GPT).
 3. **Tìm footage nếu có** — video chỉ khi script cần, ghi rõ cảnh nào, để làm gì.
 4. **Voice** — thu giọng đọc theo beat, xuất mốc thời gian từng từ.
@@ -23,6 +23,7 @@ Mọi thứ khác trong repo (plan_assets, lint, QC, cổng duyệt...) là côn
 | `tools/check_assets.py` | Kiểm nguyên liệu Muse giao (kích thước, độ sáng, trùng) → `asset_review.xlsx` có ảnh thu nhỏ để duyệt lần 2 |
 | `tools/word_times.py` | Tra mốc cụm từ + bảng "mệnh đề → hiệu ứng gợi ý" (phủ định, số, tên riêng, trích dẫn) |
 | `tools/lint_spec.py` | **Kiểm spec trước render**: trống sự kiện, overlay tĩnh, thiếu t_out, chữ nhỏ, chồng thẻ, cảnh tối, đơn điệu |
+| `SCRIPT-NOTES.md` | **Ghi chú script**: hình theo từng câu (không lặp), phong cách tiếng theo chương, tránh bị quét nội dung lặp |
 | `EDITORIAL-PATTERNS.md` | Ngữ pháp biên tập: mệnh đề lời đọc → sự kiện hình |
 | `LESSONS.md` | Nhật ký bài học (Muse tự cập nhật mỗi beat) |
 | `tools/analyze_video.py` | **Máy chấm từng khung hình**: jitter camera, khung chết, khoảng trống sự kiện, kiểu chuyển cảnh |
