@@ -10,6 +10,9 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 4. **Voice** — thu giọng đọc theo beat, xuất mốc thời gian từng từ.
 5. **Dựng** — Claude dựng từ ảnh + voice + âm thanh, anh xem bản cuối.
 
+**Ai làm gì:** Muse làm script, voice, hình, tìm footage và âm thanh (và cập nhật `SOUND-LIBRARY.md`). Dựng do Muse **hoặc** GPT/Claude, anh chọn.
+**Làm tuần tự theo chương:** xong NGUYÊN LIỆU của một chương (script, hình, footage, voice, âm thanh, đã QC và anh duyệt) rồi mới sang chương tiếp theo. Không làm song song nhiều chương.
+
 Mọi thứ khác trong repo (plan_assets, lint, QC, cổng duyệt...) là công cụ chạy ngầm phục vụ 5 bước này, không phải việc thêm cho anh.
 
 | File | Việc |
@@ -23,6 +26,7 @@ Mọi thứ khác trong repo (plan_assets, lint, QC, cổng duyệt...) là côn
 | `tools/check_assets.py` | Kiểm nguyên liệu Muse giao (kích thước, độ sáng, trùng) → `asset_review.xlsx` có ảnh thu nhỏ để duyệt lần 2 |
 | `tools/word_times.py` | Tra mốc cụm từ + bảng "mệnh đề → hiệu ứng gợi ý" (phủ định, số, tên riêng, trích dẫn) |
 | `tools/lint_spec.py` | **Kiểm spec trước render**: trống sự kiện, overlay tĩnh, thiếu t_out, chữ nhỏ, chồng thẻ, cảnh tối, đơn điệu |
+| `SOUND-LIBRARY.md` | **Thư viện âm thanh dùng lại** — Muse cập nhật mỗi khi có âm thanh mới |
 | `SCRIPT-NOTES.md` | **Ghi chú script**: hình theo từng câu (không lặp), phong cách tiếng theo chương, tránh bị quét nội dung lặp |
 | `EDITORIAL-PATTERNS.md` | Ngữ pháp biên tập: mệnh đề lời đọc → sự kiện hình |
 | `LESSONS.md` | Nhật ký bài học (Muse tự cập nhật mỗi beat) |
