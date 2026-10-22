@@ -401,7 +401,8 @@ def el_stamp(t, e):
     tmp = Image.new("RGBA", (int(tw + 2 * pad), int(size * 1.25 + 2 * pad)), (0, 0, 0, 0))
     td = ImageDraw.Draw(tmp)
     c = col(color_of(e, "color", "red")) + (255,)
-    td.rounded_rectangle((4, 4, tmp.width - 5, tmp.height - 5), radius=10, outline=c, width=8)
+    td.rounded_rectangle((4, 4, tmp.width - 5, tmp.height - 5), radius=10, outline=c, width=8,
+                         fill=col(C.colors["card"]) + (int(255 * e.get("fill", 0.6)),))   # nền tối giúp đọc được
     td.text((tmp.width / 2, tmp.height / 2), e["text"], font=fnt, fill=c, anchor="mm")
     sc_ = 1 + 1.1 * (1 - p) ** 2
     tmp = tmp.resize((int(tmp.width * sc_), int(tmp.height * sc_)), Image.BICUBIC)
@@ -492,7 +493,80 @@ def el_ticker(t, e):
              C.colors["cream"], e.get("anchor", "mm"), stroke=3)
     return apply_alpha(lay, f)
 
+def el_rain(t, e):
+    """Mưa rơi thật trong khung: 3 lớp sâu (xa mảnh/chậm, gần dài/nhanh). Vị trí là hàm của t -> không cần lưu trạng thái."""
+    f = vis(t, e, e.get("fade_in", 0.6), e.get("fade_out", 0.8))
+    if f <= 0:
+        return None
+    key = ("rain", id(e))
+    if key not in C.cache:
+        rng = np.random.default_rng(e.get("seed", 7))
+        n = int(e.get("density", 220))
+        C.cache[key] = (rng.random(n), rng.random(n), rng.integers(0, 3, n))
+    rx, ry, dp = C.cache[key]
+    ang = math.radians(e.get("angle", 14))
+    spd = e.get("speed", 1500)
+    lay = np.zeros((C.H, C.W, 4), np.uint8)
+    base = e.get("alpha", 0.40)
+    pad = 200
+    for i in range(len(rx)):
+        k = 0.55 + 0.45 * dp[i] / 2.0
+        vy, vx = spd * k * math.cos(ang), spd * k * math.sin(ang)
+        x = (rx[i] * (C.W + 2 * pad) + vx * t) % (C.W + 2 * pad) - pad
+        y = (ry[i] * (C.H + 2 * pad) + vy * t) % (C.H + 2 * pad) - pad
+        ln = e.get("length", 70) * k
+        x2, y2 = x - ln * math.sin(ang), y - ln * math.cos(ang)
+        a = int(255 * base * (0.5 + 0.5 * dp[i] / 2.0))
+        cv2.line(lay, (int(x), int(y)), (int(x2), int(y2)), (205, 215, 230, a), 1 + int(dp[i] >= 2), cv2.LINE_AA)
+    return apply_alpha(Image.fromarray(lay, "RGBA"), f)
+
+def _mist_tex(seed, scale):
+    rng = np.random.default_rng(seed)
+    w = C.W * 2
+    small = rng.random((max(4, C.H // scale), max(8, w // scale))).astype(np.float32)
+    big = cv2.resize(small, (w, C.H), interpolation=cv2.INTER_CUBIC)
+    big = cv2.GaussianBlur(big, (0, 0), scale * 0.6)
+    big = (big - big.min()) / (big.max() - big.min() + 1e-6)
+    return big
+
+def el_mist(t, e):
+    """Sương/khói trôi ngang: 2 lớp nhiễu mịn cuộn ở tốc độ khác nhau (thị sai nhẹ)."""
+    f = vis(t, e, e.get("fade_in", 1.0), e.get("fade_out", 1.0))
+    if f <= 0:
+        return None
+    if "mist" not in C.cache:
+        C.cache["mist"] = [_mist_tex(11, 90), _mist_tex(23, 45)]
+    out = np.zeros((C.H, C.W), np.float32)
+    for k, tex in enumerate(C.cache["mist"]):
+        off = (e.get("speed", 18) * (1 + 0.8 * k) * t) % C.W
+        i0 = int(off); fr = off - i0
+        a = tex[:, i0:i0 + C.W]; b = tex[:, i0 + 1:i0 + 1 + C.W]
+        if b.shape[1] < C.W:
+            b = np.concatenate([b, tex[:, :C.W - b.shape[1]]], 1)
+        out += (a * (1 - fr) + b * fr) * (0.6 if k == 0 else 0.4)
+    al = np.clip((out - e.get("floor", 0.45)) * e.get("gain", 2.2), 0, 1) * e.get("opacity", 0.30) * f
+    if "y_fade" in e:   # chỉ phủ dải ngang (ví dụ gần mặt đất): [y0,y1]
+        y0, y1 = e["y_fade"]
+        yy = np.arange(C.H, dtype=np.float32)
+        al *= np.clip(1 - np.abs((yy - (y0 + y1) / 2) / ((y1 - y0) / 2)), 0, 1)[:, None]
+    col_ = color_of(e, "color", [235, 235, 225])
+    lay = np.zeros((C.H, C.W, 4), np.uint8)
+    lay[..., 0], lay[..., 1], lay[..., 2] = col_
+    lay[..., 3] = (al * 255).astype(np.uint8)
+    return Image.fromarray(lay, "RGBA")
+
+def el_dim(t, e):
+    """Phủ đen tăng/giảm dần (tối dần cho nhịp 'im lặng', hoặc sáng lại). alpha: [a0,a1] giữa t_in và t_out."""
+    u = ss(A(t, e["t_in"], e["t_out"]))
+    a = lerp(e["alpha"], u)
+    if "t_end" in e:   # giữ rồi nhả: sáng lại sau t_end trong fade_out giây
+        a *= 1 - ss(A(t, e["t_end"], e["t_end"] + e.get("fade_out", 0.6)))
+    if a <= 0.003:
+        return None
+    return Image.new("RGBA", (C.W, C.H), col(e.get("color", [0, 0, 0])) + (int(255 * a),))
+
 TYPES = {
+    "rain": el_rain, "mist": el_mist, "dim": el_dim,
     "spotlight": el_spotlight, "highlight_box": el_highlight_box, "stamp": el_stamp,
     "lower_third": el_lower_third, "flash": el_flash, "redact": el_redact,
     "timeline": el_timeline, "ticker": el_ticker,
@@ -525,6 +599,7 @@ def setup(spec, root):
     C.dissolve = spec.get("dissolve", 0.5)
     C.grain = spec.get("grain", 3.2)
     C.flicker = spec.get("flicker", 0.0)
+    C.cache = {}
     yy, xx = np.mgrid[0:C.H, 0:C.W].astype(np.float32)
     rr = np.sqrt(((xx - C.W / 2) / (C.W / 2)) ** 2 + ((yy - C.H / 2) / (C.H / 2)) ** 2) / 1.414
     C.VIG = (1.0 - spec.get("vignette", 0.38) * np.clip(rr, 0, 1) ** 2.2)[..., None]

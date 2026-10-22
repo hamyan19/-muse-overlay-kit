@@ -5,10 +5,11 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 
 | File | Việc |
 |---|---|
-| `overlay_engine.py` | Engine: đọc `spec.json` → render MP4 (hình + mix tiếng). 17 loại phần tử, camera easing/shake, dissolve, grain/vignette |
+| `overlay_engine.py` | Engine: đọc `spec.json` → render MP4 (hình + mix tiếng). 20 loại phần tử, camera easing/shake, dissolve, grain/vignette |
 | `tools/find_gaps.py` | Từ `wordts.json` (Whisper) → danh sách câu + khoảng lặng để đặt điểm cắt/dissolve |
 | `tools/analyze_video.py` | **Máy chấm từng khung hình**: jitter camera, khung chết, khoảng trống sự kiện, kiểu chuyển cảnh |
 | `examples/koepcke_hook.json` | Spec thật của Hook Koepcke 28s (tái tạo pixel-identical bản đã duyệt) |
+| `examples/beat1_lansa.json` | Spec Beat 1 thật (85s, 6 cảnh từ 4 ảnh, mưa, sương, tối dần) |
 | `examples/demo_effects.json` | Demo các hiệu ứng mới (spotlight, highlight_box, stamp, lower_third, timeline, ticker, redact, flash, shake) |
 | `PLAYBOOK.md` | Quy trình làm từng beat + lỗi thường gặp + checklist QC |
 | `EFFECTS.md` | Tham chiếu từng hiệu ứng: tham số + khi nào dùng |

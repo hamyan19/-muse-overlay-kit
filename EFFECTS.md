@@ -17,10 +17,13 @@ Toạ độ màn hình 1280x720. Toạ độ "src" = toạ độ trên ảnh ngu
 | `timeline` | Trục thời gian vẽ dần + mốc bật theo lời | `x0,x1,y,draw,events[{t,pos,label,sub}]` |
 | `spotlight` | Tối cả khung, chừa vòng sáng dẫn mắt (có thể bám ảnh) | `scene,src` hoặc `pos`, `r,dim,from_mult,soft` |
 | `highlight_box` | Khung góc mở ra quanh vật thể + nhãn | `scene,src_box,label,color,width` |
-| `stamp` | Dấu đóng "RECONSTRUCTION/CLASSIFIED" đập xuống + rung | `text,pos,size,angle,color,opacity` |
+| `stamp` | Dấu đóng "RECONSTRUCTION/CLASSIFIED" đập xuống + rung (nền tối mờ cho dễ đọc) | `text,pos,size,angle,color,opacity,fill` |
 | `lower_third` | Thanh tên/chú thích trượt vào | `title,sub,y` |
 | `flash` | Chớp trắng nhấn twist/cú đập | `dur,alpha,color` |
 | `redact` | Thanh đen quét che chữ (hồ sơ mật) | `boxes[[x0,y0,x1,y1]]` |
+| `rain` | Mưa rơi thật, 3 lớp sâu (bão, đêm, cảnh u ám) | `density,alpha,angle,speed,length,seed` |
+| `mist` | Sương/khói trôi ngang, 2 lớp thị sai | `opacity,speed,floor,gain,y_fade[y0,y1],color` |
+| `dim` | Tối dần / sáng lại (nhịp im lặng, tập trung vào thẻ) | `alpha[a0,a1],t_in,t_out,t_end,fade_out` |
 
 Camera (`scenes[].camera`): `t0,t1,scale[a,b],cx[a,b],cy[a,b],ease` với ease = `linear | smooth | pow:2.2`,
 tuỳ chọn `shake{t0,t1,amp,hz}` (rung mượt tắt dần cho cú đập). Cảnh: `blur`, `brightness` để tạo nền mờ/tối từ chính ảnh.
