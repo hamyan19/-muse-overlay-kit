@@ -1,4 +1,5 @@
-# QUY TRÌNH MỘT BEAT — 3 CỔNG DUYỆT (anh duyệt ở sheet, Muse không tự duyệt)
+# CHI TIẾT LỆNH MỘT BEAT (tham chiếu — quy trình chung ở `QUY-TRINH.md`: 2 cổng duyệt)
+Cổng 1 = `asset_plan.xlsx`, Cổng 2 = `asset_review.xlsx`. Bước "CỔNG 3" bên dưới chỉ là anh xem video và nhận xét.
 
 ```
 Kịch bản → VO (Warm Pebble) → wordts.json (Whisper)

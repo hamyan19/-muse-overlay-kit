@@ -3,7 +3,7 @@
 Bộ công cụ + quy trình để một AI producer (Muse) hoặc người dựng tạo video documentary từ **ảnh tĩnh + giọng đọc**,
 với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ hoạ chồng theo đúng nhịp lời đọc.
 
-## BẮT ĐẦU Ở ĐÂY — quy trình 6 bước
+## BẮT ĐẦU Ở ĐÂY — đọc `QUY-TRINH.md` (Muse làm chính, 2 cổng duyệt) — 6 bước
 1. **Script** — kịch bản kèm ghi chú rõ theo `SCRIPT-NOTES.md`: câu nào cần hình gì (không lặp), mỗi chương là *bình thường* hay *sôi nổi*, phong cách tiếng và **âm thanh phụ trợ** gì (nền, tiếng động, nhạc, im lặng).
 2. **Character sheet (một lần, đầu dự án)** — nhân vật, đạo cụ, bối cảnh, phong cách + ảnh master, anh duyệt rồi khóa (`CHARACTER-SHEET.md`).
 3. **Tạo hình** — ảnh tĩnh theo kế hoạch đã duyệt (một bên làm: Muse *hoặc* GPT).
@@ -27,6 +27,7 @@ Mọi thứ khác trong repo (plan_assets, lint, QC, cổng duyệt...) là côn
 | `tools/check_assets.py` | Kiểm nguyên liệu Muse giao (kích thước, độ sáng, trùng) → `asset_review.xlsx` có ảnh thu nhỏ để duyệt lần 2 |
 | `tools/word_times.py` | Tra mốc cụm từ + bảng "mệnh đề → hiệu ứng gợi ý" (phủ định, số, tên riêng, trích dẫn) |
 | `tools/lint_spec.py` | **Kiểm spec trước render**: trống sự kiện, overlay tĩnh, thiếu t_out, chữ nhỏ, chồng thẻ, cảnh tối, đơn điệu |
+| `QUY-TRINH.md` | **ĐỌC ĐẦU TIÊN** — quy trình chung gọn: ai làm gì, 6 bước, 2 cổng |
 | `SOUND-LIBRARY.md` | **Thư viện âm thanh dùng lại** — Muse cập nhật mỗi khi có âm thanh mới |
 | `CHARACTER-SHEET.md` | **Character sheet** làm đầu dự án, áp dụng xuyên suốt mọi chương |
 | `SCRIPT-NOTES.md` | **Ghi chú script**: hình theo từng câu (không lặp), phong cách tiếng theo chương, tránh bị quét nội dung lặp |
