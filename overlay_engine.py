@@ -928,10 +928,12 @@ def build_audio(spec, root, out_wav):
     a = spec["audio"]
     total = a.get("total", spec["meta"]["duration"])
     inputs = [os.path.join(root, a["vo"]["file"])]
+    loops = [False]   # track có "loop": true → lặp file ngắn cho đủ trim_end (nền dài)
     chains = [f"[0]aresample=48000,apad=whole_dur={total},atrim=0:{total},"
               f"volume={a['vo'].get('volume_db', 0)}dB[a0]"]
     for k, tr in enumerate(a["tracks"], start=1):
         inputs.append(os.path.join(root, tr["file"]))
+        loops.append(bool(tr.get("loop")))
         ch = []
         if tr.get("trim_end"):
             ch.append(f"atrim=0:{tr['trim_end']}")
@@ -947,8 +949,8 @@ def build_audio(spec, root, out_wav):
     chains.append(f"{mix}amix=inputs={n}:normalize=0:duration=longest,"
                   f"alimiter=limit=0.95,atrim=0:{total}[out]")
     cmd = ["ffmpeg", "-v", "error", "-y"]
-    for p in inputs:
-        cmd += ["-i", p]
+    for p, lp in zip(inputs, loops):
+        cmd += (["-stream_loop", "-1"] if lp else []) + ["-i", p]
     cmd += ["-filter_complex", ";".join(chains), "-map", "[out]", "-ar", "48000", "-ac", "1", out_wav]
     subprocess.run(cmd, check=True)
 

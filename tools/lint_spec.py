@@ -15,6 +15,8 @@ root = a.root or os.path.dirname(os.path.abspath(a.spec))
 S = json.load(open(a.spec, encoding="utf-8"))
 dur = S["meta"]["duration"]; E = S["elements"]; SC = S["scenes"]
 errs, warns, infos = [], [], []
+CALM = bool(S.get("calm"))   # beat chủ đích thở: nới ngưỡng trống sự kiện lên 9s, bỏ kiểm "ít phần tử"
+if CALM: a.max_gap = max(a.max_gap, 9.0)
 ANIMATED = {"counter_down", "ticker", "gauge", "day_ticker", "rain", "mist", "dim", "spotlight", "anchored_circle", "timeline", "flash"}
 NEEDS_OUT = {"label", "lower_third", "stamp", "badge_pop", "highlight_box", "strike_cards", "typed_card", "redact", "question_card"}
 
@@ -105,7 +107,7 @@ for k, s in enumerate(SC):
         if im is None: errs.append(f"không đọc được ảnh {s['image']}"); continue
     if im is None:
         n = sum(1 for e in E if s["start"] - 0.1 <= span(e)[0] < end)
-        if L > 7 and n < 2: errs.append(f"CẢNH {s['id']} ({s['start']}–{end}s) chỉ có {n} phần tử cho {L:.0f}s")
+        if L > 7 and n < 2 and not CALM: errs.append(f"CẢNH {s['id']} ({s['start']}–{end}s) chỉ có {n} phần tử cho {L:.0f}s")
         continue
     if s.get("blur"): im = cv2.GaussianBlur(im, (0, 0), float(s["blur"]) / 2)
     lum = float(cv2.cvtColor(im, cv2.COLOR_BGR2GRAY).mean()) * float(s.get("brightness", 1.0))
@@ -113,7 +115,7 @@ for k, s in enumerate(SC):
     c = s["camera"]; dz = abs(c["scale"][1] - c["scale"][0]); dc = abs(c["cx"][1] - c["cx"][0]) + abs(c["cy"][1] - c["cy"][0])
     if L > 4 and dz < 0.05 and dc < 60: warns.append(f"CẢNH {s['id']}: camera gần đứng yên ({L:.0f}s) — thêm đẩy/lùi 8–30% hoặc pan")
     n = sum(1 for e in E if s["start"] - 0.1 <= span(e)[0] < end)
-    if L > 7 and n < 2: errs.append(f"CẢNH {s['id']} ({s['start']}–{end}s) chỉ có {n} phần tử cho {L:.0f}s")
+    if L > 7 and n < 2 and not CALM: errs.append(f"CẢNH {s['id']} ({s['start']}–{end}s) chỉ có {n} phần tử cho {L:.0f}s")
 
 # --- 6. đa dạng
 from collections import Counter
