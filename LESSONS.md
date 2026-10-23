@@ -22,6 +22,7 @@
 | 22/10 · Koepcke | Ảnh không đạt 2560×1440 | Báo kích thước thật, không phóng lớn rồi gọi là gốc |
 | 23/10 · Izba Ch2 | `room_tone.wav` gần như im lặng (−70 LUFS); `forest_ambience.wav` 12s nhưng chỉ ~6s có tiếng | Nghe một lượt mỗi file trước khi giao (mục 5 kiểm mắt); file nền ≥ 30s có tiếng thật |
 | 23/10 · Izba Ch2 | Manifest ghi chú vào ô `file` ("Ch2_S02.png (tai dung…)") và đường dẫn voice trỏ ra ngoài gói | Ô `file` chỉ chứa tên file có trong gói; ghi chú để ở visual plan |
+| 23/10 · Izba Ch3 | Sprite cửa giao dạng ảnh chữ nhật không nền trong suốt, cắt lệch (dính nền + đầu gỗ, mất mép cửa) | Sprite là PNG có kênh alpha, cắt sát đúng vật thể; để trong `sprites/`, không để chung `stills/` |
 | 22/10 · Cartoon | Style nét đơn giản làm model nuốt chân/tay | Prompt ghi "whole body visible, both legs and feet clearly drawn" |
 
 ## Dựng (người dựng)
