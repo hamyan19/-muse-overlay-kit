@@ -20,6 +20,8 @@
 | 22/10 · Koepcke | Giày đảo chân; cảnh còn đủ 2 giày khi đã mất 1 | Character sheet ghi rõ trái/phải; mục 1 của kiểm mắt |
 | 22/10 · Koepcke | Thừa ghế / sai số ghế | Character sheet ghi số lượng đạo cụ |
 | 22/10 · Koepcke | Ảnh không đạt 2560×1440 | Báo kích thước thật, không phóng lớn rồi gọi là gốc |
+| 23/10 · Izba Ch2 | `room_tone.wav` gần như im lặng (−70 LUFS); `forest_ambience.wav` 12s nhưng chỉ ~6s có tiếng | Nghe một lượt mỗi file trước khi giao (mục 5 kiểm mắt); file nền ≥ 30s có tiếng thật |
+| 23/10 · Izba Ch2 | Manifest ghi chú vào ô `file` ("Ch2_S02.png (tai dung…)") và đường dẫn voice trỏ ra ngoài gói | Ô `file` chỉ chứa tên file có trong gói; ghi chú để ở visual plan |
 | 22/10 · Cartoon | Style nét đơn giản làm model nuốt chân/tay | Prompt ghi "whole body visible, both legs and feet clearly drawn" |
 
 ## Dựng (người dựng)
@@ -33,4 +35,5 @@
 | 22/10 · cả phim | Nhãn từ khoá tự lấp chỗ trống chọn theo độ dài, không theo nghĩa | Người dựng xem lại, bỏ nhãn vô nghĩa |
 | 22/10 · cả phim | Mix từng chương riêng → âm lượng chênh khi ghép | Chạy loudnorm cho bản ghép cuối |
 | 22/10 · cả phim | Render cloud 2 nhân ≈ 10 phút / 1 phút video | Cả phim nên render trên máy local |
+| 23/10 · Izba Ch2 | Ảnh có chi tiết lơ lửng khó hiểu (nắp bình treo xích) | Tách thành `sprite`, vá nền, cho nó chuyển động đúng lời ("sealed" → nắp rơi đóng) |
 | 22/10 · cả phim | Chương chủ đích chậm bị lint báo trống sự kiện | Đặt `"calm": true` trong spec (lint nới lên 9s); không dùng cho chương nhịp nhanh |

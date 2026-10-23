@@ -31,7 +31,7 @@ Anh duyệt 2 lần: ở bước Duyệt style (kế hoạch hình + style) và 
 | `tools/check_assets.py` | 6 (tuỳ chọn) | Sheet ảnh thu nhỏ khi anh muốn xem nguyên liệu trước khi dựng |
 | `tools/word_times.py`, `tools/find_gaps.py` | 7 | Mốc cụm từ, gợi ý hiệu ứng theo mệnh đề; khoảng lặng để đặt điểm cắt |
 | `tools/lint_spec.py` | 7 | Kiểm spec trước render (trống sự kiện, overlay tĩnh, thiếu t_out, chữ nhỏ...) |
-| `overlay_engine.py` | 7 | Engine: `spec.json` → MP4 (hình + mix tiếng); 29 loại phần tử, 8 preset |
+| `overlay_engine.py` | 7 | Engine: `spec.json` → MP4 (hình + mix tiếng); 35 loại phần tử, 8 preset |
 | `tools/analyze_video.py` | 7 (khi cần) | Chấm từng khung: jitter, khung chết, khoảng trống sự kiện |
 | `tools/make_fog_loop.py`, `tools/make_kinetic.py` | 7 | Tạo clip sương chồng lớp, chữ kinetic |
 | `examples/` | 7 | Spec mẫu (Hook Koepcke 28s), demo hiệu ứng, demo preset và lớp chồng |

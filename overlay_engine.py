@@ -778,7 +778,25 @@ def ss_arr(x):
     x = np.clip(x, 0, 1)
     return x * x * (3 - 2 * x)
 
-FX = {"ripple": fx_ripple, "sway": fx_sway, "glow": fx_glow, "parallax": fx_parallax}
+def fx_squash(im, fx, tl):
+    """Nén dọc vùng box về phía đáy (lún/ép xuống). run=[t0,t1] tính từ đầu cảnh; amount = tỉ lệ chiều cao cuối (vd 0.96)."""
+    x0, y0, x1, y1 = fx["box"]
+    r0, r1 = fx.get("run", [0, 3])
+    u = ss(A(tl, r0, r1))
+    s = 1 - (1 - fx.get("amount", 0.96)) * u
+    if s >= 0.9999:
+        return im
+    h = y1 - y0
+    yy = np.arange(h, dtype=np.float32)
+    srcy = (yy - h) / s + h                    # đáy đứng yên, phần trên tụt xuống
+    xx, gy = np.meshgrid(np.arange(x1 - x0, dtype=np.float32), srcy)
+    roi = im[y0:y1, x0:x1].copy()
+    bg = np.array(fx.get("fill", roi[0, 0].tolist()), np.uint8)
+    out = cv2.remap(roi, xx, gy, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=bg.tolist())
+    im[y0:y1, x0:x1] = out
+    return im
+
+FX = {"ripple": fx_ripple, "sway": fx_sway, "glow": fx_glow, "parallax": fx_parallax, "squash": fx_squash}
 
 def el_particles(t, e):
     """Hạt chuyển động trong khung: dust (bụi sáng trôi), embers (tàn lửa bay lên), snow (tuyết/tro rơi). 3 độ sâu."""
@@ -923,9 +941,17 @@ def el_marker(t, e):
         ang = math.atan2(y1 - y0, x1 - x0); L = w * 4.2
         for s_ in (2.55, -2.55):
             d.line((x1, y1, x1 + L * math.cos(ang + s_), y1 + L * math.sin(ang + s_)), fill=c, width=w)
-    if e.get("label") and p > 0.9:
+    if e.get("label") and (p > 0.9 or e.get("label_first")):
         lx, ly = e.get("label_pos", pts[-1])
-        text(d, (lx, ly), e["label"], e.get("font", "sans"), e.get("size", 30), color_of(e, "color", "red"), "mm", stroke=3)
+        if e.get("label_src"):      # nhãn bám camera cùng mũi tên (toạ độ ảnh nguồn)
+            lx, ly = S(*e["label_src"])
+        if e.get("label_card"):     # thẻ tối viền kem sau nhãn — đọc được trên nền giấy sáng
+            sz = e.get("size", 28); fnt = e.get("font", "sans")
+            wl = font(fnt, sz).getlength(e["label"]) / 2 + 18
+            card(d, (lx - wl, ly - sz * 0.75, lx + wl, ly + sz * 0.75), 0.88, 8, 2)
+            text(d, (lx, ly), e["label"], fnt, sz, color_of(e, "label_color", "cream"), "mm")
+        else:
+            text(d, (lx, ly), e["label"], e.get("font", "sans"), e.get("size", 30), color_of(e, "color", "red"), "mm", stroke=3)
     return apply_alpha(lay, f)
 
 def _torn(w, h, seed=5, jag=5):
@@ -1016,7 +1042,174 @@ def el_route(t, e):
         if i < len(seg): run += seg[i]
     return apply_alpha(lay, f)
 
+# ------------------------------------------------------------------ NHÓM SỐ LIỆU / SƠ ĐỒ (giải thích)
+def _S(t, e, x, y):
+    """Toạ độ nguồn (bám camera) nếu có 'scene', ngược lại là toạ độ màn hình."""
+    if e.get("scene"):
+        a, b, k = to_screen(C.scene_by_id[e["scene"]], t, x, y); return a, b, k
+    return x, y, 1.0
+
+def el_dimension(t, e):
+    """Đường kích thước kiểu bản vẽ (hai vạch đầu) tự vẽ giữa a và b + thẻ số đổi theo lời.
+    {scene?, a[x,y], b[x,y], draw, texts[[t,"25 CM"],[t2,"25–30 CM"]], label_off[dx,dy], color}"""
+    f = vis(t, e, 0.05, e.get("fade_out", 0.4))
+    if f <= 0:
+        return None
+    p = ss(A(t, e["t_in"], e["t_in"] + e.get("draw", 0.6)))
+    ax, ay, _ = _S(t, e, *e["a"]); bx, by, _ = _S(t, e, *e["b"])
+    mx, my = (ax + bx) / 2, (ay + by) / 2
+    hx, hy = (bx - ax) / 2 * p, (by - ay) / 2 * p
+    L = math.hypot(bx - ax, by - ay) or 1
+    nx, ny = -(by - ay) / L * 12, (bx - ax) / L * 12
+    c = col(color_of(e, "color", "yellow")) + (255,)
+    lay = new_layer(); d = ImageDraw.Draw(lay)
+    p0, p1 = (mx - hx, my - hy), (mx + hx, my + hy)
+    d.line((p0, p1), fill=(0, 0, 0, 200), width=7); d.line((p0, p1), fill=c, width=4)
+    if p > 0.95:
+        for (qx, qy) in ((ax, ay), (bx, by)):
+            d.line((qx - nx, qy - ny, qx + nx, qy + ny), fill=(0, 0, 0, 200), width=7)
+            d.line((qx - nx, qy - ny, qx + nx, qy + ny), fill=c, width=4)
+    cur = None
+    for ts, s in e.get("texts", []):
+        if t >= ts: cur = (ts, s)
+    if cur and p > 0.95:
+        ts, s = cur; pop = 1 + 0.22 * (1 - ss(A(t, ts, ts + 0.25)))
+        sz = int(e.get("size", 34) * pop)
+        dx, dy = e.get("label_off", [90, 0])
+        wl = font("sans", sz).getlength(s) / 2 + 18
+        lx, ly = mx + dx, my + dy
+        card(d, (lx - wl, ly - sz * 0.75, lx + wl, ly + sz * 0.75), 0.9, 8, 2)
+        text(d, (lx, ly), s, "sans", sz, color_of(e, "color", "yellow"), "mm")
+    return apply_alpha(lay, f)
+
+def el_bars(t, e):
+    """Thanh so sánh mọc ra theo lời. {box[x0,y0,x1,y1] màn hình, title?, max, items[{label,value,t,color,text?}], grow}"""
+    f = vis(t, e, 0.25, e.get("fade_out", 0.4))
+    if f <= 0:
+        return None
+    x0, y0, x1, y1 = e["box"]
+    lay = new_layer(); d = ImageDraw.Draw(lay)
+    card(d, (x0, y0, x1, y1), 0.86, 10, 2)
+    items = e["items"]; top = y0 + 18
+    if e.get("title"):
+        text(d, (x0 + 22, y0 + 26), e["title"], "mono", e.get("title_size", 22), C.colors["edge"], "lm"); top = y0 + 50
+    rowh = (y1 - 14 - top) / len(items)
+    lw = e.get("label_w", 120); bx0, bx1 = x0 + 22 + lw, x1 - 24
+    for i, it in enumerate(items):
+        cy = top + rowh * (i + 0.5)
+        text(d, (x0 + 22, cy), it["label"], "sans", e.get("size", 26), C.colors["cream"], "lm")
+        u = ss(A(t, it.get("t", e["t_in"]), it.get("t", e["t_in"]) + e.get("grow", 0.9)))
+        w = (bx1 - bx0) * it["value"] / e["max"] * u
+        h = min(rowh * 0.55, 30)
+        if w > 1:
+            d.rounded_rectangle((bx0, cy - h / 2, bx0 + w, cy + h / 2), radius=5, fill=col(color_of(it, "color", "yellow")) + (255,))
+        if it.get("text") and u > 0.95:
+            text(d, (bx0 + w + 10, cy), it["text"], "sans", e.get("size", 26), color_of(it, "color", "yellow"), "lm", stroke=2)
+    return apply_alpha(lay, f)
+
+def el_flow(t, e):
+    """Dòng hạt chạy theo làn (nhiệt, gió, nước...) — tốc độ = dữ liệu. {scene?, lanes[[[x,y],[x,y]],...], speed(px/s theo toạ độ làn), spacing, r, color}"""
+    f = vis(t, e, e.get("fade_in", 0.4), e.get("fade_out", 0.4))
+    if f <= 0:
+        return None
+    lay = np.zeros((C.H, C.W, 4), np.uint8)
+    c = col(color_of(e, "color", [255, 150, 60]))
+    sp, gap, r = e.get("speed", 100), e.get("spacing", 120), e.get("r", 6)
+    for li, (a_, b_) in enumerate(e["lanes"]):
+        L = math.hypot(b_[0] - a_[0], b_[1] - a_[1]) or 1
+        off = (li * 0.37 % 1) * gap
+        n = int(L // gap) + 2
+        for k in range(n):
+            s = ((t - e["t_in"]) * sp + off + k * gap) % (n * gap)
+            if s > L: continue
+            u = s / L
+            x, y, kk = _S(t, e, a_[0] + (b_[0] - a_[0]) * u, a_[1] + (b_[1] - a_[1]) * u)
+            fade = min(1.0, u / 0.12, (1 - u) / 0.12)
+            rr = max(2, int(r * (kk / 0.5 if e.get("scene") else 1)))
+            cv2.circle(lay, (int(x), int(y)), rr * 2, c + (int(70 * fade),), -1, cv2.LINE_AA)
+            cv2.circle(lay, (int(x), int(y)), rr, c + (int(255 * fade),), -1, cv2.LINE_AA)
+    return apply_alpha(Image.fromarray(lay, "RGBA"), f)
+
+def el_linechart(t, e):
+    """Biểu đồ đường mini tự vẽ. {box, run[t0,t1], title?, xlabel?, series[{label,color,pts[[0..1,0..1],...]}]}"""
+    f = vis(t, e, 0.3, e.get("fade_out", 0.4))
+    if f <= 0:
+        return None
+    x0, y0, x1, y1 = e["box"]
+    lay = new_layer(); d = ImageDraw.Draw(lay)
+    card(d, (x0, y0, x1, y1), 0.86, 10, 2)
+    ttl = 0
+    if e.get("title"):
+        text(d, (x0 + 20, y0 + 24), e["title"], "mono", 22, C.colors["edge"], "lm"); ttl = 30
+    gx0, gy0, gx1, gy1 = x0 + 24, y0 + 22 + ttl, x1 - 140, y1 - 38
+    edge = col(C.colors["edge"]) + (255,)
+    d.line((gx0, gy1, gx1, gy1), fill=edge, width=2); d.line((gx0, gy0, gx0, gy1), fill=edge, width=2)
+    if e.get("xlabel"):
+        text(d, (gx0, gy1 + 18), e["xlabel"][0], "mono", 20, C.colors["edge"], "lm")
+        text(d, (gx1, gy1 + 18), e["xlabel"][1], "mono", 20, C.colors["edge"], "rm")
+    u = A(t, *e["run"])
+    for s in e["series"]:
+        pts = s["pts"]; c = col(color_of(s, "color", "yellow")) + (255,)
+        P = []
+        for i in range(len(pts) - 1):
+            for j in range(10):
+                q = (i + j / 10) / (len(pts) - 1)
+                if q > u: break
+                a_, b_ = pts[i], pts[i + 1]; w = j / 10
+                P.append((a_[0] + (b_[0] - a_[0]) * w, a_[1] + (b_[1] - a_[1]) * w))
+        if u >= 1: P.append(tuple(pts[-1]))
+        P = [(gx0 + (gx1 - gx0) * px, gy1 - (gy1 - gy0) * py) for px, py in P]
+        if len(P) >= 2:
+            d.line(P, fill=c, width=5, joint="curve")
+        if P:
+            d.ellipse((P[-1][0] - 7, P[-1][1] - 7, P[-1][0] + 7, P[-1][1] + 7), fill=c)
+            text(d, (P[-1][0] + 14, P[-1][1]), s["label"], "sans", 22, color_of(s, "color", "yellow"), "lm", stroke=2)
+    return apply_alpha(lay, f)
+
+def el_sprite(t, e):
+    """Một mảnh ảnh PNG có nền trong suốt di chuyển from→to (bám camera nếu có scene).
+    {file, scene?, from[x,y], to[x,y] (tâm, toạ độ nguồn 2560 nếu có scene), run[t0,t1], ease, w? (rộng theo toạ độ nguồn)}"""
+    f = vis(t, e, e.get("fade_in", 0.01), e.get("fade_out", 0.3))
+    if f <= 0:
+        return None
+    key = ("spr", e["file"])
+    if key not in C.cache:
+        C.cache[key] = Image.open(os.path.join(C.root, e["file"])).convert("RGBA")
+    im = C.cache[key]
+    u = ease(e.get("ease", "smooth"), A(t, *e.get("run", [e["t_in"], e["t_in"]])))
+    x = e["from"][0] + (e["to"][0] - e["from"][0]) * u
+    y = e["from"][1] + (e["to"][1] - e["from"][1]) * u
+    sx, sy, k = _S(t, e, x, y)
+    if not e.get("scene"):
+        k = 1.0
+    w = max(1, int(im.width * k)); h = max(1, int(im.height * k))
+    piece = im.resize((w, h), Image.LANCZOS)
+    lay = new_layer()
+    lay.paste(piece, (int(sx - w / 2), int(sy - h / 2)), piece)
+    return apply_alpha(lay, f)
+
+def el_tag(t, e):
+    """Thẻ chữ có nền (tiêu đề, nhãn số liệu) bật nhẹ vào. {text, pos | scene+src, size, color, font, sub?}"""
+    f = vis(t, e, 0.2, e.get("fade_out", 0.35))
+    if f <= 0:
+        return None
+    x, y, _ = _S(t, e, *(e["src"] if e.get("scene") else e["pos"]))
+    p = ss(A(t, e["t_in"], e["t_in"] + 0.3))
+    sz = int(e.get("size", 30) * (1 + 0.15 * (1 - p)))
+    fnt = e.get("font", "sans")
+    w1 = font(fnt, sz).getlength(e["text"])
+    ws = font("mono", 20).getlength(e["sub"]) if e.get("sub") else 0
+    hw = max(w1, ws) / 2 + 20
+    h1 = sz * 0.78 + (16 if e.get("sub") else 0)
+    lay = new_layer(); d = ImageDraw.Draw(lay)
+    card(d, (x - hw, y - h1, x + hw, y + h1), 0.88, 8, 2)
+    text(d, (x, y - (10 if e.get("sub") else 0)), e["text"], fnt, sz, color_of(e, "color", "cream"), "mm")
+    if e.get("sub"):
+        text(d, (x, y + sz * 0.55), e["sub"], "mono", 20, C.colors["edge"], "mm")
+    return apply_alpha(lay, f * clamp(p * 1.5))
+
 TYPES = {
+    "tag": el_tag, "dimension": el_dimension, "bars": el_bars, "flow": el_flow, "linechart": el_linechart, "sprite": el_sprite,
     "photo_pin": el_photo_pin, "marker": el_marker, "clipping": el_clipping,
     "speech_box": el_speech_box, "route": el_route,
     "particles": el_particles, "video_overlay": el_video_overlay,

@@ -70,6 +70,22 @@ Preset ở trên chỉ đổi màu/khung. **Phong cách dựng thật sự nằm
 **Luật:** mỗi chương chọn MỘT bộ chính (có thể mượn 1 phần tử của bộ khác); hai chương liền nhau không dùng cùng bộ. Mỗi cảnh tối đa 2 lớp chồng cùng lúc + phụ đề.
 Demo: `examples/demo_overlay_styles.json` + `examples/styles/overlay_styles_grid.jpg` (Beat 4 Koepcke: album, bản đồ, truyện tranh, note).
 
+## BỘ SƠ ĐỒ & SỐ LIỆU (style dựng "Bản đồ / giải thích" — dùng thật ở Ch2 "The Wall Is a Jar")
+Mọi phần tử có `scene` thì toạ độ là ảnh nguồn 2560x1440 và bám theo camera; không có `scene` thì là toạ độ màn hình 1280x720.
+
+| type | Dùng khi | Tham số chính |
+|---|---|---|
+| `tag` | Thẻ chữ có nền tối (đọc được trên giấy sáng lẫn ảnh rậm) | `text, pos` hoặc `scene+src, size, color, font, sub?` |
+| `marker` + `label_card` | Mũi tên tay chỉ vào chi tiết, nhãn ở đuôi mũi tên bám camera | `kind:"arrow", scene, from, to, label, label_src, label_card:true, label_first:true` |
+| `dimension` | Đường kích thước kiểu bản vẽ, số đổi theo lời ("25" → "25–30 CM") | `scene, a, b, draw, texts[[t,"…"]], label_off` |
+| `bars` | Thanh so sánh mọc ra theo lời | `box, title, max, items[{label,value,t,text,color}]` |
+| `flow` | Dòng hạt chạy theo làn — **tốc độ là dữ liệu** (nhiệt qua gỗ chậm, qua gạch nhanh gấp 5) | `scene, lanes[[[x,y],[x,y]]], speed, spacing, r, color` |
+| `linechart` | Biểu đồ đường mini tự vẽ (ghi "ILLUSTRATIVE" nếu không có số thật) | `box, run, title, xlabel[a,b], series[{label,color,pts}]` |
+| `sprite` | Một mảnh PNG nền trong suốt di chuyển (nắp rơi xuống đóng bình, vật bay vào) | `file, scene, from, to, run, ease` |
+| fx `squash` | Nén dọc một vùng ảnh về phía đáy (tường lún, vật bị ép) | `box, amount (vd 0.955), run[t0,t1] tính từ đầu cảnh` |
+
+Mẹo: ảnh có chi tiết "treo lơ lửng" hoặc thừa thì tách ra làm `sprite` + xoá khỏi nền (vá bằng mảng giấy/nền cạnh đó) — biến điểm yếu thành chuyển động có nghĩa.
+
 ## CHUYỂN ĐỘNG BÊN TRONG ẢNH TĨNH ("nhìn như phim mà không cần cảnh quay")
 Ba lớp kỹ thuật, dùng chồng lên nhau trên cùng một ảnh:
 

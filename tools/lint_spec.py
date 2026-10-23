@@ -17,7 +17,8 @@ dur = S["meta"]["duration"]; E = S["elements"]; SC = S["scenes"]
 errs, warns, infos = [], [], []
 CALM = bool(S.get("calm"))   # beat chủ đích thở: nới ngưỡng trống sự kiện lên 9s, bỏ kiểm "ít phần tử"
 if CALM: a.max_gap = max(a.max_gap, 9.0)
-ANIMATED = {"counter_down", "ticker", "gauge", "day_ticker", "rain", "mist", "dim", "spotlight", "anchored_circle", "timeline", "flash"}
+ANIMATED = {"counter_down", "ticker", "gauge", "day_ticker", "rain", "mist", "dim", "spotlight", "anchored_circle", "timeline", "flash",
+            "flow", "linechart", "sprite", "particles", "dimension", "bars"}
 NEEDS_OUT = {"label", "lower_third", "stamp", "badge_pop", "highlight_box", "strike_cards", "typed_card", "redact", "question_card"}
 
 def span(e):
@@ -33,6 +34,10 @@ for e in E:
     for c in e.get("cards", []): ev += [c["t_in"], c["t_strike"]] if c.get("t_strike", 99) < dur else [c["t_in"]]
     for x in e.get("events", []): ev.append(x["t"])
     if e["type"] == "counter_down": ev.append(e["hit"])
+    for x in e.get("texts", []): ev.append(x[0])                       # dimension: số đổi theo lời
+    for x in e.get("items", []): ev.append(x.get("t", t0))              # bars: từng thanh mọc ra
+    if e["type"] in ("linechart", "sprite", "ticker") and e.get("run"):  # vẽ/di chuyển liên tục = có sự kiện mỗi ~2s
+        r0, r1 = e["run"]; ev += [r0 + k * 2.0 for k in range(int((r1 - r0) / 2.0) + 1)] + [r1]
 ev = sorted(set(round(x, 2) for x in ev))
 def _hold(p, q):   # cảnh đánh dấu "hold": true = nhịp để hình tự nói (có chủ đích, tối đa 9s)
     for k, sc in enumerate(SC):
