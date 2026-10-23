@@ -1,4 +1,4 @@
-# Character sheet — làm ĐẦU TIÊN, áp dụng xuyên suốt mọi chương
+# Character sheet — làm ở bước 5 của chương đầu tiên, áp dụng cho cả video
 
 Làm một lần ở đầu dự án (trước hình của chương đầu), anh duyệt, rồi KHÓA. Mọi ảnh sau đó phải bám sheet này; muốn đổi phải được anh đồng ý và cập nhật sheet.
 

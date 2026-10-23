@@ -1,6 +1,6 @@
 # STYLE — House Cartoon (nét cartoon nhà Chapter Studio)
 
-Phong cách ảnh MẶC ĐỊNH đã dùng xuyên các chương Chapter Studio (Amazon, Koepcke test 22/10/2026).
+Phong cách ảnh đã dùng xuyên các chương Chapter Studio (Amazon, Koepcke test 22/10/2026).
 Mọi ảnh theo style này phải đối chiếu 3 ảnh mẫu trong thư mục này (`ref-1-fall.jpg`, `ref-2-seat-jungle.jpg`, `ref-3-stream.jpg`).
 
 ## Style block (chép NGUYÊN VĂN vào đầu mọi prompt, không diễn đạt lại)
@@ -26,4 +26,4 @@ Sau style block là mô tả cảnh cụ thể + khóa nhân vật (từ charact
 ## Khi nào dùng / không dùng
 - Dùng: các chương theo lane Chapter Studio, cảnh kể chuyện thường, cảnh giải thích.
 - Không dùng: thumbnail cần độ giật gân (đó là việc của thiết kế thumbnail riêng), cảnh đã khóa style khác trong character sheet của dự án.
-- Theo QUY-TRINH.md: mỗi chương một phong cách hình khác chương liền kề — style này là MỘT trong các style luân phiên, không mặc định cho mọi chương liên tiếp.
+- Đây là style HÌNH: chọn thì giữ cho cả video. Sự đa dạng giữa các chương đến từ style DỰNG (`STYLES.md` bảng B), không đổi style hình giữa chừng.

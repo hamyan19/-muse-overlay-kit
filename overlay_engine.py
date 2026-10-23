@@ -1086,10 +1086,11 @@ def frame(i):
     return post(np.asarray(base.convert("RGB")), i)
 
 PRESETS = {
-    # phim cũ / bản tin xưa: đen trắng ngả nâu, hạt thô, nhấp nháy, vết xước, khung 4:3
+    # phim cũ / bản tin xưa: đen trắng ngả nâu, hạt thô, nhấp nháy, vết xước; full 16:9
+    # (muốn khung 4:3 thì tự thêm "style": {"pillarbox": 1.37} vào spec — mặc định tắt vì video phải full 16:9)
     "newsreel": {"grain": 6.0, "vignette": 0.55, "warm": [1.0, 1.0, 1.0], "flicker": 0.03,
                  "grade": {"bw": 1.0, "tint": [1.12, 0.98, 0.78], "contrast": 1.15},
-                 "style": {"scratches": True, "pillarbox": 1.37},
+                 "style": {"scratches": True},
                  "colors": {"yellow": [236, 214, 160], "red": [170, 60, 50], "cream": [240, 228, 200],
                             "edge": [210, 198, 165], "card": [24, 20, 14]}},
     # điện ảnh tối giản: full khung 16:9 (KHÔNG dải đen), phụ đề serif, ít hạt, màu gần tự nhiên

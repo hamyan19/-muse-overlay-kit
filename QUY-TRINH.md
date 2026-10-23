@@ -1,41 +1,84 @@
-# QUY TRÌNH CHUNG — đọc file này TRƯỚC (Muse làm chính)
+# QUY TRÌNH — file duy nhất cần đọc trước
 
-Các file khác (PIPELINE, PLAYBOOK, EDITORIAL-PATTERNS, EFFECTS...) là **tham chiếu, chỉ đọc khi cần** ở đúng bước.
+Mọi file khác trong repo là **tham chiếu**, chỉ mở ở đúng bước được nhắc tên bên dưới.
+Nếu file tham chiếu nói khác file này, **file này thắng**.
 
 ## Ai làm gì
-- **Muse (chính):** script, character sheet, hình, tìm footage, voice, âm thanh (và cập nhật `SOUND-LIBRARY.md`), QC các nguyên liệu này.
-- **Dựng:** Muse hoặc Claude, anh chọn (dùng `overlay_engine.py` + `EDITORIAL-PATTERNS.md`).
-- **Anh:** duyệt ở 2 cổng.
+- **Muse:** script, voice, mapping, visual plan, nguyên liệu (hình, footage, âm thanh).
+- **Người dựng:** anh chọn cho từng dự án (Claude, Muse hoặc GPT). Dùng `overlay_engine.py`.
+- **Anh:** duyệt 2 lần: kế hoạch hình + style (trước khi tạo nguyên liệu) và video chương.
 
-## 6 bước (làm TUẦN TỰ theo chương: xong chương này mới sang chương sau)
-**Đầu dự án, một lần:** Character sheet (`CHARACTER-SHEET.md`) → anh duyệt → khóa.
+## 7 bước — làm tuần tự từng chương (xong chương này mới sang chương sau)
 
-Mỗi chương:
-1. **Script + ghi chú** (`SCRIPT-NOTES.md`): chương bình thường/sôi nổi, câu nào cần hình gì (không lặp), phong cách tiếng + âm thanh phụ trợ.
-2. **Hình** theo kế hoạch → QC cứng (`QC-ASSETS.md`, `tools/qc_assets.py`).
-3. **Footage** nếu script cần: nói rõ cảnh nào, ghép với ảnh hay thay ảnh (20–30% chương).
-4. **Voice** → `wordts.json`.
-5. **Âm thanh**: tra `SOUND-LIBRARY.md` trước, thiếu mới tạo/tìm, rồi ghi bổ sung vào thư viện.
-6. **Dựng** → lint → render → analyze → video chương.
+| # | Bước | Ai | Ra cái gì | Tham chiếu |
+|---|---|---|---|---|
+| 1 | **Script** | Muse | Lời đọc + ghi chú chương: BÌNH THƯỜNG hay SÔI NỔI, âm thanh phụ trợ | `SCRIPT-NOTES.md` mục 1 |
+| 2 | **Voice** | Muse | `vo/<chương>.wav` + `vo/wordts.json` (mốc từng từ), đã sửa tên riêng | — |
+| 3 | **Mapping câu theo voice** | Muse | Bảng câu/cụm câu ↔ mốc thời gian thật, cắt ở khoảng lặng | `tools/plan_assets.py` |
+| 4 | **Visual plan** | Muse | Mỗi dòng của bảng mapping một ý tưởng hình, không lặp | `SCRIPT-NOTES.md` mục 2 |
+| 5 | **Duyệt style dựng** | **Anh duyệt** | Chốt kế hoạch hình (bước 4) + style hình + style dựng của chương | `STYLES.md` |
+| 6 | **Nguyên liệu cần có** | Muse | Danh sách → sản xuất → 1 lần kiểm → giao gói | `QC-ASSETS.md` |
+| 7 | **Dựng** | Người dựng | Video chương → **anh xem**, nhận xét thì sửa | `PLAYBOOK.md`, `EFFECTS.md`, `EDITORIAL-PATTERNS.md` |
 
-## 2 cổng anh duyệt
-- **Cổng 1 — Kế hoạch:** `asset_plan.xlsx` (hình theo câu, footage, âm thanh). Anh điền OK/SỬA/BỎ. Dòng CHỜ chưa được làm.
-- **Cổng 2 — Nguyên liệu thật:** `asset_review.xlsx` (ảnh thu nhỏ, kiểm tự động, voice, âm thanh). Duyệt xong mới dựng.
-- Xem video chương là bước xem kết quả, không phải cổng riêng; anh nhận xét thì sửa.
+### Bước 1 — Script
+Viết lời đọc của chương và ghi chú ngắn theo `SCRIPT-NOTES.md` mục 1 (loại chương + âm thanh phụ trợ).
+Chưa viết ý tưởng hình ở bước này: hình được lên kế hoạch theo voice thật ở bước 4.
 
-## Lệnh nhanh (chạy ngầm, không phải việc của anh)
+### Bước 2 — Voice
+- Voice phải khớp script. Lệch thì hỏi anh trước khi thu lại.
+- Chạy Whisper ra `wordts.json`, rồi **sửa chữ các tên riêng và con số** (giữ nguyên mốc thời gian).
+- Đổi voice ⇒ làm lại bước 3 (mốc thời gian cũ không còn đúng).
+
+### Bước 3 — Mapping câu theo voice
 ```bash
-python3 tools/plan_assets.py res/vo/wordts.json --beat B2 --out plan/     # lập kế hoạch -> Cổng 1
-python3 tools/apply_approval.py plan/asset_plan.xlsx --out plan/           # đọc sheet đã duyệt
-python3 tools/qc_assets.py ...                                             # QC cứng (FAIL=0)
-python3 tools/check_assets.py plan/approved_manifest.json --root res --out plan/   # -> Cổng 2
-python3 tools/lint_spec.py spec.json --root res && python3 overlay_engine.py spec.json --root res --out beat.mp4
-python3 tools/analyze_video.py beat.mp4 --out qa/
+python3 tools/plan_assets.py res/vo/wordts.json --beat B3 --out plan/ --fix "Kupka=Koepcke"
 ```
-Chi tiết từng lệnh: `PIPELINE.md`.
+Ra `plan/asset_plan.xlsx`. Sheet **SHOTS** là bảng mapping: mỗi dòng = một khoảng thời gian thật + lời đọc của khoảng đó,
+điểm cắt nằm trong khoảng lặng. Muse đọc lại, gộp/tách dòng nếu ý nghĩa bị cắt sai chỗ.
 
-## Luật cứng
-1. Không tự duyệt; không làm dòng CHỜ.
-2. Mọi ảnh bám character sheet; ảnh sai kích thước (không phải 2560×1440) phải báo thẳng, không phóng lớn rồi gọi là gốc.
-3. Muse đọc `MUSE-MISTAKES.md` trước mỗi dự án và ghi lỗi mới vào sau mỗi lần giao. Cuối mỗi chương ghi bài học dựng vào `LESSONS.md` và cập nhật `SOUND-LIBRARY.md` / character sheet nếu có đổi.
-4. Mỗi chương một phong cách hình/tiếng khác chương liền kề (tránh lặp, tránh bị quét nội dung lặp).
+### Bước 4 — Visual plan
+Muse điền cột **HÌNH GỢI Ý** của sheet SHOTS cho từng dòng (thay đề xuất tự động nếu chưa hay), theo luật chống lặp trong
+`SCRIPT-NOTES.md` mục 2. Dòng nào cần footage/AI video thì viết brief (mục "BRIEF VIDEO" trong `EDITORIAL-PATTERNS.md`);
+không có brief thì là ảnh tĩnh.
+
+### Bước 5 — Duyệt style (lần duyệt 1 của anh)
+Muse gửi anh `asset_plan.xlsx` kèm đề xuất style của chương (chọn từ `STYLES.md`):
+- **Style hình** — giữ nguyên cho cả video (chương đầu tiên: kèm character sheet theo `CHARACTER-SHEET.md`).
+- **Style dựng** — preset + bộ chồng lớp, **khác chương liền trước**.
+
+Anh điền cột DUYỆT (OK / SỬA / BỎ) và xác nhận hoặc đổi style. Dòng còn CHỜ thì chưa được làm. **Dừng chờ anh.**
+
+### Bước 6 — Nguyên liệu cần có
+```bash
+python3 tools/apply_approval.py plan/asset_plan.xlsx --out plan/      # -> plan/MUSE-TODO.md = danh sách cần làm
+```
+1. Muse làm đúng danh sách OK/SỬA: ảnh, footage có brief, âm thanh (tra `SOUND-LIBRARY.md` trước, thiếu mới tạo).
+2. **Một lần kiểm** theo `QC-ASSETS.md` (một lệnh máy + 5 mục nhìn bằng mắt). FAIL = 0 mới giao.
+3. Giao gói cho người dựng. Anh **không** phải duyệt ảnh lần nữa (muốn xem trước thì chạy `tools/check_assets.py`).
+
+### Bước 7 — Dựng
+```bash
+python3 tools/word_times.py res/vo/wordts.json --auto          # gợi ý hiệu ứng theo mệnh đề
+python3 tools/lint_spec.py spec.json --root res                # kiểm spec, sửa hết ERR (vài giây)
+python3 overlay_engine.py spec.json --root res --out chuong.mp4
+```
+Dựng theo style đã duyệt ở bước 5. Gửi anh video chương (lần duyệt 2). `tools/analyze_video.py` chỉ chạy khi thấy hình rung/đứng.
+
+## Luật cứng (chỉ 5 điều)
+1. Không tự duyệt thay anh; không làm dòng CHỜ; chương này chưa duyệt thì chưa sang chương sau.
+2. Mọi ảnh bám style hình + character sheet đã khóa; ảnh không đủ 2560×1440 thì báo thẳng.
+3. Style dựng của hai chương liền nhau phải khác nhau (chống bị quét nội dung lặp).
+4. Video luôn full khung 16:9, không dải đen.
+5. Có lỗi mới thì ghi **một dòng** vào `LESSONS.md`. Có âm thanh mới thì ghi vào `SOUND-LIBRARY.md`.
+
+## Thư mục một dự án (không đưa lên repo này)
+```
+res/
+  vo/        <chương>.wav, wordts.json
+  stills/    ảnh 2560x1440 (tên file theo cột TÊN FILE ĐÍCH)
+  video/     footage có brief
+  sfx/       âm thanh
+  fonts/     (chép từ repo)
+plan/        asset_plan.xlsx, MUSE-TODO.md, approved_manifest.json
+qc/          QC-REPORT.md
+```

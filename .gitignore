@@ -4,3 +4,5 @@ __pycache__/
 qa/
 plan/
 _thumb_*.png
+analysis/
+qc/

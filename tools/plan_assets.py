@@ -207,7 +207,7 @@ for gi, (i0, i1) in enumerate(groups, 1):
         rows_shots.append([sid, gi, covers, round(te - ts, 1), stext, f"{label} — {vdesc}",
                            "AI ảnh 2560x1440 (bắt buộc) · footage/AI video 6–10s (tuỳ chọn, nên có cho: " + ("nước/mưa/lửa" if main in ('water','storm','fire') else "cảnh đang hành động") + ")",
                            prompt, ", ".join(mv), fname, "CHỜ", ""])
-        manifest["items"].append({"id": sid, "kind": "still", "file": fname, "covers": covers, "scene": gi, "role": role, "approval": "CHỜ"})
+        manifest["items"].append({"id": sid, "kind": "still", "file": fname, "covers": [round(ts, 2), round(te, 2)], "scene": gi, "role": role, "approval": "CHỜ"})
     for s in sfx:
         ascii_ = unicodedata.normalize("NFKD", s.split("(")[0]).encode("ascii", "ignore").decode().lower()
         fn = f"sfx/{re.sub('[^a-z0-9]+', '_', ascii_).strip('_')}.wav"
@@ -218,7 +218,7 @@ for gi, (i0, i1) in enumerate(groups, 1):
         sid = f"{a.beat}-SFX{len(rows_sfx)+1:02d}"
         rows_sfx.append([sid, str(gi), f"{t0:.1f}–{t1:.1f}s", "nền (bed)", s, fn, "CHỜ", ""])
 for r in rows_sfx:
-    manifest["items"].append({"id": r[0], "kind": "sfx", "file": r[5], "covers": r[2], "approval": "CHỜ"})
+    manifest["items"].append({"id": r[0], "kind": "sfx", "file": r[5], "when": r[2], "approval": "CHỜ"})
 rows_sfx.append([f"{a.beat}-MUS-01", "—", f"0–{DUR:.0f}s", "nhạc nền/drone", "drone/nốt nhạc căng thẳng, rất nhỏ (−25 dB), vào chậm, tắt trước câu chốt", "sfx/music_bed.wav", "CHỜ", ""])
 manifest["items"].append({"id": f"{a.beat}-MUS-01", "kind": "sfx", "file": "sfx/music_bed.wav", "approval": "CHỜ"})
 ACC = [e for e in events if e[2] in ("CON SỐ", "PHỦ ĐỊNH", "TRÍCH DẪN/PHÁN QUYẾT")][:8]
@@ -229,7 +229,7 @@ manifest["items"].append({"id": f"{a.beat}-ACC-01", "kind": "sfx", "file": "sfx/
 if DUR > 30 and not any(it.get("role") == "hold" for it in manifest["items"]):
     best = None
     for r_, it in zip(rows_shots, [i for i in manifest["items"] if i["kind"] == "still"]):
-        ts_, te_ = [float(x) for x in r_[2].replace("s", "").split("–")]
+        ts_, te_ = it["covers"]
         if te_ - ts_ < 5: continue
         n_ev = sum(1 for e in events if ts_ <= e[0] < te_)
         if best is None or n_ev < best[0]: best = (n_ev, r_, it)
@@ -276,12 +276,14 @@ ws0 = wb.active; ws0.title = "HUONG_DAN"
 guide = [
  f"KẾ HOẠCH NGUYÊN LIỆU — BEAT {a.beat}  ({DUR:.0f}s lời đọc, {len(groups)} cảnh)",
  "",
- "CÁCH DUYỆT: mở các sheet SHOTS / OVERLAYS / SFX, ở cột DUYỆT chọn OK (làm đúng như đề xuất), SỬA (làm nhưng theo ghi chú của anh) hoặc BỎ (không làm).",
+ "Sheet SHOTS = MAPPING câu theo voice (bước 3) + VISUAL PLAN (bước 4): Muse sửa cột HÌNH GỢI Ý thành ý tưởng hình cuối cho từng dòng trước khi gửi anh.",
+ "CÁCH DUYỆT (bước 5): ở cột DUYỆT chọn OK (làm đúng như đề xuất), SỬA (làm nhưng theo ghi chú của anh) hoặc BỎ (không làm); xác nhận hoặc đổi style ở dòng cuối sheet này.",
  "Dòng để CHỜ = chưa duyệt, Muse KHÔNG được sinh/tìm nguyên liệu cho dòng đó. Ghi yêu cầu riêng vào cột GHI CHÚ CỦA ANH.",
- "Prompt trong sheet SHOTS chỉ là NHÁP theo cấu trúc lời đọc; Muse viết prompt cuối cùng rồi sinh ảnh. Anh duyệt lần 2 trên ảnh thật (asset_review.xlsx).",
+ "Prompt trong sheet SHOTS chỉ là NHÁP; Muse viết prompt cuối rồi sinh ảnh. Đây là lần duyệt duy nhất trước khi tạo nguyên liệu; sau đó anh xem video chương.",
  "Sau khi duyệt xong: lưu file, đưa lại cho Muse (hoặc đưa Claude chạy tools/apply_approval.py) để ra MUSE-TODO.md.",
  "",
- f"Phong cách dựng: {a.preset or 'mặc định (hồ sơ điều tra)'} · Phong cách ảnh: {a.style_bible}",
+ f"STYLE ĐỀ XUẤT (STYLES.md) — style dựng: {a.preset or 'mặc định (hồ sơ điều tra)'} · style hình: {a.style_bible}",
+ "STYLE ANH CHỐT (để trống = đồng ý đề xuất): ",
 ]
 for i, g in enumerate(guide, 1):
     ws0.cell(i, 1, g).alignment = Alignment(wrap_text=True, vertical="top")
