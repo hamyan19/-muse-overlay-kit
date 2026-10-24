@@ -32,13 +32,25 @@ Riêng cảnh sơ đồ thì thêm: `empty blank label boxes with thin ink arrow
 ## Đặc điểm nhận diện
 - Nét: mực đen vẽ tay, nét phác hơi run, gạch chéo (hatching) tạo khối, không phải vector sạch,
   không tả thực, không 3D.
-- Mặt người que: mặt tròn/oval gần như trắng, chỉ 2 mắt chấm đen, miệng nhỏ, gần như không có mũi;
-  cảm xúc chỉ qua lông mày (vạch ngắn) và miệng. Đây chính là lý do dùng style này: KHÔNG cần
-  đồng hóa khuôn mặt từng người xuyên các cảnh — chỉ cần cùng "mặt chấm đen" là đủ nhận diện.
+- **LUẬT MẶT TỐI GIẢN TUYỆT ĐỐI (An chốt 24/10, áp cả cận mặt):** mặt trắng PHẲNG, hai mắt chấm
+  đen đặc, lông mày chỉ là nét vẽ đơn, miệng nét phẳng hoặc cong nhỏ, cùng lắm một chấm mũi mờ.
+  CẤM: highlight trong mắt, nếp nhăn, răng, tả khối/bóng trên mặt, lông mày nặng tay. Cảm xúc CHỈ
+  đổi bằng góc lông mày + hình miệng. Đây chính là lý do dùng style này: KHÔNG cần đồng hóa khuôn
+  mặt từng người xuyên các cảnh — chỉ cần cùng "mặt chấm đen" là đủ nhận diện.
+- **Tương phản là style:** chi tiết dồn vào THẾ GIỚI, không dồn vào mặt — lông thú, xương, lửa,
+  tuyết, nền giấy parchment, màu nước vẽ càng chi tiết càng tốt; người thì tối giản. Thế giới thật,
+  người tối giản. Cận cảnh tay/vật thì mặt KHÔNG được chiếm khung thay cho chủ thể (lỗi S04 v1:
+  mặt tả chi tiết + chiếm khung thay vì cận tay → gen lại, truyền thẳng 4 ảnh mẫu làm anchor).
+  Gen cảnh có mặt: truyền thẳng 4 ẢNH MẪU làm anchor, không chỉ viết prompt bằng chữ.
 - Tóc: rối, sợi bay, nâu sẫm/đen; elder tóc bạc búi, mother tóc tết dài, child tóc rối.
 - Quần áo: da lông rách, xám-nâu, đường khâu lộ rõ, chân quấn da, tay chân có vết bẩn nhẹ.
 - Màu: bảng trầm — nâu đất, xám, xanh lạnh cho băng/đêm; cam lửa là điểm nhấn bão hòa duy nhất.
   Cấm ám vàng/đỏ lên da và ánh sáng (bake warmth vào prompt là lỗi cũ ở The Kind Truth).
+- **TƯƠNG PHẢN GIỮA CÁC THÀNH PHẦN LÀ TIÊU CHÍ MÀU (An chốt 24/10):** băng giá lạnh xanh, ánh lửa
+  ấm cam, bầu trời dải riêng, quần áo nâu đất PHẢI nổi khỏi nền, đồ vật đọc được ngay. Lỗi chết:
+  một dải hue duy nhất phủ cả khung (đo S05 bản ngoài: người 207°, băng 212°, trời 216° — áo lông
+  cùng màu băng nên người CHÌM vào cảnh). QC màu = đo/soi hue TỪNG THÀNH PHẦN tách nhau, không
+  đo bão hòa trung bình cả khung (Phoenix đã chẩn đoán sai bằng bão hòa TB, An bắt lại).
 - Bối cảnh: chi tiết thật, không phẳng trơn — tuyết, đá, xương, ngà voi, cỏ khô, gỗ, da khâu đều
   có vân. Vật liệu phải đúng thời kỳ: đá, xương, gỗ, da, lửa — cấm kim loại, vải hiện đại, đồ nhựa.
 - Ánh sáng: lửa ấm trong nhà, hoàng hôn cam + xanh lạnh ngoài trời, đêm sao. Nguồn sáng phải
@@ -52,7 +64,27 @@ Riêng cảnh sơ đồ thì thêm: `empty blank label boxes with thin ink arrow
 - Cảnh có người toàn thân phải ghi rõ "whole body visible, both legs and feet clearly drawn"
   (nét này model cũng dễ nuốt chân như style cartoon nhà).
 
+## PHƯƠNG PHÁP PROMPT — CHUẨN NGẮN v3 (An duyệt 24/10, thay mọi prompt dài)
+
+Bài học màu: prompt dài kiểu cũ (style block + đoạn mô tả thời kỳ + negative dài) cho màu
+ĐỤC/xấu. Chuẩn đã kiểm chứng qua trọn bộ Hook v3 (19 hình, An duyệt): prompt NGẮN, cấu trúc cố định:
+
+1. Mở đầu nguyên văn: `Using the attached reference images for the drawing style and the simple
+   face:` (cảnh không có người thì bỏ đoạn "and the simple face").
+2. ĐÍNH THẲNG 4 ẢNH MẪU của thư mục này vào mọi lần gen — anchor bằng hình, không mô tả lại style
+   bằng chữ.
+3. Thân prompt chỉ gồm: cảnh gì + từng thành phần có màu/ánh sáng riêng (băng xanh lạnh, lửa cam
+   ấm, áo lông nâu, trời dải riêng) + nếu có mặt người thì 1 câu luật mặt ("His face stays flat
+   white with two solid round dot eyes, two thin single-stroke eyebrows …, and one small flat
+   mouth line.").
+4. Kết nguyên văn: `Rough Ice Age furs only, no text.` — không negative list dài.
+5. Ảnh bám bố cục một ảnh đã duyệt (chuỗi trại S08→S09→S10) thì đính thêm chính ảnh đó.
+
+Bộ prompt mẫu đã duyệt: `PROMPTS-HOOK-v3-short.csv` (cùng thư mục style trên repo).
+
 ## Khi nào dùng / không dùng
+- **Kích hoạt bằng từ khóa:** khi An nói "làm người que" / "style người que" → dùng ĐÚNG style
+  này (4 ảnh mẫu + prompt ngắn v3), không tự chế style người que khác.
 - Dùng: toàn bộ video Ice Age Winter, cả cảnh kể chuyện lẫn sơ đồ (sơ đồ chỉ đổi nền parchment
   + hộp nhãn trống, giữ nguyên ngôn ngữ mực).
 - Không dùng: thumbnail cần độ giật gân (việc riêng của thumbnail), và không mang sang dự án khác
