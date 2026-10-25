@@ -50,6 +50,8 @@ Muse gửi anh `asset_plan.xlsx` kèm đề xuất style của chương (chọn 
 
 Anh điền cột DUYỆT (OK / SỬA / BỎ) và xác nhận hoặc đổi style. Dòng còn CHỜ thì chưa được làm. **Dừng chờ anh.**
 
+**Sinh prompt ảnh:** nếu chưa được giao prompt đầy đủ, AI vào repo đọc `META-PROMPT-VISUAL.md` (metaprompt mới nhất) và sinh prompt từ bảng mapping đã chốt theo đúng file đó. Không dùng phương pháp prompt nào khác.
+
 ### Bước 6 — Nguyên liệu cần có
 ```bash
 python3 tools/apply_approval.py plan/asset_plan.xlsx --out plan/      # -> plan/MUSE-TODO.md = danh sách cần làm

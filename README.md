@@ -19,6 +19,7 @@ Anh duyệt 2 lần: ở bước Duyệt style (kế hoạch hình + style) và 
 | `PLAYBOOK.md` | 7 | Nguyên tắc dựng, thứ tự dựng, bảng lỗi → cách sửa |
 | `EFFECTS.md` | 7 | Tham số từng hiệu ứng, preset, lớp chồng |
 | `EDITORIAL-PATTERNS.md` | 7 | Ngữ pháp biên tập: mệnh đề lời đọc → sự kiện hình; brief video |
+| `META-PROMPT-VISUAL.md` | 5 | **Metaprompt mới nhất (25/10)**: AI vào repo mà chưa được giao prompt đầy đủ thì đọc file này và sinh prompt từ bảng mapping |
 | `LESSONS.md` | đầu dự án | Sổ bài học (nguyên liệu + dựng), thêm một dòng khi có lỗi mới |
 | `HUONG-DAN-WINDOWS.md` | — | Chạy kit trên máy Windows không cần AI |
 
