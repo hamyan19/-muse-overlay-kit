@@ -110,10 +110,23 @@ def load_scene(sc, root):
 
 def cam(sc, t):
     c = sc["camera"]
-    u = A(t, c["t0"], c["t1"])
-    e = ease(c.get("ease", "linear"), u)
-    s = lerp(c["scale"], e)
-    cx, cy = lerp(c["cx"], e), lerp(c["cy"], e)
+    if c.get("keys"):          # nhiều mốc: [{t, scale, cx, cy}, ...] — đứng yên trước mốc đầu / sau mốc cuối, mượt giữa hai mốc
+        K = c["keys"]
+        if t <= K[0]["t"]:
+            k0 = k1 = K[0]; e = 0.0
+        elif t >= K[-1]["t"]:
+            k0 = k1 = K[-1]; e = 0.0
+        else:
+            i = max(j for j in range(len(K) - 1) if K[j]["t"] <= t)
+            k0, k1 = K[i], K[i + 1]
+            e = ease(c.get("ease", "smooth"), A(t, k0["t"], k1["t"]))
+        s = lerp([k0["scale"], k1["scale"]], e)
+        cx, cy = lerp([k0["cx"], k1["cx"]], e), lerp([k0["cy"], k1["cy"]], e)
+    else:
+        u = A(t, c["t0"], c["t1"])
+        e = ease(c.get("ease", "linear"), u)
+        s = lerp(c["scale"], e)
+        cx, cy = lerp(c["cx"], e), lerp(c["cy"], e)
     sh = c.get("shake")          # {"t0","t1","amp","hz"}: rung máy mượt, tắt dần (không giật ngẫu nhiên)
     if sh and sh["t0"] <= t < sh["t1"]:
         dk = (1 - A(t, sh["t0"], sh["t1"])) ** 1.5
