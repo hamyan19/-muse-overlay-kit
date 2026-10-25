@@ -17,7 +17,10 @@ import openpyxl
 ap = argparse.ArgumentParser()
 ap.add_argument("xlsx"); ap.add_argument("--vo", required=True, help="đường dẫn voice trong res/, ví dụ vo/ch1.mp3")
 ap.add_argument("--stills", default="stills"); ap.add_argument("--preset", default=None)
+ap.add_argument("--duration", type=float, default=None, help="độ dài video (giây); mặc định = hết shot cuối. Nên đặt = độ dài file voice")
+ap.add_argument("--calm", action="store_true", help="đánh dấu calm=true (spec chưa có lớp phủ nên lint không báo thiếu phần tử)")
 ap.add_argument("--dissolve", type=float, default=0.5); ap.add_argument("--out", default="spec.json")
+ap.add_argument("--name-from-id", action="store_true", help="tên ảnh = <ID>.png với dấu - thành _ (CH2-S10 -> CH2_S10.png), dùng khi ảnh đặt tên ngắn theo mã shot")
 ap.add_argument("--include-pending", action="store_true", help="lấy cả dòng CHỜ (chỉ để thử, không dựng thật)")
 a = ap.parse_args()
 
@@ -45,7 +48,7 @@ for r in ws.iter_rows(min_row=2, values_only=True):
     m = re.match(r"\s*([\d.,]+)\s*[–-]\s*([\d.,]+)", str(r[col["PHỦ THỜI GIAN"]]))
     t0, t1 = num(m.group(1)), num(m.group(2))
     rows.append(dict(id=r[col["ID"]], t0=t0, t1=t1, motion=str(r[col["CHUYỂN ĐỘNG ĐỀ XUẤT"]] or ""),
-                     image=r[col["TÊN FILE ĐÍCH"]]))
+                     image=(str(r[col["ID"]]).replace("-", "_") + ".png") if a.name_from_id else r[col["TÊN FILE ĐÍCH"]]))
 if not rows: sys.exit("Không có dòng nào để dựng (kiểm cột DUYỆT, hoặc dùng --include-pending để thử).")
 rows.sort(key=lambda x: x["t0"])
 
@@ -75,11 +78,13 @@ if "OVERLAYS" in wb.sheetnames:
     o = wb["OVERLAYS"]; OH = [c.value for c in o[1]]
     for r in o.iter_rows(min_row=2, values_only=True):
         if r[0]: ov.append(dict(zip(OH, r)))
-dur = rows[-1]["t1"]
+dur = max(rows[-1]["t1"], a.duration or 0)
 spec = {"meta": {"width": 1920, "height": 1080, "fps": 30, "duration": round(dur, 2),
                  "overlays_todo": [{k: v for k, v in x.items() if k in ("ID", "GIÂY", "TỪ KÍCH HOẠT", "LOẠI", "HIỆU ỨNG ĐỀ XUẤT", "GHI CHÚ NỘI DUNG")} for x in ov]},
+        "colors": {"yellow": [255, 209, 26], "red": [235, 50, 40], "cream": [255, 240, 200], "edge": [230, 225, 200], "card": [10, 12, 10], "white": [255, 255, 255]}, "fonts": {"sans": "fonts/DejaVuSans-Bold.ttf", "mono": "fonts/DejaVuSansMono-Bold.ttf"},
         "dissolve": a.dissolve, "scenes": scenes, "elements": [],
         "audio": {"total": round(dur, 2), "vo": {"file": a.vo}, "tracks": []}}
 if a.preset: spec["preset"] = a.preset
+if a.calm: spec["calm"] = True
 json.dump(spec, open(a.out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print(f"{a.out}: {len(scenes)} cảnh, {dur:.1f}s, {len(ov)} overlay chờ thêm tay")

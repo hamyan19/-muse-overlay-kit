@@ -125,7 +125,7 @@ for k, s in enumerate(SC):
 # --- 6. đa dạng
 from collections import Counter
 cnt = Counter(e["type"] for e in E)
-top, tn = cnt.most_common(1)[0]
+top, tn = cnt.most_common(1)[0] if cnt else ("", 0)
 if len(E) >= 6 and tn / len(E) > 0.4: warns.append(f"ĐƠN ĐIỆU: '{top}' chiếm {tn}/{len(E)} phần tử — trộn thêm kiểu khác (xem EFFECTS.md)")
 if dur > 45 and len(cnt) < 7: warns.append(f"chỉ {len(cnt)} kiểu hiệu ứng cho {dur:.0f}s (mục tiêu ≥ 7)")
 if dur > 20 and not any(e["type"] in ("rain", "mist") for e in E): infos.append("chưa dùng chuyển động trong khung (rain/mist): cân nhắc cho cảnh tĩnh dài")
