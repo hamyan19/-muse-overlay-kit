@@ -116,7 +116,11 @@ for k, s in enumerate(SC):
         continue
     if s.get("blur"): im = cv2.GaussianBlur(im, (0, 0), float(s["blur"]) / 2)
     lum = float(cv2.cvtColor(im, cv2.COLOR_BGR2GRAY).mean()) * float(s.get("brightness", 1.0))
-    if lum < 38 and L > 4: warns.append(f"CẢNH {s['id']} ({s['start']}–{end}s): quá tối (độ sáng TB {lum:.0f}/255) trong {L:.0f}s — nếu không chủ đích 'im lặng', tăng brightness hoặc thêm spotlight/mist")
+    if lum < 38 and L > 4: warns.append(f"CẢNH {s['id']} ({s['start']}–{end}s): quá tối (độ sáng TB {lum:.0f}/255) trong {L:.0f}s — nếu không chủ đích 'im lặng', tăng brightness (KHÔNG thêm spotlight: nó làm tối thêm)")
+    for e in E:   # rào sáng cho spotlight: phủ xong khung không được tối mò
+        if e.get('type') == 'spotlight' and e.get('scene') == s['id']:
+            frac = min(1.0, 3.14159 * e.get('r', 380) ** 2 / (2560 * 1440)); after = lum * (1 - e.get('dim', 0.65) * (1 - frac))
+            if lum < 80 or after < 90 or e.get('dim', 0.65) > 0.45: warns.append(f"SPOTLIGHT trên {s['id']}: sáng TB {lum:.0f} → sau phủ ≈ {after:.0f}/255, dim {e.get('dim', 0.65)} — dễ tối mò; giảm dim ≤0.45 hoặc đổi sang circle/arrow")
     c = s["camera"]; dz = abs(c["scale"][1] - c["scale"][0]); dc = abs(c["cx"][1] - c["cx"][0]) + abs(c["cy"][1] - c["cy"][0])
     if L > 4 and dz < 0.05 and dc < 60: warns.append(f"CẢNH {s['id']}: camera gần đứng yên ({L:.0f}s) — thêm đẩy/lùi 8–30% hoặc pan")
     n = sum(1 for e in E if s["start"] - 0.1 <= span(e)[0] < end)

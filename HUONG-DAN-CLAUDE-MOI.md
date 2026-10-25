@@ -22,7 +22,7 @@ Bạn **không** viết script, không thu voice, không tạo ảnh, không t�
 ```bash
 git clone https://github.com/hamyan19/-muse-overlay-kit
 cd -muse-overlay-kit          # tên thư mục bắt đầu bằng dấu "-": dùng `cd ./-muse-overlay-kit` nếu shell hiểu nhầm là tuỳ chọn
-git checkout muse/retime-5-11s   # hoặc nhánh có file này; xem 1.2
+# đang ở nhánh main là đủ công cụ (xem 1.2)
 pip install -r requirements.txt   # trên Linux/Claude cloud thêm: --break-system-packages
 ```
 
@@ -37,9 +37,7 @@ python3 tools/check_wordts.py wordts.json CHX_asset_plan.xlsx --voice chX.mp3
 Từ lạ (OOV) báo ra thì thêm vào dict `SUB` đầu `tools/align.py` bằng từ phát âm gần giống.
 
 ### 1.2 Chọn nhánh nào
-- `main` **thiếu** `mapping_to_spec.py`, `apply_focus.py`, camera nhiều mốc (`camera.keys`) và `dissolve` riêng từng cảnh.
-- `muse/retime-5-11s` có đủ các công cụ đó (nhánh làm việc từ 25/10, chưa merge vào `main`).
-- Muốn dựng thì dùng `muse/retime-5-11s` (hoặc nhánh nào đã merge nó). Nếu anh bảo dùng nhánh khác, theo anh.
+- `main` (đã merge 26/10) có đủ công cụ: `mapping_to_spec.py`, `apply_focus.py`, `apply_overlays.py`, camera nhiều mốc, `dissolve` riêng từng cảnh, `image_overlay`. Dựng từ `main`; nhánh `muse/retime-5-11s` chỉ là lịch sử. Nếu anh bảo dùng nhánh khác, theo anh.
 
 ### 1.3 Môi trường Claude cloud (nếu bạn chạy trong phiên Claude có sandbox)
 - Mạng thường chỉ cho phép registry gói (pip/npm) và GitHub. **Không tải được file từ Google Drive** bằng shell. Nếu ảnh/voice nằm trên Drive thì xin anh gửi thẳng vào chat (zip) hoặc đặt vào thư mục đã kết nối. Đừng thử vòng qua chặn.
@@ -104,7 +102,7 @@ python3 tools/mapping_to_spec.py plan/CH2_asset_plan.xlsx --vo vo/ch2.mp3 --name
 - Mặc định chỉ lấy dòng `DUYỆT=OK`. Thêm `--include-pending` chỉ để **thử** với dòng CHỜ.
 - `--duration` = độ dài file voice (giây). `--calm` khi spec chưa có lớp phủ (không thì lint báo thiếu phần tử).
 - `--preset` là style dựng đã chọn (xem `STYLES.md`/`EFFECTS.md`). Bỏ qua nếu anh chưa chốt, nhưng phải hỏi.
-- Camera suy từ cột CHUYỂN ĐỘNG ĐỀ XUẤT ("đẩy vào", "lia/dolly", "cố định"…). Lớp phủ trong sheet OVERLAYS **không** tự thành phần tử: công cụ chỉ ghi vào `meta.overlays_todo`, bạn thêm tay.
+- Camera suy từ cột CHUYỂN ĐỘNG ĐỀ XUẤT ("đẩy vào", "lia/dolly", "cố định"…). Lớp phủ trong sheet OVERLAYS không tự thành phần tử: công cụ chỉ ghi vào `meta.overlays_todo`; bật chúng bằng `tools/apply_overlays.py` (mục 3.5b).
 - Công cụ này ghi `width=1920, height=1080, fps=30`. Muốn bản xem nhanh 1280×720 thì sửa `meta.width/height` trong spec (engine dùng 1280×720 nếu thiếu). Toạ độ camera và điểm nhấn vẫn tính theo ảnh nguồn **2560×1440**.
 
 ### 3.3 Kiểm spec ngay sau khi tạo
@@ -112,7 +110,7 @@ python3 tools/mapping_to_spec.py plan/CH2_asset_plan.xlsx --vo vo/ch2.mp3 --name
 python3 tools/lint_spec.py spec_ch2.json --root res
 python3 tools/lint_spec.py spec_ch2.json --root res --max-gap 12   # phong cách tối giản, ít lớp phủ
 ```
-Sửa hết **ERR** trước khi render. WARN thì đọc rồi quyết định. Tham số mặc định: `--max-gap 3.5` (khoảng tối đa không có sự kiện hình), `--max-static 3.0`, `--min-text 26`.
+Sửa hết **ERR** trước khi render. (Luật "≤3,5s một sự kiện hình" của PLAYBOOK dành cho chương nhiều hiệu ứng; chương theo kiểu **ít hiệu ứng** như Ch2 dùng `--calm` khi tạo spec và `--max-gap 12` khi lint.) WARN thì đọc rồi quyết định. Tham số mặc định: `--max-gap 3.5` (khoảng tối đa không có sự kiện hình), `--max-static 3.0`, `--min-text 26`.
 
 ### 3.4 Xem nhanh vài khung trước khi render cả chương
 ```bash
@@ -123,7 +121,7 @@ Xem ảnh khung ra: không lộ viền/dải đen, chi tiết đúng chỗ, ch�
 ### 3.5 Điểm nhấn theo lời (chỉ 5–7 điểm cho cả chương)
 Đây là phần anh phản hồi nhiều nhất, đọc kỹ `NHAT-KY-DUNG-CH2.md` mục 4.
 1. Đọc `wordts.json` quanh từng shot, ghi **giây của từ đang nói** tới chi tiết đó (hình đi theo lời, không theo thứ tự bảng).
-2. Chọn **5–7 khoảnh khắc** cho cả chương, **mỗi điểm một kiểu khác nhau**: `zoom`, `circle`, `arrow`, `cut`. Dùng `spot` (làm tối nền) tối đa 1–2 lần/chương. Bản v2 dùng spotlight 22 lần bị anh chê lạm dụng.
+2. Chọn **5–7 khoảnh khắc** cho cả chương, **mỗi điểm một kiểu khác nhau**: `zoom`, `circle`, `arrow`, `cut`. Có thể dùng `spot` (tô sáng vật thể, hạ sáng nền) tối đa 1–2 lần/chương cho vật thể then chốt; công cụ tự canh độ sáng (dim ≤0.45, khung sau phủ ≥95/255, ảnh gốc tối <80 thì tự đổi sang khoanh tròn). Đọc dòng `spot ... dim ...` in ra và xem khung kiểm trước khi render. Bản v2 dùng spotlight 22 lần bị anh chê lạm dụng.
 3. Lấy toạ độ trên ảnh 2560×1440: kẻ lưới 320px lên ảnh thu nhỏ rồi đọc bằng mắt. **Render khung kiểm ngay** (3.4): lần đầu từng đọc lệch cả 200px.
 4. Viết `focus.json` (mẫu: `examples/focus/CH2_focus.json`) rồi chạy:
 ```bash
@@ -132,6 +130,15 @@ python3 tools/apply_focus.py spec_ch2.json focus_ch2.json --out spec_ch2_focus.j
 5. Nếu anh chưa chỉ định điểm nhấn: đề xuất danh sách (giây, kiểu, câu trong lời) rồi **hỏi trước khi làm** (bài học v2: "trả lời trước khi làm").
 
 Kiểu `cut` cần `dissolve: 0` riêng cho cảnh (công cụ tự đặt). Vật sát mép ảnh bị kẹt, không vào giữa khung được (engine không lộ viền).
+
+### 3.5b Lớp phủ trong sheet OVERLAYS (mũi tên, nhãn, nét đứt, ảnh L01, tuyết) — đã BẬT
+```bash
+python3 tools/apply_overlays.py spec_focus.json plan/CHX_asset_plan.xlsx --template pos.json     # khung điền, mỗi dòng OVERLAYS một mục
+# nhìn ảnh (lưới 320px), điền toạ độ ảnh nguồn 2560x1440 vào pos.json (from/to, at, points; L01 cần ảnh + file)
+python3 tools/apply_overlays.py spec_focus.json plan/CHX_asset_plan.xlsx --pos pos.json --out spec_ov.json --root res
+```
+Mục chưa điền toạ độ bị bỏ qua và được liệt kê; tuyết tự bật. **Luôn render khung kiểm** sau khi đọc toạ độ bằng mắt.
+**RÀO SÁNG:** lớp ảnh L01 là multiply chỉ phủ nét tối (không tối cả khung), strength ≤0.85, độ phủ TB ≤10%, nền < 80/255 thì không phủ; `spot` (tô sáng vật) dim ≤0.45 và sáng TB sau phủ ≥95/255 (lint cảnh báo nếu vượt). Tối đa 2 phần tử phủ cùng lúc. Phủ xong phải mở khung kiểm xem còn sáng, đừng chỉ tin số.
 
 ### 3.6 Render
 ```bash
@@ -159,7 +166,7 @@ Tiếng: voice là chuẩn; nhạc nền −21…−25 dB, sfx nhấn −5…−
 | Lỗi | Nguyên nhân | Cách xử |
 |---|---|---|
 | `KeyError: 'colors'` | engine bắt buộc có `colors` và `fonts` trong spec | `mapping_to_spec.py` đã tự thêm; nhớ chép `fonts/` vào `res/` |
-| `lint_spec.py` sập `IndexError` | spec chưa có phần tử nào | đã sửa trên nhánh `muse/retime-5-11s` |
+| `lint_spec.py` sập `IndexError` | spec chưa có phần tử nào | đã sửa (có trên `main`) |
 | Render bị cắt giữa chừng (ví dụ ở khung 2200/3053) | lệnh chạy nổi giới hạn ~10 phút | chạy nền, chờ xong |
 | Lint báo "TRỐNG SỰ KIỆN" 5 chỗ | đoạn 9–10s không có gì đổi trên màn hình | đúng với spec chưa có lớp phủ; hết sau khi thêm điểm nhấn, hoặc dùng `--max-gap 12` |
 | Không tải được ảnh từ Drive | mạng sandbox chặn | xin anh gửi thẳng vào chat |
@@ -167,7 +174,7 @@ Tiếng: voice là chuẩn; nhạc nền −21…−25 dB, sfx nhấn −5…−
 ### 4.2 Giới hạn hiện tại (nói thẳng với anh, đừng giấu)
 - Ảnh Ch2 gốc 1672×941, không phải 2560×1440. Bản **1920×1080 chất lượng cao cần ảnh nguồn lớn hơn**.
 - `mapping_to_spec.py` mới thử chuyển đổi trên Ch2, chưa render hết cho các chương khác.
-- Chưa có: lớp nét đứt `L01` (thiếu ảnh), chữ nhãn, mũi tên chữ, âm thanh ngoài voice.
+- Lớp phủ (mũi tên, nhãn, nét đứt, ảnh L01) đã có công cụ bật (`apply_overlays.py`, mới thử trên dữ liệu giả, chưa trên bản dựng thật): cần anh đưa ảnh L01 thật; chưa có âm thanh ngoài voice.
 - Hook, Ch1, Ch3–Ch9, Ending chưa dựng. Mỗi chương một `focus.json` riêng.
 
 ### 4.3 Phản hồi của anh trên các bản Ch2 (để biết "đạt" là gì)

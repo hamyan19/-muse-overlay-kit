@@ -862,6 +862,41 @@ def el_video_overlay(t, e):
     return apply_alpha(Image.fromarray(lay, "RGBA"), f)
 
 
+def el_image_overlay(t, e):
+    """Lớp phủ ẢNH (ví dụ L01 nét đứt đồ hiện đại) đặt lên một vật thể, hiện dần rồi tan.
+    {file, scene+at[x,y] (toạ độ ảnh nguồn, bám camera) | pos, width (px ảnh nguồn), blend: multiply|normal, strength}
+    multiply: nền trắng = trong suốt, chỉ nét tối được phủ (không làm tối cả ảnh). RÀO SÁNG: strength <= 0.85, và tổng phần
+    ảnh bị phủ (alpha TB) bị hạ xuống <= max_cover (mặc định 0.10) để khung không bị tối mò."""
+    f = vis(t, e, e.get("fade_in", 0.8), e.get("fade_out", 0.8))
+    if f <= 0:
+        return None
+    key = ("imgov", id(e))
+    if key not in C.cache:
+        im = Image.open(os.path.join(C.root, e["file"])).convert("RGBA")
+        a = np.array(im).astype(np.float32)
+        if e.get("blend", "multiply") == "multiply" and a[..., 3].min() > 250:      # ảnh đặc, nền trắng -> alpha theo độ tối
+            g = a[..., :3].mean(axis=2) / 255.0
+            al = np.clip((1 - g) * 1.6, 0, 1)
+        else:
+            al = a[..., 3] / 255.0
+        st = min(float(e.get("strength", 0.8)), 0.85)
+        cover = float((al * st).mean())
+        mc = float(e.get("max_cover", 0.10))
+        if cover > mc:
+            st *= mc / cover
+        a[..., 3] = al * st * 255
+        C.cache[key] = Image.fromarray(a.astype(np.uint8), "RGBA")
+    base = C.cache[key]
+    if e.get("scene"):
+        x, y, k = to_screen(C.scene_by_id[e["scene"]], t, *e["at"])
+    else:
+        x, y = e["pos"]; k = C.W / 2560.0
+    w = max(8, int(e.get("width", 600) * k))
+    h = max(8, int(base.height * w / base.width))
+    piece = base.resize((w, h), Image.LANCZOS)
+    lay = new_layer(); lay.paste(piece, (int(x - w / 2), int(y - h / 2)), piece)
+    return apply_alpha(lay, f)
+
 # ------------------------------------------------------------------ NHÓM CHỒNG LỚP "SỔ TAY / TƯ LIỆU / TRUYỆN TRANH"
 _IMG_CACHE = {}
 def _rgba_img(path, crop=None):
@@ -1226,7 +1261,7 @@ TYPES = {
     "tag": el_tag, "dimension": el_dimension, "bars": el_bars, "flow": el_flow, "linechart": el_linechart, "sprite": el_sprite,
     "photo_pin": el_photo_pin, "marker": el_marker, "clipping": el_clipping,
     "speech_box": el_speech_box, "route": el_route,
-    "particles": el_particles, "video_overlay": el_video_overlay,
+    "particles": el_particles, "video_overlay": el_video_overlay, "image_overlay": el_image_overlay,
     "captions": el_captions, "kinetic": el_kinetic,
     "rain": el_rain, "mist": el_mist, "dim": el_dim,
     "spotlight": el_spotlight, "highlight_box": el_highlight_box, "stamp": el_stamp,

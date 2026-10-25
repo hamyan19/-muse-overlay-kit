@@ -8,7 +8,7 @@
 Làm gì: mỗi dòng SHOTS (bỏ dòng lớp phủ CẢNH 0, bỏ dòng DUYỆT=BỎ) thành một cảnh: ảnh = cột TÊN FILE ĐÍCH,
 start = đầu cột PHỦ THỜI GIAN, camera suy từ cột CHUYỂN ĐỘNG ĐỀ XUẤT (đẩy vào -> zoom vào, lia/dolly -> pan,
 cố định -> gần như đứng, còn lại -> zoom nhẹ), xen hướng để hai cảnh liền nhau không cùng chuyển động.
-KHÔNG làm: lớp chữ/mũi tên/nét đứt (sheet OVERLAYS) — chỉ ghi vào meta.overlays_todo để người dựng thêm tay;
+KHÔNG làm: lớp chữ/mũi tên/nét đứt (sheet OVERLAYS) — chỉ ghi vào meta.overlays_todo; bật chúng bằng tools/apply_overlays.py;
 âm thanh ngoài lời đọc. Mặc định chỉ lấy dòng DUYỆT=OK (dùng --include-pending để thử với dòng CHỜ).
 """
 import argparse, json, re, sys

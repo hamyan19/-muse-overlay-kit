@@ -32,6 +32,7 @@ Anh duyệt 2 lần: ở bước Duyệt style (kế hoạch hình + style) và 
 | Công cụ | Bước | Việc |
 |---|---|---|
 | `tools/plan_assets.py` | 3 | `wordts.json` → `asset_plan.xlsx`: mapping câu ↔ mốc thời gian, gợi ý hình, overlay, âm thanh; cột DUYỆT |
+| `tools/apply_overlays.py` | 7 | Bật sheet OVERLAYS (mũi tên, nhãn, nét đứt, ảnh L01, tuyết) lên đúng vật thể từ `pos.json`, có rào độ sáng |
 | `tools/mapping_to_spec.py` | 7 | `asset_plan.xlsx` (dòng DUYỆT=OK) → `spec.json` cho engine: ảnh, mốc bắt đầu, camera, giọng đọc. Chưa gồm lớp phủ và âm thanh (ghi vào `meta.overlays_todo`). Mới thử chuyển đổi, chưa render |
 | `tools/apply_approval.py` | 6 | Sheet đã duyệt → `MUSE-TODO.md` (danh sách nguyên liệu) + `approved_manifest.json` |
 | `tools/qc_assets.py` | 6 | Kiểm máy nguyên liệu (thiếu file, kích thước, nét, mặt, chữ, video, LUFS...) |

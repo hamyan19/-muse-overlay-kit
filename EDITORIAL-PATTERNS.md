@@ -17,14 +17,14 @@ Lấy mốc bằng `tools/word_times.py wordts.json --auto`. Bảng dưới là 
 | **Cú đập / twist / sét** | `flash` + `shake` camera + sfx CÙNG khung | flash 50.0s + sấm | Không quá 3 flash trong một beat |
 | **Câu hỏi** | `question_card` ("?" nhấp nháy) | cuối Hook | |
 | **Hệ quả / nhịp kết** | `label` ngắn hiện trên cảnh tối, rồi `dim` đen dần, chữ cuối hiện ma | "NONE OF THAT MATTERED" → fade đen → "SILENCE" | Khi VO ngừng, hình cũng phải ngừng: dọn hết overlay trước |
-| **Cảnh tĩnh dài, không từ khoá** | `rain` / `mist` / `spotlight` / camera đổi nhịp | sương trôi cảnh Panguana; mưa bão | Chuyển động trong khung giữ mắt khi không có thông tin mới |
+| **Cảnh tĩnh dài, không từ khoá** | `rain` / `mist` / camera đổi nhịp (spotlight chỉ khi ảnh đủ sáng) | sương trôi cảnh Panguana; mưa bão | Chuyển động trong khung giữ mắt khi không có thông tin mới |
 
 ## Quy tắc đi kèm
 1. **Đúng lúc từ**: `t_in` = mốc bắt đầu của từ khoá (wordts) − 0 … +0.05s. Không đặt trước lời, không trễ quá 0.2s.
 2. **Phần tử phải chết đúng lúc**: luôn có `t_out` (lint sẽ báo lỗi nếu thiếu). Hết ý là rút. Qua điểm đổi cảnh phải có lý do.
 3. **Tối đa 2 phần tử đồng thời** trong cùng vùng màn hình; thẻ chữ chính căn giữa/dưới trái, badge góc trên phải.
 4. **Cỡ chữ**: chính ≥ 34px, phụ ≥ 26px. Chữ dài thì rút ý, đừng thu nhỏ.
-5. **Cảnh tối**: nếu ảnh gốc tối (độ sáng TB < 38) và không phải nhịp "im lặng" thì nâng `brightness` hoặc thêm `spotlight`.
+5. **Cảnh tối**: nếu ảnh gốc tối (độ sáng TB < 38) và không phải nhịp "im lặng" thì nâng `brightness` hoặc thêm `mist`. **Không** thêm `spotlight`: nó hạ sáng phần còn lại, ảnh tối sẽ tối mò.
 6. **Hai cảnh liền nhau không dùng cùng kiểu**: sau chuỗi lower_third thì chuyển sang strike/ticker/highlight.
 7. **Đọc lời trước, thiết kế sau**: nghe/đọc VO, gạch chân từ khoá, rồi mới viết spec.
 
