@@ -88,6 +88,16 @@ qc/          báo cáo kiểm
 ```
 Mọi đường dẫn bên trong spec tính từ `--root`.
 
+### 3.0 Đường tắt (khuyên dùng): một lệnh cho cả chương
+Quyết định đã chốt ở `QUYET-DINH.md`. Các mục 3.1–3.6 bên dưới là chi tiết từng bước; `tools/build_chapter.py` làm hết, chỉ dừng 2 chỗ cần mắt:
+```bash
+python3 tools/build_chapter.py plan   --ch 3 --xlsx CH3_asset_plan.xlsx --vo ch3.mp3 --stills anh_ch3/ --preset documentary
+#   → xem 1 lần work/ch3/contact.jpg (mọi ảnh, lưới 320px) → điền work/ch3/focus.json (5–7 điểm) + work/ch3/pos.json (lớp phủ)
+python3 tools/build_chapter.py check  --ch 3      # → xem 1 lần work/ch3/check.jpg (khung đúng lúc từng điểm nhấn/lớp phủ)
+python3 tools/build_chapter.py render --ch 3 --quick   # chạy nền; 1280×720 @15fps để An duyệt
+```
+Tiết kiệm token: xem tấm ghép thay vì từng ảnh; đọc `work/chX/build.log` chỉ khi có lỗi.
+
 ### 3.1 Kiểm đầu vào (3 phút, tránh dựng nhầm cả buổi)
 1. Đếm ảnh: số ảnh trong `res/stills/` = số dòng SHOTS được dựng (không tính dòng lớp phủ `CẢNH 0` và dòng thời lượng 0, vì công cụ bỏ chúng). Thiếu ảnh nào thì **báo ngay**, đừng tự thế ảnh khác.
 2. Kích thước ảnh: `python3 -c "import glob; from PIL import Image; [print(f, Image.open(f).size) for f in sorted(glob.glob('res/stills/*'))]"`. Nếu không phải 2560×1440 (ví dụ 1672×941 như ảnh Ch2) thì phóng lên 2560×1440 bằng Lanczos, lưu vào `res/stills/`, và **nói với anh** rằng ảnh có thể hơi mềm. Luật cứng số 2 trong `QUY-TRINH.md`: không im lặng.
