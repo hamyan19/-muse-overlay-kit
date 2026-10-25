@@ -1,7 +1,28 @@
 # NHẬT KÝ DỰNG CH2 — để Muse học quy trình dựng (25/10)
 
-Ghi lại đúng những gì đã làm khi dựng Ch2 "The Wall Is a Jar" từ gói ảnh + voice, theo thứ tự thật, kể cả lỗi và cách sửa.
-Kết quả: bản xem nhanh 1280×720, 101,8s, có camera + giọng đọc + nhấn mạnh theo lời. Chưa có chữ/mũi tên/âm thanh, các dòng vẫn CHỜ duyệt (bản thử, không phải bản duyệt thật).
+**Trạng thái:** An duyệt bản dựng thử v3 của Ch2 (25/10, 21:02: "ok ổn"). Đây vẫn là bản xem nhanh 1280×720 — dòng DUYỆT trong bảng vẫn là CHỜ, chưa có chữ/âm thanh/lớp nét đứt L01.
+Spec đã duyệt: `examples/CH2_spec_approved_v3.json`; điểm nhấn: `examples/focus/CH2_focus.json`.
+
+## Toàn cảnh quy trình đã chạy trong phiên 25/10 (từ script đến dựng)
+| Bước | Việc | Kết quả / quyết định |
+|---|---|---|
+| 1 | Nhận script v2 + voice (warm-pebble-speed110) + `wordts.json` | 11 phần: Hook, Ch1–Ch9, Ending |
+| 2 | Mapping visual ý tưởng theo voice, dựa repo | làm Hook trước, rồi từng chương; gộp ảnh (bỏ nhiều cảnh 2s); bỏ nhạc, bỏ discard card, bỏ khung vàng |
+| 3 | Bảng đối tượng dùng lại | sprite/crop/biến thể cùng góc, giảm số ảnh phải sinh |
+| 4 | Mũi tên to hơn, đậm hơn 15%, có chuyển động | ghi vào cột chuyển động và engine |
+| 5 | Viết lại toàn bộ prompt theo METAPROMPT v2 (25/10) | một ảnh một khoảnh khắc, Negative riêng từng shot; lưu `META-PROMPT-VISUAL.md` |
+| 6 | An: mỗi shot phải 5–11s | tính lại điểm cắt cho cả 11 phần (cắt giữa khoảng lặng, ≥0,3s); Hook 11, Ch1 15, Ch2 12, Ch3 15, Ch4 13, Ch5 14, Ch6 17, Ch7 15, Ch8 14, Ch9 16, Ending 10 shot; 5 shot 11,6s vì không có chỗ ngắt |
+| 7 | Sinh lại prompt, xlsx, CSV; up Drive (thay sheet cũ); chia sẻ Editor | sheet quy ước + 11 sheet mapping + sheet đối tượng dùng lại |
+| 8 | Repo: nhánh `muse/retime-5-11s` (chưa merge main) | `plan_assets.py` mặc định 5–11s, `QUY-TRINH.md`, `LESSONS.md`, `META-PROMPT-VISUAL.md`, `VISUAL-IDEA-GUIDE.md`, 3 ảnh mẫu style, gỡ mục CHUẨN NGẮN v3 |
+| 9 | Công cụ dựng | `mapping_to_spec.py`, `apply_focus.py`, camera nhiều mốc, dissolve riêng từng cảnh |
+| 10 | Dựng thử Ch2 từ 12 ảnh An gửi | 3 vòng chỉnh (mục "Các bản"), v3 được duyệt |
+
+## Các bản dựng thử Ch2 và phản hồi của An
+| Bản | Có gì | Phản hồi | Bài học |
+|---|---|---|---|
+| v1 | 12 ảnh + camera suy từ mapping + voice, không hiệu ứng | "ở 0:36, 0:45 đáng lẽ phải nhấn mạnh bằng cách zoom vào động tác được nói đến, làm mờ phần còn lại; dựng lớp phủ lên đi" | camera theo mapping không đủ; phải canh theo lời |
+| v2 | spotlight tô sáng chi tiết + tối nền, 22 điểm, 9 cảnh | "lạm dụng quá… còn cách nào khác không; trả lời trước khi làm" | một kiểu hiệu ứng cho mọi shot là nhàm; hỏi lại ý trước khi làm |
+| v3 | 7 điểm: cắt cận, khoanh tròn ×2, mũi tên vẽ tay ×2, zoom ×2 (không tối) | "ok ổn" | chọn ít, mỗi điểm một kiểu, đúng câu then chốt |
 
 ## 0. Đầu vào cần có (thiếu một thứ là không dựng được)
 | Thứ | Ở đâu | Ghi chú |
