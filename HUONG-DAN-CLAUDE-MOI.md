@@ -27,7 +27,14 @@ pip install -r requirements.txt   # trên Linux/Claude cloud thêm: --break-syst
 ```
 
 Tuỳ chọn (không bắt buộc để dựng): `tesseract` (để `qc_assets.py` kiểm chữ/logo trong ảnh bằng OCR). Không có thì công cụ ghi "OCR TẮT" và bạn phải kiểm chữ/logo bằng mắt.
-Whisper **không** nằm trong repo: file `wordts.json` do Muse giao, bạn không tự tạo.
+`wordts.json`: nếu An chưa đưa thì **tự tạo**, không cần hỏi (căn theo script bằng PocketSphinx, không dùng Whisper, nên chữ trong file là chữ của script, không cần sửa tên riêng/số):
+```bash
+pip install pocketsphinx
+ffmpeg -i chX.mp3 -ar 16000 -ac 1 chX16.wav
+python3 tools/align.py chX16.wav chX.txt wordts.json   # chX.txt = script chương (An đưa)
+python3 tools/check_wordts.py wordts.json CHX_asset_plan.xlsx --voice chX.mp3
+```
+Từ lạ (OOV) báo ra thì thêm vào dict `SUB` đầu `tools/align.py` bằng từ phát âm gần giống.
 
 ### 1.2 Chọn nhánh nào
 - `main` **thiếu** `mapping_to_spec.py`, `apply_focus.py`, camera nhiều mốc (`camera.keys`) và `dissolve` riêng từng cảnh.
@@ -48,7 +55,7 @@ Whisper **không** nằm trong repo: file `wordts.json` do Muse giao, bạn khô
 | # | Thứ | Định dạng / quy ước | Ghi chú |
 |---|---|---|---|
 | 1 | **Voice** | `res/vo/<chương>.mp3` hoặc `.wav` | Phải đúng voice đã dùng để lấy mốc thời gian. Đổi voice ⇒ mốc cũ vô dụng, Muse phải làm lại mapping. |
-| 2 | **`wordts.json`** | `res/vo/wordts.json`, mỗi dòng `[bắt đầu, kết thúc, "từ"]` (giây) | Mốc từng từ từ Whisper, **tên riêng và con số đã sửa chính tả**. Dùng để canh hiệu ứng theo lời. |
+| 2 | **`wordts.json`** | `res/vo/wordts.json`, mỗi dòng `[bắt đầu, kết thúc, "từ"]` (giây) | Mốc từng từ (An đưa, hoặc tự tạo bằng `tools/align.py`, xem 1.1). Dùng để canh hiệu ứng theo lời. |
 | 3 | **Ảnh** | `res/stills/`, PNG/JPG, **2560×1440** (16:9) | Tên đúng cột **TÊN FILE ĐÍCH** của bảng mapping (không dấu, không `#`, không khoảng trắng), hoặc dạng `CH2_S01.png` ứng với mã shot `CH2-S01` khi dùng `--name-from-id`. |
 | 4 | **Bảng mapping đã duyệt** | `asset_plan.xlsx` có sheet **SHOTS** (và sheet OVERLAYS nếu có) | Cột bắt buộc trong SHOTS: `ID`, `CẢNH`, `PHỦ THỜI GIAN`, `DÀI (s)`, `CHUYỂN ĐỘNG ĐỀ XUẤT`, `TÊN FILE ĐÍCH`, `DUYỆT`. Chỉ dòng `DUYỆT=OK` được dựng thật. |
 | 5 | **Font** | `res/fonts/` | Chép nguyên thư mục `fonts/` của repo sang `res/fonts/`. |
@@ -207,3 +214,18 @@ Thêm cho người dựng: **cứ ≤ 3,5s phải có một sự kiện hình m�
 > Làm tới bước `<bản xem nhanh có điểm nhấn>`; hỏi tôi danh sách điểm nhấn trước khi làm. Chưa có lớp phủ/chữ/âm thanh thì cứ để trống.
 
 Nếu tin nhắn thiếu mục nào trong phần 2, hỏi đúng mục đó rồi dừng chờ.
+
+---
+
+## 8. Mặc định tạm khi An chưa chốt (đừng dừng chờ, dựng rồi ghi rõ "mặc định tạm" trong báo cáo)
+
+| Việc | Mặc định |
+|---|---|
+| Style dựng | Khác chương liền trước (Ch2 = `storybook` → Ch3 `documentary`, Ch4 lại `storybook`…) |
+| Độ phân giải | Bản thử 1280×720; bản chính thức 1920×1080 khi An yêu cầu |
+| Số tự đếm (ticker) | Không dùng (An muốn ít hiệu ứng) |
+| Nhạc nền | Không có |
+| Cột DUYỆT | Vẫn CHỜ; dựng bản thử với `--include-pending`, không ghi OK thay An |
+| Ảnh 1672×941 | Phóng Lanczos lên 2560×1440 và báo An |
+
+Voice, ảnh, script, bảng mapping An tự đưa trong chat; repo công khai không chứa chúng. Chỉ hỏi An khi **thiếu ảnh** hoặc ảnh sai tên.
