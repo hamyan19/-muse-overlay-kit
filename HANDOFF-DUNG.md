@@ -5,18 +5,25 @@ Mọi thứ cần để dựng nằm trong repo này + **gói dữ liệu** `dun
 
 ## 1. Lấy đồ
 ```bash
-git clone -b muse/retime-5-11s https://github.com/hamyan19/-muse-overlay-kit    # nhánh này có công cụ mới, main chưa có
+git clone -b muse/huong-dan-claude-moi https://github.com/hamyan19/-muse-overlay-kit    # nhánh hướng dẫn + công cụ
 cd -muse-overlay-kit && pip install -r requirements.txt     # cần ffmpeg trong PATH; xem HUONG-DAN-WINDOWS.md
-unzip dung-handoff.zip -d handoff                           # gói dữ liệu (xin An nếu chưa có)
 ```
-Gói dữ liệu gồm: `vo/<chương>.mp3` (voice), `wordts/<chương>.json` (mốc từng từ), `plan/<TAG>_asset_plan.xlsx` (bảng mapping), `align.py`. **Ảnh** An gửi riêng theo chương (`CHx_Sxx.png`).
+Repo công khai nên **KHÔNG chứa** voice, ảnh, script. **An tự đưa cho bạn** (đính kèm trong chat): `chX.mp3` (voice), ảnh `CHx_Sxx.png`, script chương, và bảng `CHX_asset_plan.xlsx`. Có đủ 4 thứ này là dựng được; đừng đòi thêm.
+**Mốc từng từ `wordts.json`** (`[bắt đầu, kết thúc, "từ"]`): nếu An chưa đưa thì **tự tạo**, không cần hỏi:
+```bash
+pip install pocketsphinx
+ffmpeg -i chX.mp3 -ar 16000 -ac 1 chX16.wav
+python3 tools/align.py chX16.wav chX.txt wordts.json     # chX.txt = script chương; căn theo script, không phải Whisper
+python3 tools/check_wordts.py wordts.json CHX_asset_plan.xlsx --voice chX.mp3
+```
+Từ lạ (OOV) báo ra thì thêm vào dict `SUB` đầu `align.py` bằng từ phát âm gần giống.
 
 ## 2. KHÔNG hỏi lại những thứ này — đã có sẵn / đã chốt
 | Bạn hay hỏi | Trả lời |
 |---|---|
-| "Gửi wordts.json" | Có trong gói: `handoff/wordts/chX.json`. Định dạng `[bắt đầu, kết thúc, "từ"]`. Căn **theo script bằng PocketSphinx**, không phải Whisper; chữ trong file là chữ của script nên **không cần sửa tên riêng/số**. Chạy `python3 tools/check_wordts.py handoff/wordts/chX.json handoff/plan/CHX_asset_plan.xlsx --voice handoff/vo/chX.mp3` để kiểm (9 chương đã qua kiểm: không lỗi, mọi ranh giới shot sát khoảng lặng thật). |
+| "Gửi wordts.json" | Tự tạo bằng `tools/align.py` (mục 1). Định dạng `[bắt đầu, kết thúc, "từ"]`. Căn **theo script bằng PocketSphinx**, không phải Whisper; chữ trong file là chữ của script nên **không cần sửa tên riêng/số**. Chạy `python3 tools/check_wordts.py wordts.json CHX_asset_plan.xlsx --voice chX.mp3` để kiểm . |
 | Có cần Whisper? | Không. Bản căn script đủ để canh điểm nhấn. (Whisper chỉ thêm khả năng phát hiện chỗ voice đọc khác script — không cần ở bước này.) |
-| Bảng mapping / lời đọc | `handoff/plan/CHX_asset_plan.xlsx`, sheet SHOTS. Đã tính mốc 5–11s theo khoảng lặng; không tính lại. |
+| Bảng mapping / lời đọc | `CHX_asset_plan.xlsx` (An đưa), sheet SHOTS. Đã tính mốc 5–11s theo khoảng lặng; không tính lại. |
 | Ảnh phải bao nhiêu | Đúng số dòng SHOTS (bỏ dòng CẢNH 0 = lớp phủ). Ảnh gốc có thể 1672×941 → phóng 2560×1440 và báo An. |
 | Style dựng | **Mặc định tạm** (An chưa chốt): preset khác chương liền trước. Ch2 dùng `storybook` → Ch3 dùng `documentary`, Ch4 quay lại `storybook`… Dựng bản thử theo mặc định, ghi rõ trong báo cáo "preset X là mặc định tạm". Không dừng chờ. |
 | Độ phân giải xuất | Bản thử: 1280×720. Bản chính thức: 1920×1080 khi An yêu cầu. |
@@ -26,9 +33,9 @@ Gói dữ liệu gồm: `vo/<chương>.mp3` (voice), `wordts/<chương>.json` (m
 
 ## 3. Quy trình (đủ chạy từ đầu đến cuối; log đầy đủ ở `NHAT-KY-DUNG-CH2.md`)
 ```bash
-mkdir -p res/stills res/vo res/fonts && cp -r fonts/* res/fonts/ && cp handoff/vo/chX.mp3 res/vo/
+mkdir -p res/stills res/vo res/fonts && cp -r fonts/* res/fonts/ && cp chX.mp3 res/vo/
 # ảnh An gửi → res/stills/CHX_Sxx.png (2560x1440)
-python3 tools/mapping_to_spec.py handoff/plan/CHX_asset_plan.xlsx --vo vo/chX.mp3 --name-from-id \
+python3 tools/mapping_to_spec.py CHX_asset_plan.xlsx --vo chX.mp3 --name-from-id \
     --include-pending --preset documentary --duration <độ dài voice> --calm --out spec.json
 # chọn 5–7 điểm nhấn cho cả chương, mỗi điểm một kiểu, canh theo từ đang nói trong wordts → focus.json (mẫu: examples/focus/CH2_focus.json)
 python3 tools/apply_focus.py spec.json focus.json --out spec_focus.json
