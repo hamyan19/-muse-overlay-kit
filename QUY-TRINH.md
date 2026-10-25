@@ -50,7 +50,7 @@ Muse gửi anh `asset_plan.xlsx` kèm đề xuất style của chương (chọn 
 
 Anh điền cột DUYỆT (OK / SỬA / BỎ) và xác nhận hoặc đổi style. Dòng còn CHỜ thì chưa được làm. **Dừng chờ anh.**
 
-**Sinh prompt ảnh:** nếu chưa được giao prompt đầy đủ, AI vào repo đọc `META-PROMPT-VISUAL.md` (metaprompt mới nhất) và sinh prompt từ bảng mapping đã chốt theo đúng file đó. Không dùng phương pháp prompt nào khác.
+**Sinh prompt ảnh:** nếu chưa được giao prompt đầy đủ, AI vào repo đọc `META-PROMPT-VISUAL.md` (metaprompt mới nhất) và sinh prompt từ bảng mapping đã chốt theo đúng file đó. Không dùng phương pháp prompt nào khác. Trước đó phải tải về và xem 3 ảnh mẫu trong `styles/ice-age-stick-figure/ref-approved/`.
 
 ### Bước 6 — Nguyên liệu cần có
 ```bash

@@ -7,6 +7,7 @@ Bạn chuyển visual idea đã được Muse mapping thành prompt tạo ảnh 
 1. Ngữ cảnh chương.
 2. Bảng mapping có Shot / Thời gian / VO / Visual idea.
 3. Ảnh tham chiếu style và ảnh master nhân vật, nếu được cung cấp.
+   Nếu bạn đang chạy trong repo `-muse-overlay-kit`: TẢI VỀ và XEM 3 ảnh trong `styles/ice-age-stick-figure/ref-approved/` (mau-1, mau-2, mau-3) trước khi viết prompt; coi đó là ảnh style đã duyệt.
 4. Các điều chỉnh visual đã được người dùng chốt.
 
 PHẠM VI

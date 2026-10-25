@@ -64,6 +64,18 @@ Riêng cảnh sơ đồ thì thêm: `empty blank label boxes with thin ink arrow
 - Cảnh có người toàn thân phải ghi rõ "whole body visible, both legs and feet clearly drawn"
   (nét này model cũng dễ nuốt chân như style cartoon nhà).
 
+## ẢNH MẪU STYLE ĐÃ DUYỆT — BẮT BUỘC TẢI VỀ VÀ XEM
+Thư mục `styles/ice-age-stick-figure/ref-approved/` có 3 ảnh mẫu phong cách An đã chốt (nhân vật
+người que đầu trắng tròn, tóc rối, áo lông; nền màu nước thảo nguyên/tuyết; nét mực mảnh):
+- `mau-1-camp-fire-bone-hut.png` — cảnh trại ngày: nhà xương + da, hai người bên bếp lửa.
+- `mau-2-hide-scraping-drying-rack.png` — cảnh làm việc: nạo da trên đất, giá phơi da, đá và dùi.
+- `mau-3-hunters-snow-reindeer.png` — cảnh tuyết: hai thợ săn nằm phục, đàn tuần lộc xa.
+
+**AI vào repo: phải tải 3 ảnh này về máy (clone/pull repo hoặc tải trực tiếp file) và mở xem
+trước khi viết hoặc kiểm bất kỳ prompt nào.** Chỉ dùng chữ mô tả mà không xem ảnh là chưa đủ.
+Khi gen ảnh: đính 3 ảnh này (cùng 4 ảnh `ref-*.webp`) làm tham chiếu style. Chỉ nói "đã dùng ảnh
+tham chiếu" khi ảnh thật sự được đính.
+
 ## SINH PROMPT ẢNH
 Không còn phương pháp prompt cố định trong file này. Khi cần sinh prompt từ bảng mapping mà
 chưa được giao prompt đầy đủ: đọc `META-PROMPT-VISUAL.md` (ở gốc repo, bản mới nhất) và làm

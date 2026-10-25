@@ -7,6 +7,8 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 **Script → Voice → Mapping câu theo voice → Visual plan → Duyệt style → Nguyên liệu → Dựng**
 Anh duyệt 2 lần: ở bước Duyệt style (kế hoạch hình + style) và khi xem video chương.
 
+> **AI vào repo:** tải về và xem 3 ảnh mẫu style trong `styles/ice-age-stick-figure/ref-approved/` trước khi làm hình hoặc viết prompt (chi tiết trong `STYLE.md` cùng thư mục).
+
 ## Tài liệu (mở ở đúng bước)
 | File | Dùng ở bước | Việc |
 |---|---|---|
