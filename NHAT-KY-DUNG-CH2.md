@@ -39,18 +39,25 @@ python3 tools/mapping_to_spec.py CH2_asset_plan.xlsx --vo vo/ch2.mp3 --name-from
 
 Thời gian render: 1280×720, 8 tiến trình, cả chương ~10–13 phút. **Kiểm nhanh trước:** `--frames 36.8,40,... --frames-dir fr` chỉ render vài khung (vài chục giây), xem trước khi render cả chương.
 
-## 4. Nhấn mạnh theo lời (yêu cầu của An: "zoom vào động tác được nói đến, làm mờ phần còn lại")
-Nguyên tắc: **hình phải đi theo từ đang được nói**, không theo thứ tự trong bảng mapping.
-1. Đọc `wordts.json` quanh từng shot, ghi giây của từ nói ra từng chi tiết (ví dụ S05: "sharp edge… open" 35,9–37,6 → rạch; "scrape" 39,3 → cạo; "point… holes" 42,0 → đục lỗ).
-2. Lấy toạ độ chi tiết trên ảnh 2560×1440: vẽ **lưới đỏ/xanh mỗi 320px** lên ảnh thu nhỏ rồi đọc toạ độ bằng mắt (làm contact sheet 4 ảnh/tờ cho nhanh).
-3. Viết `focus.json` (`examples/focus/CH2_focus.json`): mỗi beat gồm `t:[vào,ra]`, `at:[x,y]`, `zoom` (1.3–1.7), `r` (bán kính vòng sáng).
-4. Chạy: `python3 tools/apply_focus.py spec_ch2.json CH2_focus.json --out spec_ch2_focus.json`
-   - Camera trượt tới chi tiết trước `t` vào 0,45s, giữ đến `t` ra, rồi lùi nhẹ ở cuối cảnh (engine mới hỗ trợ `camera.keys` nhiều mốc).
-   - Phần ngoài vòng sáng tối đi ~62% (`spotlight`, bám camera).
-5. Khi lời đọc và bảng mapping ngược thứ tự (S06: lời nói khung nhà trước, mảnh đá sau; mapping ghi mảnh đá trước) → **theo lời đọc**.
-6. Zoom 1.3 cho chi tiết to/cảnh rộng (khung nhà, khay dụng cụ), 1.5–1.7 cho bàn tay/vật nhỏ. Vật sát mép ảnh sẽ bị kẹt không vào giữa khung được (engine không lộ viền) — vẫn đúng chỗ, chỉ lệch tâm.
-- Không áp cho S01, S08, S12: camera đã đẩy/lia sẵn vào đúng thứ đang nói.
-- "Làm mờ" mới làm bằng **làm tối** (spotlight). Nhòe thật (blur vùng ngoài) engine chưa có.
+## 4. Nhấn mạnh theo lời (yêu cầu của An: nhấn đúng động tác đang nói, nhưng ÍT hiệu ứng)
+**Bản đầu em làm sai:** dùng spotlight (tô sáng vật, làm tối xung quanh) cho 22 điểm → lạm dụng, mọi shot cùng một kiểu. An yêu cầu: ít hiệu ứng, **chỉ 5–7 điểm nhấn cho cả chương**, dùng mũi tên vẽ tay, khoanh tròn, cắt cận cảnh, hoặc chỉ zoom (không tối nền). Phần còn lại giữ camera của mapping.
+
+Nguyên tắc: hình đi theo **từ đang được nói**, không theo thứ tự trong bảng mapping.
+1. Đọc `wordts.json` quanh từng shot, ghi giây của từ nói ra chi tiết (ví dụ S05: "sharp edge… open" 35,9–37,6 → rạch; "point… holes" 42,0 → đục lỗ).
+2. Chọn **5–7 khoảnh khắc đáng nhấn nhất** của cả chương (câu then chốt, chi tiết dễ bỏ qua). Mỗi khoảnh khắc một kiểu khác nhau, không lặp kiểu liền nhau.
+3. Lấy toạ độ chi tiết trên ảnh 2560×1440: vẽ **lưới mỗi 320px** lên ảnh thu nhỏ rồi đọc bằng mắt. **Sau đó render vài khung để kiểm** — lần đầu em đọc sai toạ độ khối đá vỡ ở S03 (đặt lệch cả 200px), chỉ nhìn ảnh khung mới thấy.
+4. Viết `focus.json` (`examples/focus/CH2_focus.json`), mỗi beat có `t`, `kind`:
+   - `zoom` {at, zoom}: camera trượt vào chi tiết, không tối nền.
+   - `circle` {box}: khoanh tròn vẽ tay (bám camera).
+   - `arrow` {from, to}: mũi tên vẽ tay.
+   - `cut` {at, zoom}: cắt thẳng sang cận cảnh (crop cùng ảnh) rồi cắt lại, camera cũ chạy tiếp.
+   - `spot` {at, r}: tô sáng/tối nền — chỉ khi thật sự cần, 1–2 lần/chương.
+5. Chạy: `python3 tools/apply_focus.py spec_ch2.json CH2_focus.json --out spec_ch2_focus.json`
+6. Ch2 dùng 7 điểm: S02 cắt cận mảnh dăm bật ra (12,2s); S03 khoanh khối đá vỡ (22,8s); S05 zoom bàn tay rạch da (35,3s) và mũi tên vào lỗ vừa đục (42,0s); S06 zoom khung nhà (45,1s); S07 khoanh vết rách (54,9s); S10 mũi tên vào đường khâu (78,8s).
+7. Khi lời đọc và bảng mapping ngược thứ tự (S06: lời nói khung nhà trước, mapping ghi mảnh đá trước) → theo lời đọc.
+8. Vật sát mép ảnh bị kẹt không vào giữa khung được (engine không lộ viền): vẫn đúng chỗ, chỉ lệch tâm.
+- Cắt thẳng cần `dissolve: 0` riêng cho cảnh (engine đã hỗ trợ); khoanh/mũi tên bám camera nên không trôi khi camera chạy.
+- Lint `--max-gap 12` khi spec ít lớp phủ (mặc định 9s hay báo "trống sự kiện" cho phong cách tối giản).
 
 ## 5. Kiểm sau khi dựng
 - `tools/lint_spec.py spec.json --root res` → 0 lỗi (còn cảnh báo: toàn spotlight, camera S12 gần đứng, S01–S03 cùng đẩy vào).
@@ -68,5 +75,6 @@ Nguyên tắc: **hình phải đi theo từ đang được nói**, không theo t
 1. Ảnh không đủ 2560×1440 thì báo ngay (luật cứng số 2), đừng im lặng phóng lên.
 2. Tải ảnh qua Drive không được → xin người dùng gửi thẳng vào chat.
 3. Render dài thì chạy nền và kiểm trước bằng vài khung.
-4. Nhấn mạnh theo từ đang nói (wordts), không theo thứ tự bảng.
-5. Chạy lint ngay sau khi tạo spec, trước khi render.
+4. Nhấn mạnh theo từ đang nói (wordts), không theo thứ tự bảng; **chỉ 5–7 điểm/chương, mỗi điểm một kiểu**, đừng dùng một hiệu ứng cho mọi shot (bài học bản đầu dùng spotlight 22 lần).
+5. Đọc toạ độ bằng mắt thì render khung kiểm ngay, đừng tin toạ độ ước lượng.
+6. Chạy lint ngay sau khi tạo spec, trước khi render.

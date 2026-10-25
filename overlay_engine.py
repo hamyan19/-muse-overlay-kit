@@ -193,9 +193,10 @@ def background(t):
         if t >= sc["start"]:
             k = i
     out = render_scene(scenes[k], t)
-    if k > 0 and t < scenes[k]["start"] + C.dissolve:
+    dv = scenes[k].get("dissolve", C.dissolve)     # dissolve riêng của cảnh; 0 = cắt thẳng
+    if k > 0 and dv > 0 and t < scenes[k]["start"] + dv:
         prev = render_scene(scenes[k - 1], t)
-        a = ss(A(t, scenes[k]["start"], scenes[k]["start"] + C.dissolve))
+        a = ss(A(t, scenes[k]["start"], scenes[k]["start"] + dv))
         out = prev * (1 - a) + out * a
     return out
 
