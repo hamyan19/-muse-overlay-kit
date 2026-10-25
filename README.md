@@ -23,6 +23,7 @@ Anh duyệt 2 lần: ở bước Duyệt style (kế hoạch hình + style) và 
 | `EDITORIAL-PATTERNS.md` | 7 | Ngữ pháp biên tập: mệnh đề lời đọc → sự kiện hình; brief video |
 | `VISUAL-IDEA-GUIDE.md` | 4–6 | Cách chọn ý tưởng hình cho từng shot và cách QC (máy làm gì, mắt làm gì) |
 | `META-PROMPT-VISUAL.md` | 5 | **Metaprompt mới nhất (25/10)**: AI vào repo mà chưa được giao prompt đầy đủ thì đọc file này và sinh prompt từ bảng mapping |
+| `NHAT-KY-DUNG-CH2.md` | 7 | Nhật ký dựng Ch2 từng bước (lệnh, lỗi, cách sửa, nhấn mạnh theo lời) — Muse đọc để học quy trình dựng |
 | `LESSONS.md` | đầu dự án | Sổ bài học (nguyên liệu + dựng), thêm một dòng khi có lỗi mới |
 | `HUONG-DAN-WINDOWS.md` | — | Chạy kit trên máy Windows không cần AI |
 
