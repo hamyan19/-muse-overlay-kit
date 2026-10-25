@@ -12,6 +12,7 @@ Anh duyệt 2 lần: ở bước Duyệt style (kế hoạch hình + style) và 
 ## Tài liệu (mở ở đúng bước)
 | File | Dùng ở bước | Việc |
 |---|---|---|
+| `HUONG-DAN-CLAUDE-MOI.md` | 7 | **Claude mới vào dựng video: đọc file này trước.** Cài đặt, cần được cung cấp gì, từng lệnh từ gói nguyên liệu tới `mp4`, lỗi đã gặp, mẫu tin nhắn khởi động |
 | `QUY-TRINH.md` | tất cả | **Quy trình duy nhất**: 7 bước, ai làm gì, 5 luật cứng |
 | `SCRIPT-NOTES.md` | 1, 4 | Ghi chú chương (loại, âm thanh) + visual plan theo mapping + chống lặp |
 | `STYLES.md` | 5 | Menu style hình (cả video) và style dựng (theo chương) |
