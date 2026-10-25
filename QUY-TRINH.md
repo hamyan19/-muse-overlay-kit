@@ -36,6 +36,8 @@ python3 tools/plan_assets.py res/vo/wordts.json --beat B3 --out plan/ --fix "Kup
 Ra `plan/asset_plan.xlsx`. Sheet **SHOTS** là bảng mapping: mỗi dòng = một khoảng thời gian thật + lời đọc của khoảng đó,
 điểm cắt nằm trong khoảng lặng. Muse đọc lại, gộp/tách dòng nếu ý nghĩa bị cắt sai chỗ.
 
+**Độ dài mỗi shot: tối thiểu 5 giây, tối đa 10–11 giây** (anh chốt 25/10). Shot ngắn hơn 5s thì gộp với shot kề; dài hơn 11s thì cắt ở khoảng lặng gần giữa, mỗi nửa vẫn ≥5s. Đoạn nào không có khoảng lặng ≥0,3s thì giữ nguyên và ghi chú, không cắt giữa từ. Gộp nhiều mệnh đề vào một ảnh thì mỗi ảnh vẫn chỉ vẽ MỘT khoảnh khắc; các trạng thái còn lại do camera A→B→C xử lý hoặc ghi thành khung phụ chờ anh quyết.
+
 ### Bước 4 — Visual plan
 Muse điền cột **HÌNH GỢI Ý** của sheet SHOTS cho từng dòng (thay đề xuất tự động nếu chưa hay), theo luật chống lặp trong
 `SCRIPT-NOTES.md` mục 2. Dòng nào cần footage/AI video thì viết brief (mục "BRIEF VIDEO" trong `EDITORIAL-PATTERNS.md`);
