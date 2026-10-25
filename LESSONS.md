@@ -24,6 +24,8 @@
 | 23/10 · Izba Ch2 | Manifest ghi chú vào ô `file` ("Ch2_S02.png (tai dung…)") và đường dẫn voice trỏ ra ngoài gói | Ô `file` chỉ chứa tên file có trong gói; ghi chú để ở visual plan |
 | 23/10 · Izba Ch3 | Sprite cửa giao dạng ảnh chữ nhật không nền trong suốt, cắt lệch (dính nền + đầu gỗ, mất mép cửa) | Sprite là PNG có kênh alpha, cắt sát đúng vật thể; để trong `sprites/`, không để chung `stills/` |
 | 22/10 · Cartoon | Style nét đơn giản làm model nuốt chân/tay | Prompt ghi "whole body visible, both legs and feet clearly drawn" |
+| 25/10 · Mammoth Bones | Mapping có shot 2–4s và 13–15s (cắt theo mệnh đề, không theo nhịp ảnh) | Mỗi shot 5–11s; ngắn thì gộp, dài thì cắt ở khoảng lặng; đổi mốc ⇒ viết lại prompt của shot đó, mã shot đánh số lại |
+| 25/10 · Mammoth Bones | Prompt viết cho từng cảnh theo bản cũ, sau đó mapping đổi mốc nên prompt lệch ý | Sau khi chốt điểm cắt mới mới sinh prompt; prompt dùng `META-PROMPT-VISUAL.md` (một ảnh = một khoảnh khắc, negative riêng từng shot) |
 
 ## Dựng (người dựng)
 | Khi | Lỗi đã xảy ra | Luật |

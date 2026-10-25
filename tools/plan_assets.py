@@ -14,14 +14,14 @@ import json, re, os, sys, argparse, csv, unicodedata
 
 ap = argparse.ArgumentParser()
 ap.add_argument("wordts"); ap.add_argument("--beat", default="B1"); ap.add_argument("--out", default="plan")
-ap.add_argument("--target", type=float, default=9.0, help="độ dài mục tiêu mỗi cảnh (s)")
-ap.add_argument("--min", type=float, default=4.0); ap.add_argument("--max", type=float, default=14.0)
+ap.add_argument("--target", type=float, default=8.5, help="độ dài mục tiêu mỗi cảnh (s)")
+ap.add_argument("--min", type=float, default=5.0); ap.add_argument("--max", type=float, default=11.0)
 ap.add_argument("--gap", type=float, default=0.35, help="khoảng nghỉ tối thiểu tách mệnh đề")
 ap.add_argument("--style-bible", default="painterly photorealistic, muted natural palette, soft cinematic light, shallow haze")
 ap.add_argument("--preset", default="", help="dossier|newsreel|cinematic|kinetic (ghi chú phong cách dựng)")
 ap.add_argument("--fix", default="", help="sửa chính tả Whisper: Kupka=Koepcke,Lancer=LANSA,Pucalpa=Pucallpa")
-ap.add_argument("--long-shot", type=float, default=10.0, help="cảnh dài hơn mức này cần thêm ảnh cận/biến thể")
-ap.add_argument("--no-rhythm", action="store_true", help="tắt chia độ dài ảnh theo nhịp (mỗi cảnh chia đôi như bản cũ)")
+ap.add_argument("--long-shot", type=float, default=11.0, help="cảnh dài hơn mức này cần thêm ảnh cận/biến thể")
+ap.add_argument("--rhythm", action="store_true", help="bật chia ảnh theo nhịp (ra cảnh 2–3s; mặc định TẮT từ 25/10 vì shot phải 5–11s)")
 a = ap.parse_args()
 os.makedirs(a.out, exist_ok=True)
 
@@ -104,7 +104,7 @@ PAT = {
 }
 def plan_shots(t0, t1, cands, main):
     L = t1 - t0
-    if a.no_rhythm:
+    if not a.rhythm:
         return [(t0, t1, "wide")] if L <= a.long_shot else [(t0, t0 + L/2, "wide"), (t0 + L/2, t1, "mid")]
     if L <= 6.0: return [(t0, t1, "hold" if main == "dark" and L >= 4 else "wide")]
     pat = PAT.get(main, PAT["_"]); out = []; cur = t0; k = 0

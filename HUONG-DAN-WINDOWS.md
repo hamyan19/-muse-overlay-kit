@@ -7,3 +7,5 @@
 5. Xem trước vài khung (nhanh): `--frames 1.2,20,48 --frames-dir chk`.
 6. Kiểm: `python tools/lint_spec.py spec.json --root res` và `python tools/analyze_video.py beat.mp4`.
 Spec là file JSON (kịch bản dựng: ảnh nào, giây nào, hiệu ứng gì) — sửa bằng trình soạn thảo bất kỳ. Chưa thử trên Windows: nếu lỗi đường dẫn/font, báo để sửa.
+
+**Kiểm đã cài đủ chưa (Windows/Mac/Linux):** `python -c "import cv2, numpy, PIL, openpyxl, matplotlib; print(cv2.__version__)"` và `ffmpeg -version`. Thiếu `cv2` → `pip install opencv-python-headless`; thiếu `openpyxl` (công cụ đọc/ghi bảng xlsx) → `pip install openpyxl`.

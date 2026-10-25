@@ -36,6 +36,8 @@ python3 tools/plan_assets.py res/vo/wordts.json --beat B3 --out plan/ --fix "Kup
 Ra `plan/asset_plan.xlsx`. Sheet **SHOTS** là bảng mapping: mỗi dòng = một khoảng thời gian thật + lời đọc của khoảng đó,
 điểm cắt nằm trong khoảng lặng. Muse đọc lại, gộp/tách dòng nếu ý nghĩa bị cắt sai chỗ.
 
+**Độ dài mỗi shot: tối thiểu 5 giây, tối đa 10–11 giây** (anh chốt 25/10). Shot ngắn hơn 5s thì gộp với shot kề; dài hơn 11s thì cắt ở khoảng lặng gần giữa, mỗi nửa vẫn ≥5s. Đoạn nào không có khoảng lặng ≥0,3s thì giữ nguyên và ghi chú, không cắt giữa từ. Gộp nhiều mệnh đề vào một ảnh thì mỗi ảnh vẫn chỉ vẽ MỘT khoảnh khắc; các trạng thái còn lại do camera A→B→C xử lý hoặc ghi thành khung phụ chờ anh quyết.
+
 ### Bước 4 — Visual plan
 Muse điền cột **HÌNH GỢI Ý** của sheet SHOTS cho từng dòng (thay đề xuất tự động nếu chưa hay), theo luật chống lặp trong
 `SCRIPT-NOTES.md` mục 2. Dòng nào cần footage/AI video thì viết brief (mục "BRIEF VIDEO" trong `EDITORIAL-PATTERNS.md`);
@@ -47,6 +49,8 @@ Muse gửi anh `asset_plan.xlsx` kèm đề xuất style của chương (chọn 
 - **Style dựng** — preset + bộ chồng lớp, **khác chương liền trước**.
 
 Anh điền cột DUYỆT (OK / SỬA / BỎ) và xác nhận hoặc đổi style. Dòng còn CHỜ thì chưa được làm. **Dừng chờ anh.**
+
+**Sinh prompt ảnh:** nếu chưa được giao prompt đầy đủ, AI vào repo đọc `META-PROMPT-VISUAL.md` (metaprompt mới nhất) và sinh prompt từ bảng mapping đã chốt theo đúng file đó. Không dùng phương pháp prompt nào khác. Trước đó phải tải về và xem 3 ảnh mẫu trong `styles/ice-age-stick-figure/ref-approved/`.
 
 ### Bước 6 — Nguyên liệu cần có
 ```bash
