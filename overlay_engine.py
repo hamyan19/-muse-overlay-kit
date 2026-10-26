@@ -1526,7 +1526,7 @@ def main():
     tmp = tempfile.mkdtemp()
     vid = os.path.join(tmp, "video.mp4")
     render_video(vid, a.crf, a.jobs)
-    if a.video_only or "audio" not in spec:
+    if a.video_only or "audio" not in spec or not (spec["audio"].get("vo") or spec["audio"].get("tracks")):   # không có tiếng -> chỉ hình
         os.replace(vid, a.out)
     else:
         wav = os.path.join(tmp, "mix.wav")
