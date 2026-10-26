@@ -17,6 +17,7 @@ Toạ độ màn hình 1280x720. Toạ độ "src" = toạ độ trên ảnh ngu
 | `timeline` | Trục thời gian vẽ dần + mốc bật theo lời | `x0,x1,y,draw,events[{t,pos,label,sub}]` |
 | `spotlight` | Hạ sáng khung, chừa vòng sáng dẫn mắt (bám ảnh). **Rào sáng:** dim ≤0.45, sáng TB sau phủ ≥95/255, ảnh gốc <80 thì đừng dùng; ≤2 lần/chương (qua `apply_focus.py` kind `spot` tự canh) | `scene,src` hoặc `pos`, `r,dim,from_mult,soft` |
 | `image_overlay` | Ảnh phủ (L01 nét đứt đồ hiện đại) đặt lên vật thể, hiện dần rồi tan; multiply chỉ phủ nét tối. **Rào sáng:** strength ≤0.85, độ phủ TB ≤10% (engine tự hạ) | `file,scene,at,width,blend,strength,max_cover` (dùng qua `tools/apply_overlays.py`) |
+| `panel_reveal` | **Lộ dần từng ô**: ảnh chia 3–4 ô, mỗi ý mở một ô, hết ý là hình hoàn chỉnh; ô chưa mở phủ giấy sáng (không tối) | `scene, layout 3col/4col/3row/2x2 hoặc panels, reveal[t...], order, ghost, fade, line` |
 | `highlight_box` | Khung góc mở ra quanh vật thể + nhãn | `scene,src_box,label,color,width` |
 | `stamp` | Dấu đóng "RECONSTRUCTION/CLASSIFIED" đập xuống + rung (nền tối mờ cho dễ đọc) | `text,pos,size,angle,color,opacity,fill` |
 | `lower_third` | Thanh tên/chú thích trượt vào | `title,sub,y` |

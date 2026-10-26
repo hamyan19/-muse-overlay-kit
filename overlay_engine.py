@@ -429,6 +429,49 @@ def el_spotlight(t, e):
     lay[..., 3] = a
     return Image.fromarray(lay, "RGBA")
 
+def _panels(e):
+    """Danh sách ô [x0,y0,x1,y1] (toạ độ ảnh nguồn 2560x1440) theo layout: 3col | 4col | 3row | 2x2 | panels tự đặt."""
+    if e.get("panels"):
+        return e["panels"]
+    L = e.get("layout", "3col")
+    if L == "2x2":
+        return [[0, 0, 1280, 720], [1280, 0, 2560, 720], [0, 720, 1280, 1440], [1280, 720, 2560, 1440]]
+    n = int(L[0]); vert = L.endswith("row")
+    if vert:
+        return [[0, 1440 * i // n, 2560, 1440 * (i + 1) // n] for i in range(n)]
+    return [[2560 * i // n, 0, 2560 * (i + 1) // n, 1440] for i in range(n)]
+
+def el_panel_reveal(t, e):
+    """LỘ DẦN TỪNG Ô: ảnh chia 3–4 ô, mỗi ý lời đọc mở một ô; hết các ý là thấy hình hoàn chỉnh.
+    {scene, layout 3col|4col|3row|2x2 | panels[[x0,y0,x1,y1]], reveal[t1,t2,...] (giây mở từng ô, theo thứ tự panels hoặc 'order'),
+     cover: màu phủ ô chưa mở (mặc định giấy sáng), ghost: 0..0.4 (để lờ mờ thấy hình dưới giấy), fade: giây mở, line: nét chia ô}
+    RÀO SÁNG: ô chưa mở phủ GIẤY SÁNG (không phủ đen) -> khung không bao giờ tối mò. Nét chia tan dần sau ô cuối (done_fade)."""
+    P = _panels(e); R = e["reveal"]; order = e.get("order", list(range(len(P))))
+    t_end = e.get("t_out", R[-1] + 1.5)
+    if t < e.get("t_in", 0) or t > t_end + e.get("done_fade", 0.8):
+        return None
+    sc = C.scene_by_id[e["scene"]]
+    cover = tuple(col(e.get("cover", [244, 236, 220])))
+    ghost = float(e.get("ghost", 0.12)); fd = float(e.get("fade", 0.5))
+    lay = new_layer(); d = ImageDraw.Draw(lay)
+    boxes = []
+    for k, idx in enumerate(order):
+        x0, y0, x1, y1 = P[idx]
+        a, b, _ = to_screen(sc, t, x0, y0); c, dd, _ = to_screen(sc, t, x1, y1)
+        boxes.append((a, b, c, dd))
+        tr = R[k] if k < len(R) else 1e9
+        op = 1 - ss(A(t, tr, tr + fd))                   # 1 = còn phủ, 0 = đã mở
+        if op > 0.001:
+            d.rectangle((a, b, c, dd), fill=cover + (int(255 * op * (1 - ghost)),))
+    lw = int(e.get("line", 6))
+    if lw:
+        la = 1 - ss(A(t, R[-1] + fd, R[-1] + fd + e.get("done_fade", 0.8)))   # nét chia tan khi hình hoàn chỉnh
+        if la > 0:
+            lc = tuple(col(e.get("line_color", [40, 34, 28])))
+            for a, b, c, dd in boxes:
+                d.rectangle((a, b, c, dd), outline=lc + (int(235 * la),), width=lw)
+    return lay
+
 def el_highlight_box(t, e):
     """Khung góc (corner brackets) mở rộng từ tâm, bám theo vật thể trong ảnh nguồn."""
     f = vis(t, e, 0.15, e.get("fade_out", 0.4))
@@ -1264,7 +1307,7 @@ TYPES = {
     "particles": el_particles, "video_overlay": el_video_overlay, "image_overlay": el_image_overlay,
     "captions": el_captions, "kinetic": el_kinetic,
     "rain": el_rain, "mist": el_mist, "dim": el_dim,
-    "spotlight": el_spotlight, "highlight_box": el_highlight_box, "stamp": el_stamp,
+    "spotlight": el_spotlight, "panel_reveal": el_panel_reveal, "highlight_box": el_highlight_box, "stamp": el_stamp,
     "lower_third": el_lower_third, "flash": el_flash, "redact": el_redact,
     "timeline": el_timeline, "ticker": el_ticker,
     "typed_card": el_typed_card, "badge_pop": el_badge_pop, "gauge": el_gauge,
