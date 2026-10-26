@@ -64,6 +64,7 @@ Rào sáng có sẵn: lớp phủ và tô sáng vật thể không được làm
 |---|---|---|
 | `HUONG-DAN-CLAUDE-MOI.md` | 7 | **Claude mới vào dựng video: đọc file này trước.** Cài đặt, cần được cung cấp gì, từng lệnh từ gói nguyên liệu tới `mp4`, lỗi đã gặp, mẫu tin nhắn khởi động |
 | `QUYET-DINH.md` | — | **Mọi quyết định đã chốt** (style, độ phân giải, điểm nhấn, lớp phủ…). Đọc trước khi hỏi |
+| `KY-THUAT-DUNG.md` | 3–7 | **Tách cụm ý** (một ảnh kể nhiều ý), kỹ thuật dựng cũ + mới (zoom từng vùng, lộ dần ô, ảnh 4K), cách tiết kiệm token và tăng tốc. Đang thử |
 | `QUY-TRINH.md` | tất cả | **Quy trình duy nhất**: 7 bước, ai làm gì, 5 luật cứng |
 | `SCRIPT-NOTES.md` | 1, 4 | Ghi chú chương (loại, âm thanh) + visual plan theo mapping + chống lặp |
 | `STYLES.md` | 5 | Menu style hình (cả video) và style dựng (theo chương) |

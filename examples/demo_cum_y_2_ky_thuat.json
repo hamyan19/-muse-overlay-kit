@@ -1,0 +1,23 @@
+{"meta":{"width":1280,"height":720,"fps":15,"duration":46},
+ "colors":{"yellow":[255,209,26],"red":[235,50,40],"orange":[255,140,30],"cream":[255,240,200],"edge":[230,225,200],"card":[10,12,10],"white":[255,255,255]},
+ "fonts":{"sans":"fonts/DejaVuSans-Bold.ttf","mono":"fonts/DejaVuSansMono-Bold.ttf"},"dissolve":0.6,
+ "scenes":[
+  {"id":"T1","image":"stills/hut.png","start":0,"camera":{"t0":0,"t1":17,"ease":"smooth","scale":[1,1],"cx":[1280,1280],"cy":[720,720],
+    "keys":[{"t":0,"scale":1.08,"cx":1280,"cy":720},{"t":2.5,"scale":1.0,"cx":1280,"cy":720},
+            {"t":4.0,"scale":2.0,"cx":480,"cy":820},{"t":6.5,"scale":2.0,"cx":480,"cy":820},
+            {"t":8.0,"scale":1.7,"cx":820,"cy":960},{"t":10.5,"scale":1.7,"cx":820,"cy":960},
+            {"t":12.0,"scale":1.8,"cx":1300,"cy":420},{"t":13.5,"scale":1.8,"cx":1300,"cy":420},
+            {"t":15.0,"scale":1.6,"cx":1280,"cy":1060},{"t":17.0,"scale":1.6,"cx":1280,"cy":1060}]}},
+  {"id":"T1-cut","image":"stills/hut.png","start":17.0,"dissolve":0,"camera":{"t0":17,"t1":19.5,"ease":"smooth","scale":[2.2,2.3],"cx":[2150,2150],"cy":[820,820]}},
+  {"id":"T1-back","image":"stills/hut.png","start":19.5,"dissolve":0,"camera":{"t0":19.5,"t1":22,"ease":"smooth","scale":[1.25,1.0],"cx":[1500,1280],"cy":[760,720]}},
+  {"id":"T2","image":"stills/hut.png","start":22,"camera":{"t0":22,"t1":34,"ease":"smooth","scale":[1.0,1.06],"cx":[1280,1280],"cy":[720,720]}},
+  {"id":"T3","image":"stills/hut.png","start":34,"camera":{"t0":34,"t1":46,"ease":"smooth","scale":[1.06,1.0],"cx":[1280,1280],"cy":[720,720]}}],
+ "elements":[
+  {"type":"tag","text":"Kỹ thuật 1: một ảnh, zoom từng vùng","pos":[330,50],"size":24,"t_in":0.3,"t_out":3.5},
+  {"type":"marker","kind":"circle","scene":"T1","box":[620,860,1020,1080],"t_in":8.3,"t_out":10.4,"color":"red","width":9,"draw":0.7},
+  {"type":"marker","kind":"arrow","scene":"T1","from":[900,1330],"to":[1150,1170],"t_in":15.2,"t_out":16.9,"color":"orange","width":13,"draw":0.7},
+  {"type":"tag","text":"Kỹ thuật 2: lộ dần 3 ô","pos":[230,50],"size":24,"t_in":22.3,"t_out":25},
+  {"type":"panel_reveal","scene":"T2","layout":"3col","reveal":[22.6,26.4,30.2],"t_in":22,"t_out":33.5},
+  {"type":"tag","text":"Kỹ thuật 2b: lộ dần 4 ô (2x2)","pos":[280,50],"size":24,"t_in":34.3,"t_out":37},
+  {"type":"panel_reveal","scene":"T3","layout":"2x2","reveal":[34.6,37.4,40.2,43.0],"t_in":34,"t_out":45.5}],
+ "audio":{"total":46,"tracks":[]}}
