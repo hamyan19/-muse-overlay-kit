@@ -9,6 +9,22 @@ Bạn **không** viết script, không thu voice, không tạo ảnh, không t�
 
 ---
 
+## 0. NHÁNH TEST `muse/cum-y-ky-thuat-moi` — đọc mục này trước nếu bạn được giao nhánh này
+Nhánh này **đang thử** 3 thứ mới (chưa merge `main`, An chưa chốt). Đọc **`KY-THUAT-DUNG.md`** (luật tách cụm ý, kỹ thuật cũ + mới, tiết kiệm/tăng tốc) và `QUYET-DINH.md`; phần còn lại của file này vẫn đúng.
+```bash
+git clone -b muse/cum-y-ky-thuat-moi https://github.com/hamyan19/-muse-overlay-kit && cd ./-muse-overlay-kit
+pip install -r requirements.txt opencv-contrib-python-headless --break-system-packages    # contrib: để tự upscale
+```
+| Mới | Bạn làm gì |
+|---|---|
+| **Cụm ý** (nhiều shot chung 1 ảnh gốc) | Bảng có cột CỤM / VÙNG / CHUYỂN TRONG CỤM (bảng cũ: `tools/add_cluster_cols.py --set "CH3-M01:S04-S07" "CH3-M02:S10-S12:ô"`). Ảnh gốc tên `<CỤM>.png` (vd `CH3_M01.png`). Sau `plan`, điền toạ độ từng vùng vào `work/chX/vung.json` (`at:[x,y]`, `zoom`), đọc trên `contact.jpg` |
+| **Lộ dần từng ô** | Shot trong cụm có CHUYỂN = "mở ô" → tự thành `panel_reveal` (3 shot = 3 cột, 4 = 2×2). Không cần toạ độ |
+| **Ảnh 4K + tự upscale** | `build_chapter.py plan ... --upscale`: ảnh nhỏ tự phóng lên 3840×2160 (~3s/ảnh); ảnh An gửi đã 4K thì giữ nguyên |
+Lệnh vẫn là `plan → check → render --quick` (mục 3.0). Thêm trong báo cáo: cụm nào dùng kỹ thuật gì, vùng nào thiếu toạ độ, ảnh nào đã upscale.
+Mẫu tin nhắn An gửi: *"Đọc repo hamyan19/-muse-overlay-kit nhánh muse/cum-y-ky-thuat-moi, file HUONG-DAN-CLAUDE-MOI.md mục 0 và KY-THUAT-DUNG.md. Dựng Ch3 theo cụm ý; đính kèm voice, bảng, ảnh. Làm tới bản xem nhanh rồi gửi tôi."*
+
+---
+
 ## 1. Cài đặt (làm một lần mỗi máy/phiên)
 
 ### 1.1 Cần có

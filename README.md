@@ -5,6 +5,7 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 
 ## BẮT ĐẦU Ở ĐÂY
 - **Claude/AI được giao DỰNG một chương:** đọc `QUYET-DINH.md` (mọi thứ đã chốt) → cài phần mềm ở mục **Cài đặt** dưới đây → chạy `tools/build_chapter.py` (mục **Dựng một chương**). Chỉ đọc `HUONG-DAN-CLAUDE-MOI.md` khi gặp lỗi lạ.
+- **Nhánh test `muse/cum-y-ky-thuat-moi`:** đọc thêm mục 0 của `HUONG-DAN-CLAUDE-MOI.md` và `KY-THUAT-DUNG.md` (cụm ý, lộ dần ô, ảnh 4K/upscale).
 - **Muse / người lập kế hoạch:** `QUY-TRINH.md` — **Script → Voice → Mapping câu theo voice → Visual plan → Duyệt style → Nguyên liệu → Dựng**. Anh duyệt 2 lần: ở bước Duyệt style và khi xem video chương.
 
 > **AI vào repo:** tải về và xem 3 ảnh mẫu style trong `styles/ice-age-stick-figure/ref-approved/` trước khi làm hình hoặc viết prompt (chi tiết trong `STYLE.md` cùng thư mục).

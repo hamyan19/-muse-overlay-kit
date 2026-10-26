@@ -19,4 +19,7 @@ Dự án: "Surviving Winter in a House of Mammoth Bones" (Hook, Ch1–Ch9, Endin
 | Dữ liệu chưa công bố | Voice, ảnh, script, bảng mapping: An gửi trong chat, không đưa lên repo công khai | An 26/10 |
 | `wordts.json` | Căn theo script bằng `tools/align.py` (PocketSphinx), không cần Whisper | 26/10 |
 
+| Cụm ý / lộ dần ô / ảnh 4K | **ĐANG THỬ** trên nhánh `muse/cum-y-ky-thuat-moi` — luật trong `KY-THUAT-DUNG.md` | An 26/10 |
+| Metaprompt theo cụm | Để sau | An 26/10 |
+
 "Mặc định tạm" = dựng theo đó, ghi rõ trong báo cáo, không dừng chờ.
