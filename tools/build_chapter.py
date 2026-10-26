@@ -65,7 +65,8 @@ if a.stage == "plan":
         name = os.path.splitext(os.path.basename(p))[0] + ".png"
         if re.search(r"_L\d", name): shutil.copy(p, os.path.join(R, "stills", name)); continue   # ảnh lớp phủ L01: giữ nguyên cỡ
         im = Image.open(p).convert("RGB")
-        if im.size != (2560, 1440): small.append(f"{name} {im.size[0]}x{im.size[1]}"); im = im.resize((2560, 1440), Image.LANCZOS)
+        if im.size[0] >= 2560 and abs(im.size[1] / im.size[0] - 0.5625) < 0.01: pass   # ảnh lớn (4K…) giữ nguyên: engine zoom sâu vẫn nét
+        elif im.size != (2560, 1440): small.append(f"{name} {im.size[0]}x{im.size[1]}"); im = im.resize((2560, 1440), Image.LANCZOS)
         im.save(os.path.join(R, "stills", name))
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", vo], capture_output=True, text=True).stdout or 0)
     cmd = [T("mapping_to_spec.py"), a.xlsx, "--vo", "vo/" + os.path.basename(vo), "--name-from-id", "--include-pending", "--calm",
@@ -80,7 +81,7 @@ if a.stage == "plan":
     json.dump({"xlsx": os.path.abspath(a.xlsx)}, open(CFG, "w"))
     items = [(f"{s['id']}  {s['start']:.1f}s", os.path.join(R, s["image"])) for s in S["scenes"] if os.path.exists(os.path.join(R, s["image"]))]
     sheet(items, os.path.join(W, "contact.jpg"))
-    print(f"{tag}: {len(S['scenes'])} cảnh, {dur:.1f}s | ảnh phóng lên 2560x1440: {len(small)} | THIẾU ẢNH: {miss or 'không'}")
+    print(f"{tag}: {len(S['scenes'])} cảnh, {dur:.1f}s | ảnh nhỏ phải phóng lên 2560x1440 (zoom sâu sẽ mờ, nên upscale 4K): {len(small)} | THIẾU ẢNH: {miss or 'không'}")
     print(f"Xem 1 lần {W}/contact.jpg (lưới 320px) → điền {W}/focus.json + {W}/pos.json → chạy: build_chapter.py check --ch {a.ch}")
 
 elif a.stage == "check":

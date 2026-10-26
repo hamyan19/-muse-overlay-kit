@@ -100,12 +100,15 @@ def load_scene(sc, root):
     if im is None:
         raise FileNotFoundError(sc["image"])
     im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-    if im.shape[1] != 2560 or im.shape[0] != 1440:
-        im = cv2.resize(im, (2560, 1440), interpolation=cv2.INTER_LANCZOS4)
+    q = im.shape[1] / 2560.0
     if sc.get("blur"):
-        im = cv2.GaussianBlur(im, (0, 0), float(sc["blur"]))
+        im = cv2.GaussianBlur(im, (0, 0), float(sc["blur"]) * max(q, 1.0))
     if sc.get("brightness") is not None:
         im = (im.astype(np.float32) * float(sc["brightness"])).clip(0, 255).astype(np.uint8)
+    if q > 1.05 and abs(im.shape[0] / im.shape[1] - 1440 / 2560) < 0.01:
+        sc["_hi"] = im      # ẢNH GỐC LỚN (vd 3840x2160 / 5120x2880): giữ nguyên để zoom sâu vẫn nét; toạ độ spec vẫn theo 2560x1440
+    if im.shape[1] != 2560 or im.shape[0] != 1440:
+        im = cv2.resize(im, (2560, 1440), interpolation=cv2.INTER_AREA if q > 1 else cv2.INTER_LANCZOS4)
     return im
 
 def cam(sc, t):
@@ -175,6 +178,13 @@ def scene_src(sc, t):
 
 def render_scene(sc, t):
     s, cx, cy = cam(sc, t)
+    hi = sc.get("_hi")
+    if hi is not None and not sc.get("fx"):
+        q = hi.shape[1] / 2560.0; k = C.W / 2560.0
+        r = s * k / q                       # số điểm ảnh xuất trên 1 điểm ảnh gốc
+        if r >= 0.5:                        # zoom đủ sâu: lấy thẳng từ ảnh gốc lớn -> nét hơn bản 2560
+            M = np.float32([[r, 0, (1280 - s * cx) * k], [0, r, (720 - s * cy) * k]])
+            return cv2.warpAffine(hi, M, (C.W, C.H), flags=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE).astype(np.float32)
     M = np.float32([[s, 0, 1280 - s * cx], [0, s, 720 - s * cy]])
     big = cv2.warpAffine(scene_src(sc, t), M, (2560, 1440), flags=cv2.INTER_LANCZOS4,
                          borderMode=cv2.BORDER_REPLICATE)          # render ở 2560x1440
