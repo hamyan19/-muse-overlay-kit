@@ -10,7 +10,8 @@ start = đầu cột PHỦ THỜI GIAN, camera suy từ cột CHUYỂN ĐỘNG �
 cố định -> gần như đứng, còn lại -> zoom nhẹ), xen hướng để hai cảnh liền nhau không cùng chuyển động.
 CỤM Ý (cột CỤM / VÙNG / CHUYỂN TRONG CỤM, nếu có): các shot liền nhau cùng mã CỤM dùng chung 1 ảnh gốc (--name-from-id: <CỤM>.png),
 nối liền không dissolve; camera đi qua từng VÙNG (toạ độ từ --regions vung.json hoặc số '480,820 x2' trong cột VÙNG);
-CHUYỂN có 'cắt' = cắt thẳng sang vùng; có 'ô'/'lộ dần' = lộ dần từng ô (panel_reveal, 3 shot -> 3 cột, 4 -> 2x2).
+CHUYỂN có 'cắt' = cắt thẳng sang vùng; có 'ô'/'lộ dần' = lộ dần từng ô (panel_reveal, 3 shot -> 3 cột, 4 -> 2x2);
+  một shot ghi 'mở 3 ô' = tự mở 3 ô trong shot đó, mốc lấy từ (giây–giây) của cột CHUYỂN ĐỘNG ĐỀ XUẤT.
 KHÔNG làm: lớp chữ/mũi tên/nét đứt (sheet OVERLAYS) — chỉ ghi vào meta.overlays_todo; bật chúng bằng tools/apply_overlays.py;
 âm thanh ngoài lời đọc. Mặc định chỉ lấy dòng DUYỆT=OK (dùng --include-pending để thử với dòng CHỜ).
 """
@@ -107,8 +108,14 @@ while k < len(rows):
         cam = {"t0": round(T0, 2), "t1": round(T1, 2), "ease": "smooth", "scale": [1.0, 1.04], "cx": [1280, 1280], "cy": [720, 720]}
         for i, x in enumerate(grp):
             scenes.append({"id": x["id"], "image": f"{a.stills}/{x['image']}", "start": x["t0"], "camera": cam, **({"dissolve": 0} if i else {})})
-        n = len(panel); lay = "2x2" if n == 4 and "cột" not in " ".join(p["chuyen"] for p in panel) else f"{n}col"
-        extra_el.append({"type": "panel_reveal", "scene": grp[0]["id"], "layout": lay, "reveal": [round(p["t0"] + 0.15, 2) for p in panel],
+        rev = [round(p["t0"] + 0.15, 2) for p in panel]
+        mN = re.search(r"(\d)\s*ô", panel[0]["chuyen"]) if len(panel) == 1 else None
+        if mN:     # MỘT shot tự kể N ý ("mở 3 ô"): mốc mở lấy từ (giây–giây) trong CHUYỂN ĐỘNG ĐỀ XUẤT, không có thì chia đều
+            N = int(mN.group(1)); p0 = panel[0]
+            ts = [float(x.replace(",", ".")) for x in re.findall(r"\((\d+[.,]\d+)\s*[–-]", p0["motion"])]
+            rev = [round(t, 2) for t in ts[:N]] if len(ts) >= N else [round(p0["t0"] + 0.15 + i * (p0["t1"] - p0["t0"] - 1.5) / N, 2) for i in range(N)]
+        n = len(rev); lay = "2x2" if n == 4 and "cột" not in " ".join(p["chuyen"] for p in panel) else f"{n}col"
+        extra_el.append({"type": "panel_reveal", "scene": grp[0]["id"], "layout": lay, "reveal": rev,
                          "t_in": round(T0, 2), "t_out": round(T1 - 0.6, 2)})
     else:          # ZOOM TỪNG VÙNG: camera đi từ vùng trước sang vùng này rồi giữ (trôi nhẹ); 'cắt' = cắt thẳng
         prev = None
