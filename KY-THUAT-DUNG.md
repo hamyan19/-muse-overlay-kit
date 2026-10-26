@@ -140,7 +140,22 @@ Cả chương vẫn giữ luật **ít hiệu ứng**: mỗi cụm 1 kỹ thuậ
 3. Kiểm nét bằng `tools/qc_assets.py`.
 4. Đặt ảnh 4K vào thư mục ảnh; `build_chapter plan` giữ nguyên ảnh lớn, chỉ phóng ảnh nhỏ (và báo).
 
-### 3.4 Còn chưa làm (chờ An chốt)
-- Cột CỤM / VÙNG / CHUYỂN TRONG CỤM trong `plan_assets.py` và `mapping_to_spec.py` (các shot cùng cụm → một cảnh liền, camera đi qua các vùng, không dissolve).
-- Metaprompt: một prompt cho mỗi cụm (mục 1.5).
-- Claude tự upscale (Real-ESRGAN CPU, ~1–2 phút/ảnh) trong bước `plan`.
+### 3.4 Công cụ (26/10, nhánh `muse/cum-y-ky-thuat-moi`)
+**Cột CỤM trong bảng mapping**
+```bash
+python3 tools/add_cluster_cols.py CH3_asset_plan.xlsx --set "CH3-M01:S04-S07" "CH3-M02:S10-S12:ô"   # bảng cũ: thêm 3 cột + gán cụm nhanh
+```
+- `plan_assets.py` tạo bảng mới đã có sẵn 3 cột (Muse điền).
+- `mapping_to_spec.py` đọc 3 cột: shot cùng CỤM → cùng ảnh gốc `<CỤM>.png` (vd `CH3_M01.png`), nối liền không dissolve,
+  camera đi từ vùng trước sang vùng này (~1,3s) rồi giữ; CHUYỂN có "cắt" = cắt thẳng; có "ô" = `panel_reveal` (3 shot → 3 cột, 4 → 2×2).
+- Toạ độ vùng: `work/chX/vung.json` (build_chapter tự tạo khung) hoặc số trong cột VÙNG (`"người kéo da 480,820 x2"`). Thiếu toạ độ → toàn cảnh + cảnh báo.
+- `build_chapter.py`: tấm ghép `contact.jpg` hiện **mỗi ảnh gốc 1 lần** (nhãn liệt kê các shot của cụm); `check` tự dựng lại spec khi có `vung.json`.
+
+**Tự upscale (`tools/upscale.py`, `build_chapter.py plan --upscale`)**
+- Ảnh nhỏ hơn 4K → 3840×2160 bằng mô hình FSRCNN ×2 (OpenCV, CPU, ~3s/ảnh; cả chương Ch2 14 ảnh ~1,5 phút). Ảnh đã đủ lớn giữ nguyên.
+- Đo trên ảnh Ch2: độ nét 57 so với phóng thường 33. Khá hơn rõ, **chưa bằng Real-ESRGAN**. `--model edsr` sắc hơn chút nhưng >10 phút/ảnh trên CPU 2 nhân.
+- Cần `pip install opencv-contrib-python-headless`; mô hình tự tải lần đầu (GitHub, ~40 KB).
+- Muốn đẹp nhất: An chạy **Upscayl** trên máy (Real-ESRGAN, mô hình digital art/anime) rồi gửi ảnh 4K — `plan` giữ nguyên ảnh lớn.
+
+### 3.5 Còn chưa làm
+- Metaprompt: một prompt cho mỗi cụm (mục 1.5) — An để sau.

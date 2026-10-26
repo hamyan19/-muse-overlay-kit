@@ -259,7 +259,7 @@ for k, (s, w, kind, eff, note) in enumerate(events, 1):
     rows_ov.append([f"{a.beat}-EV{k:03d}", sc_, round(s, 2), w, kind, eff, note, "CHỜ", ""])
 
 # ---------------- 5. ghi ra
-H_SHOT = ["ID", "CẢNH", "PHỦ THỜI GIAN", "DÀI (s)", "LỜI ĐỌC", "HÌNH GỢI Ý", "LOẠI NGUYÊN LIỆU", "PROMPT NHÁP (Muse viết bản cuối)", "CHUYỂN ĐỘNG ĐỀ XUẤT", "TÊN FILE ĐÍCH", "DUYỆT", "GHI CHÚ CỦA ANH"]
+H_SHOT = ["ID", "CẢNH", "PHỦ THỜI GIAN", "DÀI (s)", "LỜI ĐỌC", "HÌNH GỢI Ý", "LOẠI NGUYÊN LIỆU", "PROMPT NHÁP (Muse viết bản cuối)", "CHUYỂN ĐỘNG ĐỀ XUẤT", "TÊN FILE ĐÍCH", "DUYỆT", "GHI CHÚ CỦA ANH", "CỤM", "VÙNG", "CHUYỂN TRONG CỤM"]
 H_OV = ["ID", "CẢNH", "GIÂY", "TỪ KÍCH HOẠT", "LOẠI", "HIỆU ỨNG ĐỀ XUẤT", "GHI CHÚ NỘI DUNG", "DUYỆT", "GHI CHÚ CỦA ANH"]
 H_SFX = ["ID", "CẢNH", "THỜI GIAN", "VAI TRÒ", "MÔ TẢ", "TÊN FILE ĐÍCH", "DUYỆT", "GHI CHÚ CỦA ANH"]
 for name, hdr, rows in (("shots", H_SHOT, rows_shots), ("overlays", H_OV, rows_ov), ("sfx", H_SFX, rows_sfx)):
@@ -309,7 +309,7 @@ def sheet(title, hdr, rows, widths, approve_col):
     ws.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"SỬA"'], fill=PatternFill("solid", bgColor="FFEB9C", fgColor="FFEB9C")))
     ws.conditional_formatting.add(rng, CellIsRule(operator="equal", formula=['"BỎ"'], fill=PatternFill("solid", bgColor="FFC7CE", fgColor="FFC7CE")))
     return ws
-sheet("SHOTS", H_SHOT, rows_shots, [14, 7, 13, 8, 46, 32, 36, 70, 28, 24, 9, 30], 11)
+sheet("SHOTS", H_SHOT, rows_shots, [14, 7, 13, 8, 46, 32, 36, 70, 28, 24, 9, 30, 14, 34, 18], 11)   # 3 cột cuối: CỤM Ý (Muse điền, KY-THUAT-DUNG.md mục 1)
 sheet("OVERLAYS", H_OV, rows_ov, [14, 7, 8, 16, 20, 26, 48, 9, 30], 8)
 sheet("SFX", H_SFX, rows_sfx, [16, 7, 16, 16, 56, 30, 9, 30], 7)
 ws = wb.create_sheet("TONG_QUAN", 1)

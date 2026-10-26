@@ -21,6 +21,7 @@ với camera mượt, chuyển cảnh trong khoảng lặng, và lớp đồ ho�
 | `pillow` (`PIL`) | Có | Vẽ chữ, mũi tên, lớp phủ, tấm ghép | |
 | `matplotlib` | Có | Biểu đồ trong engine và `analyze_video.py` | |
 | `openpyxl` | Có | Đọc/ghi bảng `asset_plan.xlsx` | |
+| `opencv-contrib-python-headless` | Khi tự upscale | `tools/upscale.py` (cv2.dnn_superres); thay được bản headless thường | `python3 -c "import cv2; cv2.dnn_superres"` |
 | `pocketsphinx` | Khi phải tự tạo `wordts.json` | `tools/align.py` (căn mốc từng từ theo script) | `python3 -c "import pocketsphinx"` |
 | `tesseract` | Không | OCR chữ/logo trong `qc_assets.py`; không có thì kiểm bằng mắt | `tesseract --version` |
 | Font | Có sẵn trong `fonts/` | DejaVu, Poppins, Lora — không cần cài | |
@@ -85,6 +86,8 @@ Rào sáng có sẵn: lớp phủ và tô sáng vật thể không được làm
 |---|---|---|
 | `tools/plan_assets.py` | 3 | `wordts.json` → `asset_plan.xlsx`: mapping câu ↔ mốc thời gian, gợi ý hình, overlay, âm thanh; cột DUYỆT |
 | `tools/build_chapter.py` | 7 | **Một lệnh cho cả chương**: `plan` (spec + tấm ghép có lưới) → `check` (điểm nhấn + lớp phủ + lint + tấm khung kiểm) → `render --quick` |
+| `tools/add_cluster_cols.py` | 3–4 | Thêm cột CỤM / VÙNG / CHUYỂN TRONG CỤM vào bảng cũ, gán nhanh dải shot vào cụm (`KY-THUAT-DUNG.md` mục 1) |
+| `tools/upscale.py` | 6–7 | Phóng ảnh nhỏ lên 4K (FSRCNN, CPU ~3s/ảnh); `build_chapter.py plan --upscale` gọi tự động |
 | `tools/apply_overlays.py` | 7 | Bật sheet OVERLAYS (mũi tên, nhãn, nét đứt, ảnh L01, tuyết) lên đúng vật thể từ `pos.json`, có rào độ sáng |
 | `tools/mapping_to_spec.py` | 7 | `asset_plan.xlsx` → `spec.json` cho engine: ảnh, mốc bắt đầu, camera, giọng đọc (lớp phủ ghi vào `meta.overlays_todo`, bật bằng `apply_overlays.py`). Đã render Ch2 |
 | `tools/apply_focus.py` | 7 | `focus.json` → điểm nhấn theo lời: zoom, cut cận, khoanh tròn, mũi tên, spot (có rào sáng) |

@@ -4,4 +4,4 @@ pillow
 matplotlib
 openpyxl
 # cần thêm: ffmpeg (có trong PATH)
-# tuỳ chọn: pocketsphinx (tools/align.py, tự tạo wordts.json) · tesseract (OCR trong qc_assets.py)
+# tuỳ chọn: opencv-contrib-python-headless (tools/upscale.py) · pocketsphinx (tools/align.py, tự tạo wordts.json) · tesseract (OCR trong qc_assets.py)

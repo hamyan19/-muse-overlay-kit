@@ -3,7 +3,8 @@
 
   # B1 plan: spec + TẤM GHÉP ảnh có lưới (đọc toạ độ cả chương trong 1 lần xem) + khung focus.json / pos.json để điền
   python3 tools/build_chapter.py plan   --ch 3 --xlsx plan/CH3_asset_plan.xlsx --vo ch3.mp3 --stills anh_ch3/ --preset documentary
-  # (điền work/ch3/focus.json và work/ch3/pos.json bằng toạ độ đọc trên work/ch3/contact.jpg)
+  #   thêm --upscale: ảnh nhỏ tự phóng lên 4K (tools/upscale.py)
+  # (điền work/ch3/focus.json, pos.json, và vung.json nếu bảng có CỤM — toạ độ đọc trên work/ch3/contact.jpg)
   # B2 check: áp điểm nhấn + lớp phủ + lint + 1 TẤM khung kiểm đúng lúc từng điểm nhấn/lớp phủ
   python3 tools/build_chapter.py check  --ch 3
   # B3 render: --quick = 1280x720 @15fps (nhanh ~2 lần, để duyệt) | mặc định 1920x1080 @30fps (bản chính). Nên chạy nền.
@@ -21,6 +22,7 @@ ap = argparse.ArgumentParser(); ap.add_argument("stage", choices=["plan", "check
 ap.add_argument("--ch", required=True); ap.add_argument("--xlsx"); ap.add_argument("--vo"); ap.add_argument("--stills")
 ap.add_argument("--preset"); ap.add_argument("--work", default="work"); ap.add_argument("--quick", action="store_true")
 ap.add_argument("--jobs", type=int, default=os.cpu_count() or 4)
+ap.add_argument("--upscale", action="store_true", help="ảnh nhỏ hơn 4K: tự phóng lên 3840x2160 bằng tools/upscale.py (FSRCNN, ~3s/ảnh) thay vì phóng thường lên 2560")
 a = ap.parse_args()
 tag = f"CH{a.ch}" if str(a.ch).isdigit() else str(a.ch).upper()
 W = os.path.join(a.work, tag.lower()); R = os.path.join(W, "res"); CFG = os.path.join(W, "build.json")
@@ -61,7 +63,10 @@ if a.stage == "plan":
     shutil.copytree(os.path.join(ROOT, "fonts"), os.path.join(R, "fonts"), dirs_exist_ok=True)
     vo = os.path.join(R, "vo", os.path.basename(a.vo)); shutil.copy(a.vo, vo)
     small = []
-    for p in sorted(glob.glob(os.path.join(a.stills, "*.png")) + glob.glob(os.path.join(a.stills, "*.jpg"))):
+    src_dir = a.stills
+    if a.upscale:
+        src_dir = os.path.join(W, "_up4k"); run([T("upscale.py"), a.stills, src_dir])
+    for p in sorted(glob.glob(os.path.join(src_dir, "*.png")) + glob.glob(os.path.join(src_dir, "*.jpg"))):
         name = os.path.splitext(os.path.basename(p))[0] + ".png"
         if re.search(r"_L\d", name): shutil.copy(p, os.path.join(R, "stills", name)); continue   # ảnh lớp phủ L01: giữ nguyên cỡ
         im = Image.open(p).convert("RGB")
@@ -73,19 +78,35 @@ if a.stage == "plan":
            "--duration", f"{dur:.2f}", "--out", os.path.join(W, "spec.json")]
     if a.preset: cmd += ["--preset", a.preset]
     run(cmd)
+    # khung vung.json cho các shot trong CỤM (toạ độ vùng điền sau khi xem contact.jpg)
+    import openpyxl
+    sh = openpyxl.load_workbook(a.xlsx, data_only=True)["SHOTS"]; HH = [c.value for c in sh[1]]
+    vj = os.path.join(W, "vung.json"); V = json.load(open(vj, encoding="utf-8")) if os.path.exists(vj) else {}
+    if "CỤM" in HH:
+        for r in sh.iter_rows(min_row=2, values_only=True):
+            d = dict(zip(HH, r))
+            if d.get("CỤM") and d.get("ID") not in V and not re.search(r"\bô\b|mở ô|lộ dần", str(d.get("CHUYỂN TRONG CỤM") or "")):
+                V[d["ID"]] = {"cụm": d["CỤM"], "vùng": d.get("VÙNG"), "chuyển": d.get("CHUYỂN TRONG CỤM"), "at": [None, None], "zoom": None}
+        if V: json.dump(V, open(vj, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     S = json.load(open(os.path.join(W, "spec.json"), encoding="utf-8"))
     miss = [s["image"] for s in S["scenes"] if not os.path.exists(os.path.join(R, s["image"]))]
     run([T("apply_overlays.py"), os.path.join(W, "spec.json"), a.xlsx, "--template", os.path.join(W, "pos.json")])
     fp = os.path.join(W, "focus.json")
     if not os.path.exists(fp): json.dump({"_mẫu": "xem examples/focus/CH2_focus.json; 5–7 điểm, mỗi điểm một kiểu; t lấy từ wordts"}, open(fp, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-    json.dump({"xlsx": os.path.abspath(a.xlsx)}, open(CFG, "w"))
-    items = [(f"{s['id']}  {s['start']:.1f}s", os.path.join(R, s["image"])) for s in S["scenes"] if os.path.exists(os.path.join(R, s["image"]))]
+    json.dump({"xlsx": os.path.abspath(a.xlsx), "map": cmd}, open(CFG, "w"))
+    seen = {}      # ảnh dùng chung (CỤM) chỉ hiện 1 lần trên tấm ghép, nhãn liệt kê các shot
+    for s_ in S["scenes"]:
+        if os.path.exists(os.path.join(R, s_["image"])): seen.setdefault(s_["image"], []).append(f"{s_['id'].split('-')[-1]} {s_['start']:.0f}s")
+    items = [(" · ".join(v) if len(v) < 4 else f"{v[0]} … {v[-1]} ({len(v)} shot)", os.path.join(R, k)) for k, v in seen.items()]
     sheet(items, os.path.join(W, "contact.jpg"))
     print(f"{tag}: {len(S['scenes'])} cảnh, {dur:.1f}s | ảnh nhỏ phải phóng lên 2560x1440 (zoom sâu sẽ mờ, nên upscale 4K): {len(small)} | THIẾU ẢNH: {miss or 'không'}")
-    print(f"Xem 1 lần {W}/contact.jpg (lưới 320px) → điền {W}/focus.json + {W}/pos.json → chạy: build_chapter.py check --ch {a.ch}")
+    print(f"Xem 1 lần {W}/contact.jpg (lưới 320px) → điền {W}/focus.json + {W}/pos.json" + (f" + {W}/vung.json ({len(V)} vùng trong cụm)" if V else "") + f" → chạy: build_chapter.py check --ch {a.ch}")
 
 elif a.stage == "check":
-    xlsx = json.load(open(CFG))["xlsx"]; spec = os.path.join(W, "spec.json"); cur = spec
+    cfg = json.load(open(CFG)); xlsx = cfg["xlsx"]; spec = os.path.join(W, "spec.json"); cur = spec
+    vj = os.path.join(W, "vung.json")
+    if os.path.exists(vj) and cfg.get("map"):          # có toạ độ vùng của CỤM -> dựng lại spec với --regions
+        run(cfg["map"] + ["--regions", vj])
     F = {k: v for k, v in json.load(open(os.path.join(W, "focus.json"), encoding="utf-8")).items() if not k.startswith("_")}
     times = []
     if F:
