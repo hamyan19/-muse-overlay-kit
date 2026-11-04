@@ -176,18 +176,34 @@ def scene_src(sc, t):
         im = FX[fx["type"]](im, fx, t - sc["start"])
     return im
 
+def _levels(sc):
+    """Các bản thu nhỏ sẵn của ảnh cảnh (2560, 1280, 640… và ảnh gốc lớn nếu có), tạo 1 lần, để camera dựng thẳng ở cỡ đầu ra."""
+    L = sc.get("_lv")
+    if L is None:
+        L = []
+        if sc.get("_hi") is not None:
+            L.append((sc["_hi"].shape[1] / 2560.0, sc["_hi"]))
+        base, q = sc["_img"], 1.0
+        while base.shape[1] * q >= C.W * 0.7:          # bậc 1/√2: mỗi lần warp chỉ thu ≤1.41 lần -> không răng cưa
+            w = int(round(2560 * q))
+            L.append((w / 2560.0, base if w == 2560 else cv2.resize(base, (w, w * 9 // 16), interpolation=cv2.INTER_AREA)))
+            q /= 2 ** 0.5
+        L.sort(key=lambda x: -x[0]); sc["_lv"] = L
+    return L
+
 def render_scene(sc, t):
     s, cx, cy = cam(sc, t)
-    hi = sc.get("_hi")
-    if hi is not None and not sc.get("fx"):
-        q = hi.shape[1] / 2560.0; k = C.W / 2560.0
-        r = s * k / q                       # số điểm ảnh xuất trên 1 điểm ảnh gốc
-        if r >= 0.5:                        # zoom đủ sâu: lấy thẳng từ ảnh gốc lớn -> nét hơn bản 2560
-            M = np.float32([[r, 0, (1280 - s * cx) * k], [0, r, (720 - s * cy) * k]])
-            return cv2.warpAffine(hi, M, (C.W, C.H), flags=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_REPLICATE).astype(np.float32)
+    k = C.W / 2560.0
+    if "_vpath" not in sc and not sc.get("fx"):
+        # dựng thẳng ở cỡ đầu ra: chọn bản nhỏ nhất mà vẫn ≥ 1 điểm ảnh nguồn / điểm ảnh xuất (không mất nét)
+        L = _levels(sc)
+        q, src = next(((q, im) for q, im in reversed(L) if s * k / q <= 1.0 + 1e-6), L[0])
+        r = s * k / q
+        M = np.float32([[r, 0, (1280 - s * cx) * k], [0, r, (720 - s * cy) * k]])
+        return cv2.warpAffine(src, M, (C.W, C.H), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE).astype(np.float32)
     M = np.float32([[s, 0, 1280 - s * cx], [0, s, 720 - s * cy]])
     big = cv2.warpAffine(scene_src(sc, t), M, (2560, 1440), flags=cv2.INTER_LANCZOS4,
-                         borderMode=cv2.BORDER_REPLICATE)          # render ở 2560x1440
+                         borderMode=cv2.BORDER_REPLICATE)          # cảnh video / có fx: giữ đường cũ
     return cv2.resize(big, (C.W, C.H), interpolation=cv2.INTER_AREA).astype(np.float32)
 
 def to_screen(sc, t, x, y):
@@ -210,27 +226,35 @@ def background(t):
         out = prev * (1 - a) + out * a
     return out
 
+def _color_matrix(warm, g):
+    """Gộp ấm + bw + tint + sat + contrast + lift (đều là phép biến đổi màu tuyến tính) thành MỘT ma trận 3×4,
+    áp bằng cv2.transform — kết quả y hệt áp lần lượt, nhanh hơn nhiều."""
+    w = np.array([0.299, 0.587, 0.114], np.float64)
+    M = np.diag(np.array(warm, np.float64)); b = np.zeros(3)
+    def step(A, c=0.0):
+        nonlocal M, b
+        M = A @ M; b = A @ b + c
+    one = np.ones((3, 1))
+    if g.get("bw"):
+        step((1 - g["bw"]) * np.eye(3) + g["bw"] * one @ w[None])
+    if g.get("tint"):
+        step(np.diag(np.array(g["tint"], np.float64)))
+    if g.get("sat") is not None:
+        step(g["sat"] * np.eye(3) + (1 - g["sat"]) * one @ w[None])
+    if g.get("contrast"):
+        step(g["contrast"] * np.eye(3), 128.0 * (1 - g["contrast"]))
+    if g.get("lift"):
+        step((1 - g["lift"] / 255.0) * np.eye(3), float(g["lift"]))
+    return np.hstack([M, b[:, None]]).astype(np.float32)
+
 def finish_bg(img, idx):
-    img = img * C.VIG * C.WARM
-    g = C.grade
-    if g:
-        if g.get("bw"):
-            gray = (img @ np.array([0.299, 0.587, 0.114], np.float32))[..., None]
-            img = img * (1 - g["bw"]) + gray * g["bw"]
-        if g.get("tint"):
-            img = img * np.array(g["tint"], np.float32)
-        if g.get("sat") is not None:   # bão hoà màu: <1 nhạt (hoài niệm), >1 rực (truyện tranh)
-            gray = (img @ np.array([0.299, 0.587, 0.114], np.float32))[..., None]
-            img = gray + (img - gray) * g["sat"]
-        if g.get("contrast"):
-            img = (img - 128.0) * g["contrast"] + 128.0
-        if g.get("lift"):   # nâng vùng tối -> đen bạc màu như ảnh cũ
-            img = img * (1 - g["lift"] / 255.0) + g["lift"]
+    img *= C.VIG
+    img = cv2.transform(img, C.CM)
     if C.flicker > 0:   # nhấp nháy sáng rất nhẹ như phim cũ (tuỳ chọn)
         img = img * (1 + C.flicker * (math.sin(idx * 0.9) + 0.5 * math.sin(idx * 2.3 + 1)))
     if C.grain > 0:
-        rng = np.random.default_rng(idx)
-        img += rng.normal(0, C.grain, (C.H, C.W, 1)).astype(np.float32)
+        rng = np.random.default_rng(idx)   # float32 thẳng (nhanh ~3 lần so với normal float64 rồi đổi kiểu)
+        img += rng.standard_normal((C.H, C.W, 1), dtype=np.float32) * np.float32(C.grain)
     return img
 
 # ------------------------------------------------------------------ các loại phần tử
@@ -1438,6 +1462,8 @@ def setup(spec, root):
     rr = np.sqrt(((xx - C.W / 2) / (C.W / 2)) ** 2 + ((yy - C.H / 2) / (C.H / 2)) ** 2) / 1.414
     C.VIG = (1.0 - spec.get("vignette", 0.38) * np.clip(rr, 0, 1) ** 2.2)[..., None]
     C.WARM = np.array(spec.get("warm", [1.035, 1.0, 0.955]), np.float32)
+    C.VIG = C.VIG.astype(np.float32)
+    C.CM = _color_matrix(C.WARM, C.grade or {})
     C.scenes = spec["scenes"]
     for sc in C.scenes:
         sc["_img"] = load_scene(sc, root)
@@ -1476,10 +1502,10 @@ def build_audio(spec, root, out_wav):
     subprocess.run(cmd, check=True)
 
 # ------------------------------------------------------------------ chính
-def render_video(out_mp4, crf, jobs):
+def render_video(out_mp4, crf, jobs, x264="medium"):
     cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
            "-s", f"{C.W}x{C.H}", "-r", str(C.FPS), "-i", "-", "-c:v", "libx264",
-           "-preset", "medium", "-crf", str(crf), "-pix_fmt", "yuv420p", out_mp4]
+           "-preset", x264, "-crf", str(crf), "-pix_fmt", "yuv420p", out_mp4]
     pr = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     if jobs > 1:
         import multiprocessing as mp
@@ -1509,6 +1535,7 @@ def main():
     ap.add_argument("--video-only", action="store_true")
     ap.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     ap.add_argument("--crf", type=int, default=24)
+    ap.add_argument("--x264", default="medium", help="preset nén x264: veryfast cho bản duyệt (nhanh ~3 lần), medium cho bản chính")
     ap.add_argument("--lufs", type=float, default=-14.0, help="chuẩn hoá âm lượng master (0 = tắt)")
     a = ap.parse_args()
     root = a.root or os.path.dirname(os.path.abspath(a.spec))
@@ -1525,7 +1552,7 @@ def main():
         ap.error("cần --out hoặc --frames")
     tmp = tempfile.mkdtemp()
     vid = os.path.join(tmp, "video.mp4")
-    render_video(vid, a.crf, a.jobs)
+    render_video(vid, a.crf, a.jobs, a.x264)
     if a.video_only or "audio" not in spec or not (spec["audio"].get("vo") or spec["audio"].get("tracks")):   # không có tiếng -> chỉ hình
         os.replace(vid, a.out)
     else:

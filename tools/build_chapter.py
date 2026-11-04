@@ -114,5 +114,5 @@ else:
     S["meta"].update({"width": 1280, "height": 720, "fps": 15} if a.quick else {"width": 1920, "height": 1080, "fps": 30})
     rs = os.path.join(W, "spec_render.json"); json.dump(S, open(rs, "w", encoding="utf-8"), ensure_ascii=False)
     out = os.path.join(W, f"{tag.lower()}_{'quick' if a.quick else 'final'}.mp4")
-    run([os.path.join(ROOT, "overlay_engine.py"), rs, "--root", R, "--out", out, "--jobs", str(a.jobs)])
+    run([os.path.join(ROOT, "overlay_engine.py"), rs, "--root", R, "--out", out, "--jobs", str(a.jobs)] + (["--x264", "veryfast"] if a.quick else []))
     print("xong:", out)

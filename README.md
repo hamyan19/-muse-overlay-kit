@@ -54,9 +54,9 @@ python3 tools/build_chapter.py plan   --ch X --xlsx CHX_asset_plan.xlsx --vo chX
 #   → xem 1 ảnh work/chX/contact.jpg (mọi cảnh, lưới 320px, toạ độ nguồn 2560×1440)
 #   → điền work/chX/focus.json (5–7 điểm nhấn, mỗi điểm một kiểu, giây lấy từ wordts) + work/chX/pos.json (lớp phủ)
 python3 tools/build_chapter.py check  --ch X       # → xem 1 ảnh work/chX/check.jpg; lệch thì sửa json, chạy lại
-python3 tools/build_chapter.py render --ch X --quick   # CHẠY NỀN (~6 phút / 100s video); 1280×720 @15fps để An duyệt
+python3 tools/build_chapter.py render --ch X --quick   # CHẠY NỀN (~1 phút / 100s video trên cloud 2 nhân); 1280×720 @15fps để An duyệt
 ```
-Bản chính thức 1920×1080 @30fps: bỏ `--quick` khi An yêu cầu (~2 lần lâu hơn). Lỗi: xem `work/chX/build.log`.
+Bản chính thức 1920×1080 @30fps: bỏ `--quick` khi An yêu cầu (~6 phút / 100s trên cloud 2 nhân). Lỗi: xem `work/chX/build.log`.
 Rào sáng có sẵn: lớp phủ và tô sáng vật thể không được làm khung tối mò (xem `QUYET-DINH.md`).
 
 ## Tài liệu (mở ở đúng bước)
