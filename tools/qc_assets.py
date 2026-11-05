@@ -3,6 +3,7 @@
   python3 tools/qc_assets.py --root res [--manifest plan/approved_manifest.json] --out qc/ [--strict]
 Quét: res/stills/*.png|jpg, res/video/*.mp4|mov|webm, res/sfx/*.wav|mp3, (và res/vo/*.wav nếu có).
 Xuất: qc/QC-REPORT.md + qc/qc_report.json. Mã thoát 1 nếu có FAIL (hoặc WARN khi --strict).
+  --xlsx : thêm qc/asset_review.xlsx — mỗi ảnh một dòng có ẢNH THU NHỎ + kết quả kiểm + cột DUYỆT (thay check_assets.py cũ).
 ẢNH : đủ 2560x1440 16:9, đọc được/không cụt, độ nét (Laplacian), cháy/đen (clipping), viền đen/trắng, ám màu (ám vàng/xanh),
       mặt người nhìn rõ (cấm), chữ/logo trong hình (OCR nếu có tesseract), ảnh trùng nhau, lệch màu so với cả bộ.
 VIDEO: độ phân giải ≥1280x720 16:9, 6–10s, fps, khung đen, ĐỨNG HÌNH (AI video hay bị), nhấp nháy sáng, cắt cảnh ngầm bên trong clip,
@@ -15,6 +16,7 @@ import numpy as np, cv2
 ap = argparse.ArgumentParser()
 ap.add_argument("--root", default="."); ap.add_argument("--manifest", default=""); ap.add_argument("--out", default="qc")
 ap.add_argument("--strict", action="store_true"); ap.add_argument("--min-sharp", type=float, default=60.0)
+ap.add_argument("--xlsx", action="store_true", help="thêm asset_review.xlsx có ảnh thu nhỏ để anh duyệt")
 a = ap.parse_args(); os.makedirs(a.out, exist_ok=True)
 R = []   # (loại, file, mức, thông điệp)
 def add(kind, f, lvl, msg): R.append((kind, f, lvl, msg))
@@ -182,6 +184,29 @@ if a.manifest and os.path.exists(a.manifest):
     for it in json.load(open(a.manifest, encoding="utf-8"))["items"]:
         if it.get("approval", it.get("status")) in ("OK", "SỬA") and it.get("file") and not os.path.exists(os.path.join(a.root, it["file"])):
             add("THIẾU", it["file"], "FAIL", f"{it['id']} đã duyệt nhưng chưa giao file")
+
+# ---- bảng duyệt có ảnh thu nhỏ (tuỳ chọn)
+if a.xlsx and stills:
+    import openpyxl
+    from openpyxl.drawing.image import Image as XLImage
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.worksheet.datavalidation import DataValidation
+    wb = openpyxl.Workbook(); ws = wb.active; ws.title = "ANH"
+    ws.append(["FILE", "THU NHỎ", "KẾT QUẢ KIỂM", "DUYỆT", "GHI CHÚ CỦA ANH"])
+    for c in ws[1]: c.font = Font(bold=True, color="FFFFFF"); c.fill = PatternFill("solid", fgColor="1F3A2E")
+    for k, w in zip("ABCDE", [30, 46, 60, 9, 30]): ws.column_dimensions[k].width = w
+    td = os.path.join(a.out, "_thumbs"); os.makedirs(td, exist_ok=True)
+    for r, p in enumerate(stills, start=2):
+        n = os.path.relpath(p, a.root); im = cv2.imread(p)
+        msgs = [f"{l} {m}" for k, f, l, m in R if f == n]
+        ws.append([n, "", "\n".join(msgs) or "✅ đạt kiểm tự động", "CHỜ", ""])
+        if im is not None:
+            tp = os.path.join(td, os.path.basename(n) + ".png"); cv2.imwrite(tp, cv2.resize(im, (320, 180), interpolation=cv2.INTER_AREA))
+            xi = XLImage(tp); xi.width, xi.height = 320, 180; ws.add_image(xi, f"B{r}")
+        ws.row_dimensions[r].height = 140
+        for c in ws[r]: c.alignment = Alignment(wrap_text=True, vertical="top")
+    dv = DataValidation(type="list", formula1='"CHỜ,OK,SỬA,BỎ"'); ws.add_data_validation(dv); dv.add(f"D2:D{len(stills) + 1}")
+    ws.freeze_panes = "B2"; wb.save(os.path.join(a.out, "asset_review.xlsx"))
 
 # ---- báo cáo
 order = {"FAIL": 0, "WARN": 1, "INFO": 2}

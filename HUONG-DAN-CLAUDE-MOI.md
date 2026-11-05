@@ -30,11 +30,11 @@ Tuỳ chọn (không bắt buộc để dựng): `tesseract` (để `qc_assets.p
 `wordts.json`: nếu An chưa đưa thì **tự tạo**, không cần hỏi (căn theo script bằng PocketSphinx, không dùng Whisper, nên chữ trong file là chữ của script, không cần sửa tên riêng/số):
 ```bash
 pip install pocketsphinx
-ffmpeg -i chX.mp3 -ar 16000 -ac 1 chX16.wav
-python3 tools/align.py chX16.wav chX.txt wordts.json   # chX.txt = script chương (An đưa)
-python3 tools/check_wordts.py wordts.json CHX_asset_plan.xlsx --voice chX.mp3
+# build_chapter.py plan ... --script chX.txt   tự căn + tự kiểm. Chạy riêng nếu cần:
+python3 tools/wordts.py align chX.mp3 chX.txt wordts.json     # chX.txt = script chương (An đưa); tự đổi mp3 -> wav 16k
+python3 tools/wordts.py check wordts.json CHX_asset_plan.xlsx --voice chX.mp3
 ```
-Từ lạ (OOV) báo ra thì thêm vào dict `SUB` đầu `tools/align.py` bằng từ phát âm gần giống.
+Từ lạ (OOV) báo ra thì thêm vào dict `SUB` đầu `tools/wordts.py` bằng từ phát âm gần giống.
 
 ### 1.2 Chọn nhánh nào
 - `main` (đã merge 26/10) có đủ công cụ: `mapping_to_spec.py`, `apply_focus.py`, `apply_overlays.py`, camera nhiều mốc, `dissolve` riêng từng cảnh, `image_overlay`. Dựng từ `main`; nhánh `muse/retime-5-11s` chỉ là lịch sử. Nếu anh bảo dùng nhánh khác, theo anh.
@@ -53,7 +53,7 @@ Từ lạ (OOV) báo ra thì thêm vào dict `SUB` đầu `tools/align.py` bằn
 | # | Thứ | Định dạng / quy ước | Ghi chú |
 |---|---|---|---|
 | 1 | **Voice** | `res/vo/<chương>.mp3` hoặc `.wav` | Phải đúng voice đã dùng để lấy mốc thời gian. Đổi voice ⇒ mốc cũ vô dụng, Muse phải làm lại mapping. |
-| 2 | **`wordts.json`** | `res/vo/wordts.json`, mỗi dòng `[bắt đầu, kết thúc, "từ"]` (giây) | Mốc từng từ (An đưa, hoặc tự tạo bằng `tools/align.py`, xem 1.1). Dùng để canh hiệu ứng theo lời. |
+| 2 | **`wordts.json`** | `res/vo/wordts.json`, mỗi dòng `[bắt đầu, kết thúc, "từ"]` (giây) | Mốc từng từ (An đưa, hoặc tự tạo bằng `tools/wordts.py align`, xem 1.1). Dùng để canh hiệu ứng theo lời. |
 | 3 | **Ảnh** | `res/stills/`, PNG/JPG, **2560×1440** (16:9) | Tên đúng cột **TÊN FILE ĐÍCH** của bảng mapping (không dấu, không `#`, không khoảng trắng), hoặc dạng `CH2_S01.png` ứng với mã shot `CH2-S01` khi dùng `--name-from-id`. |
 | 4 | **Bảng mapping đã duyệt** | `asset_plan.xlsx` có sheet **SHOTS** (và sheet OVERLAYS nếu có) | Cột bắt buộc trong SHOTS: `ID`, `CẢNH`, `PHỦ THỜI GIAN`, `DÀI (s)`, `CHUYỂN ĐỘNG ĐỀ XUẤT`, `TÊN FILE ĐÍCH`, `DUYỆT`. Chỉ dòng `DUYỆT=OK` được dựng thật. |
 | 5 | **Font** | `res/fonts/` | Chép nguyên thư mục `fonts/` của repo sang `res/fonts/`. |
@@ -130,7 +130,7 @@ Xem ảnh khung ra: không lộ viền/dải đen, chi tiết đúng chỗ, ch�
 
 ### 3.5 Điểm nhấn theo lời (chỉ 5–7 điểm cho cả chương)
 Đây là phần anh phản hồi nhiều nhất, đọc kỹ `NHAT-KY-DUNG-CH2.md` mục 4.
-1. Đọc `wordts.json` quanh từng shot, ghi **giây của từ đang nói** tới chi tiết đó (hình đi theo lời, không theo thứ tự bảng).
+1. Tra giây bằng `python3 tools/build_chapter.py words --ch X "từ khoá"` (không lọc wordts bằng `python3 -c`), ghi **giây của từ đang nói** tới chi tiết đó (hình đi theo lời, không theo thứ tự bảng).
 2. Chọn **5–7 khoảnh khắc** cho cả chương, **mỗi điểm một kiểu khác nhau**: `zoom`, `circle`, `arrow`, `cut`. Có thể dùng `spot` (tô sáng vật thể, hạ sáng nền) tối đa 1–2 lần/chương cho vật thể then chốt; công cụ tự canh độ sáng (dim ≤0.45, khung sau phủ ≥95/255, ảnh gốc tối <80 thì tự đổi sang khoanh tròn). Đọc dòng `spot ... dim ...` in ra và xem khung kiểm trước khi render. Bản v2 dùng spotlight 22 lần bị anh chê lạm dụng.
 3. Lấy toạ độ trên ảnh 2560×1440: kẻ lưới 320px lên ảnh thu nhỏ rồi đọc bằng mắt. **Render khung kiểm ngay** (3.4): lần đầu từng đọc lệch cả 200px.
 4. Viết `focus.json` (mẫu: `examples/focus/CH2_focus.json`) rồi chạy:
@@ -214,7 +214,7 @@ Thêm cho người dựng: **cứ ≤ 3,5s phải có một sự kiện hình m�
 | Chọn style dựng | `STYLES.md` (mục B) |
 | Tham số từng hiệu ứng, preset | `EFFECTS.md` |
 | Nguyên tắc dựng, bảng lỗi → sửa | `PLAYBOOK.md` |
-| Mệnh đề lời đọc → hiệu ứng | `EDITORIAL-PATTERNS.md`, `python3 tools/word_times.py res/vo/wordts.json --auto` |
+| Mệnh đề lời đọc → hiệu ứng | `EDITORIAL-PATTERNS.md`, `python3 tools/wordts.py auto res/vo/wordts.json` |
 | Ví dụ dựng thật một chương | `NHAT-KY-DUNG-CH2.md`, `examples/CH2_spec_approved_v3.json`, `examples/focus/CH2_focus.json` |
 | Máy Windows, không có AI | `HUONG-DAN-WINDOWS.md` |
 | Kiểm nguyên liệu | `QC-ASSETS.md` |

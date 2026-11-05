@@ -1,0 +1,183 @@
+<title>Bảng mẫu Muse Overlay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Literata:opsz,wght@7..72,600;7..72,700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: bảng tra cứu — đầu trang ngắn, thanh lọc dính trên cùng, mỗi nhóm một lưới thẻ clip 16:9 */
+:root {
+  --bg: #eef0ec; --surface: #fbfbf8; --ink: #1d1c19; --muted: #5d5b54; --line: #d8d7cf;
+  --accent: #c9570c; --accent-ink: #ffffff; --ok: #2c7049; --ok-bg: #e2efe5; --no: #9a3b2e; --no-bg: #f5e3df; --idle-bg: #e7e6df;
+  --f-display: "Literata", Georgia, "Times New Roman", serif;
+  --f-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141412; --surface: #1d1c19; --ink: #ecebe4; --muted: #a4a198; --line: #34322d;
+  --accent: #f08a3c; --accent-ink: #1d1c19; --ok: #7fc79a; --ok-bg: #1f3327; --no: #e69a8c; --no-bg: #3a221d; --idle-bg: #2a2925; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141412; --surface: #1d1c19; --ink: #ecebe4; --muted: #a4a198; --line: #34322d;
+  --accent: #f08a3c; --accent-ink: #1d1c19; --ok: #7fc79a; --ok-bg: #1f3327; --no: #e69a8c; --no-bg: #3a221d; --idle-bg: #2a2925; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); margin: 0 }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+header.top { padding-block: 36px 18px }
+h1 { font: 700 clamp(28px, 4vw, 40px)/1.1 var(--f-display); margin: 0 0 8px; text-wrap: balance; letter-spacing: -0.01em }
+.lede { color: var(--muted); max-width: 68ch; margin: 0 }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 14px; font: 500 12.5px/1.4 var(--f-mono); color: var(--muted) }
+.facts b { color: var(--ink); font-weight: 500 }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line) }
+.bar .wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding-block: 10px }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 520px; min-width: 0 }
+.chip { font: 500 13px/1 var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  padding: 8px 12px; border-radius: 999px; cursor: pointer }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+.chip:focus-visible, .search:focus-visible, .copy:focus-visible, summary:focus-visible, .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.tools { display: flex; gap: 8px; align-items: center; flex: 0 1 auto; flex-wrap: wrap }
+.search { font: 14px var(--f-body); padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); width: 210px; max-width: 100% }
+.toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); cursor: pointer; user-select: none }
+.toggle input { accent-color: var(--accent) }
+
+main { padding-block: 8px 64px }
+section.grp { padding-top: 30px }
+.grp-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 14px }
+h2 { font: 600 22px/1.2 var(--f-display); margin: 0 }
+.grp-head .n { font: 500 12px var(--f-mono); color: var(--muted) }
+.grp-note { flex-basis: 100%; color: var(--muted); font-size: 14px; max-width: 75ch }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 18px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; min-width: 0 }
+.media { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: var(--idle-bg) }
+.media video { width: 100%; height: 100%; display: block; object-fit: cover }
+.pill { position: absolute; left: 8px; top: 8px; font: 600 11.5px/1 var(--f-body); padding: 5px 8px; border-radius: 999px; letter-spacing: .01em }
+.pill.ok { background: var(--ok-bg); color: var(--ok) }
+.pill.no { background: var(--no-bg); color: var(--no) }
+.pill.idle { background: var(--idle-bg); color: var(--muted) }
+.body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0 }
+.title { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; min-width: 0 }
+.title h3 { font: 600 16px/1.3 var(--f-body); margin: 0 }
+.type { font: 500 12px var(--f-mono); color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
+.use { margin: 0; color: var(--muted); font-size: 14px }
+.note { font: 500 11.5px var(--f-mono); color: var(--muted); letter-spacing: .02em; text-transform: uppercase }
+details { margin-top: auto; border-top: 1px solid var(--line); padding-top: 8px }
+summary { cursor: pointer; font-size: 13px; font-weight: 500; color: var(--ink); list-style: none; display: flex; justify-content: space-between; align-items: center }
+summary::-webkit-details-marker { display: none }
+summary::after { content: "+"; font: 500 15px var(--f-mono); color: var(--muted) }
+details[open] summary::after { content: "−" }
+.code { position: relative; margin-top: 8px }
+pre { margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font: 12px/1.5 var(--f-mono); overflow-x: auto; max-height: 260px; color: var(--ink) }
+.copy { position: absolute; right: 6px; top: 6px; font: 600 12px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 4px 9px; cursor: pointer }
+.empty { color: var(--muted); padding: 40px 0; text-align: center }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-block: 18px 40px }
+footer code { font: 12.5px var(--f-mono); color: var(--ink) }
+@media (max-width: 560px) { .search { width: 100% } .tools { flex-basis: 100% } }
+</style>
+
+<header class="top"><div class="wrap">
+  <h1>Bảng mẫu Muse Overlay</h1>
+  <p class="lede">Mọi kiểu dựng có trong <code>overlay_engine.py</code>, mỗi kiểu một clip mẫu trên ảnh style đã duyệt. Nhãn trên clip cho biết kiểu đó đã chốt dùng cho dự án hay chưa (theo <code>QUYET-DINH.md</code>). Mở “JSON mẫu” để chép đúng đoạn cần dán vào spec hoặc focus.json.</p>
+  <div class="facts" id="facts"></div>
+</div></header>
+
+<div class="bar"><div class="wrap">
+  <div class="chips" id="chips" role="group" aria-label="Lọc theo nhóm"></div>
+  <div class="tools">
+    <input class="search" id="q" type="search" placeholder="Tìm: mũi tên, zoom, tuyết…" aria-label="Tìm kiểu dựng">
+    <label class="toggle" for="only-ok"><input type="checkbox" id="only-ok"> Chỉ kiểu đã chốt</label>
+  </div>
+</div></div>
+
+<main class="wrap" id="main"></main>
+
+<footer><div class="wrap">
+  Toạ độ trong JSON là ảnh nguồn <b>2560×1440</b> (đọc trên lưới của contact.jpg); khung màn hình của thẻ, biểu đồ là 1280×720.
+  Tạo lại trang: <code>python3 tools/gallery.py</code> — thêm loại phần tử mới thì thêm một mục vào <code>DEMOS</code> trong file đó.
+</div></footer>
+
+<script>
+const DATA = /*DATA*/[];
+const GROUPS = /*GROUPS*/[];
+const NOTES = {
+  "Preset dựng": "Cả chương dùng một preset. Hai chương liền nhau phải khác nhau; luôn full 16:9.",
+  "Điểm nhấn theo lời": "Điền vào focus.json, mỗi beat có t lấy từ giây của từ đang nói (build_chapter.py words). 5–7 điểm mỗi chương, mỗi điểm một kiểu.",
+  "Lớp phủ đánh dấu": "Phần lớn bật qua sheet OVERLAYS + pos.json (apply_overlays.py). Phủ xong không được làm khung tối mò.",
+  "Thẻ chữ & số": "Chữ và số bật đúng lúc được nói. Số tự đếm (ticker) hiện không dùng.",
+  "Biểu đồ & sơ đồ": "Cho đoạn giải thích cơ chế, số liệu. Không có số thật thì ghi ILLUSTRATIVE.",
+  "Không khí": "Lớp nền chuyển động nhẹ quanh cả cảnh. Tuyết nằm trong sheet OVERLAYS.",
+  "Chuyển động trong ảnh": "Hiệu ứng fx gắn vào cảnh (scenes[].fx), làm ảnh tĩnh có chuyển động bên trong."
+};
+const state = { group: "Tất cả", q: "", onlyOk: false };
+try { const s = JSON.parse(localStorage.getItem("muse-gallery") || "{}"); Object.assign(state, s); } catch (e) {}
+const save = () => { try { localStorage.setItem("muse-gallery", JSON.stringify(state)); } catch (e) {} };
+const isOk = d => d.status.startsWith("đã chốt");
+const pillClass = d => isOk(d) ? "ok" : (d.status.startsWith("không") ? "no" : "idle");
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+document.getElementById("facts").innerHTML =
+  `<span><b>${DATA.length}</b> mẫu</span><span><b>${DATA.filter(isOk).length}</b> đã chốt dùng</span><span><b>${GROUPS.length}</b> nhóm</span><span>clip 640×360 · 15 fps</span>`;
+
+const chips = document.getElementById("chips");
+["Tất cả", ...GROUPS].forEach(g => {
+  const b = document.createElement("button"); b.className = "chip"; b.type = "button"; b.textContent = g; b.dataset.g = g;
+  b.addEventListener("click", () => { state.group = g; save(); render(); });
+  chips.appendChild(b);
+});
+const q = document.getElementById("q"), ok = document.getElementById("only-ok");
+q.value = state.q; ok.checked = state.onlyOk;
+q.addEventListener("input", () => { state.q = q.value; save(); render(); });
+ok.addEventListener("change", () => { state.onlyOk = ok.checked; save(); render(); });
+
+const io = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => {
+  const v = e.target; if (e.isIntersecting) { v.play().catch(() => {}); } else v.pause();
+}), { rootMargin: "120px" }) : null;
+
+function card(d) {
+  const el = document.createElement("article"); el.className = "card";
+  el.innerHTML = `
+    <div class="media">
+      <video muted loop playsinline preload="none" poster="clips/${d.id}.jpg" src="clips/${d.id}.mp4" aria-label="Clip mẫu: ${esc(d.name)}"></video>
+      <span class="pill ${pillClass(d)}">${esc(d.status)}</span>
+    </div>
+    <div class="body">
+      <div class="title"><h3>${esc(d.name)}</h3><span class="type" title="${esc(d.type)}">${esc(d.type)}</span></div>
+      <p class="use">${esc(d.use)}</p>
+      ${d.note ? `<span class="note">${esc(d.note)}</span>` : ""}
+      <details><summary>JSON mẫu</summary>
+        <div class="code"><pre>${esc(d.json)}</pre><button class="copy" type="button">Chép</button></div>
+      </details>
+    </div>`;
+  const v = el.querySelector("video");
+  if (reduce || !io) { el.querySelector(".media").addEventListener("click", () => v.paused ? v.play() : v.pause()); }
+  else io.observe(v);
+  const btn = el.querySelector(".copy"), pre = el.querySelector("pre");
+  btn.addEventListener("click", () => {
+    const done = t => { btn.textContent = t; setTimeout(() => btn.textContent = "Chép", 1400); };
+    const sel = () => { const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); done("Đã chọn — nhấn Ctrl+C"); };
+    if (navigator.clipboard) navigator.clipboard.writeText(d.json).then(() => done("Đã chép"), sel); else sel();
+  });
+  return el;
+}
+
+function render() {
+  chips.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.g === state.group)));
+  const main = document.getElementById("main"); main.innerHTML = "";
+  const term = state.q.trim().toLowerCase();
+  let shown = 0;
+  GROUPS.forEach(g => {
+    if (state.group !== "Tất cả" && state.group !== g) return;
+    const items = DATA.filter(d => d.group === g && (!state.onlyOk || isOk(d)) &&
+      (!term || (d.name + " " + d.type + " " + d.use).toLowerCase().includes(term)));
+    if (!items.length) return;
+    shown += items.length;
+    const s = document.createElement("section"); s.className = "grp";
+    s.innerHTML = `<div class="grp-head"><h2>${esc(g)}</h2><span class="n">${items.length} mẫu</span><p class="grp-note">${esc(NOTES[g] || "")}</p></div><div class="grid"></div>`;
+    const grid = s.querySelector(".grid"); items.forEach(d => grid.appendChild(card(d)));
+    main.appendChild(s);
+  });
+  if (!shown) main.innerHTML = `<p class="empty">Không có mẫu nào khớp “${esc(state.q)}”. Thử từ khác hoặc bỏ lọc “Chỉ kiểu đã chốt”.</p>`;
+}
+render();
+</script>

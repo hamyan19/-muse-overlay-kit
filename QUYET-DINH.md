@@ -17,6 +17,6 @@ Dự án: "Surviving Winter in a House of Mammoth Bones" (Hook, Ch1–Ch9, Endin
 | Nhạc nền | Không | An |
 | Duyệt | Cột DUYỆT giữ CHỜ; người dựng không tự ghi OK | luật cứng |
 | Dữ liệu chưa công bố | Voice, ảnh, script, bảng mapping: An gửi trong chat, không đưa lên repo công khai | An 26/10 |
-| `wordts.json` | Căn theo script bằng `tools/align.py` (PocketSphinx), không cần Whisper | 26/10 |
+| `wordts.json` | Căn theo script bằng `tools/wordts.py align` (PocketSphinx; `build_chapter.py plan --script` tự làm), không cần Whisper | 26/10 |
 
 "Mặc định tạm" = dựng theo đó, ghi rõ trong báo cáo, không dừng chờ.

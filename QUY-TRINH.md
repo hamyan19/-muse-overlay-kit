@@ -58,11 +58,11 @@ python3 tools/apply_approval.py plan/asset_plan.xlsx --out plan/      # -> plan/
 ```
 1. Muse làm đúng danh sách OK/SỬA: ảnh, footage có brief, âm thanh (tra `SOUND-LIBRARY.md` trước, thiếu mới tạo).
 2. **Một lần kiểm** theo `QC-ASSETS.md` (một lệnh máy + 5 mục nhìn bằng mắt). FAIL = 0 mới giao.
-3. Giao gói cho người dựng. Anh **không** phải duyệt ảnh lần nữa (muốn xem trước thì chạy `tools/check_assets.py`).
+3. Giao gói cho người dựng. Anh **không** phải duyệt ảnh lần nữa (muốn xem trước thì chạy `tools/qc_assets.py --xlsx`).
 
 ### Bước 7 — Dựng
 ```bash
-python3 tools/word_times.py res/vo/wordts.json --auto          # gợi ý hiệu ứng theo mệnh đề
+python3 tools/wordts.py auto res/vo/wordts.json               # gợi ý hiệu ứng theo mệnh đề
 python3 tools/lint_spec.py spec.json --root res                # kiểm spec, sửa hết ERR (vài giây)
 python3 overlay_engine.py spec.json --root res --out chuong.mp4
 ```

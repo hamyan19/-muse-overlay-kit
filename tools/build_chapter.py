@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """BUILD CHAPTER — một lệnh cho cả quy trình dựng một chương, chỉ dừng ở 2 chỗ cần mắt (đọc toạ độ, xem khung kiểm).
 
-  # B1 plan: spec + TẤM GHÉP ảnh có lưới (đọc toạ độ cả chương trong 1 lần xem) + khung focus.json / pos.json để điền
-  python3 tools/build_chapter.py plan   --ch 3 --xlsx plan/CH3_asset_plan.xlsx --vo ch3.mp3 --stills anh_ch3/ --preset documentary
+  # B1 plan: (tự căn + kiểm wordts) + spec + TẤM GHÉP ảnh có lưới + khung focus.json / pos.json để điền
+  python3 tools/build_chapter.py plan   --ch 3 --xlsx plan/CH3_asset_plan.xlsx --vo ch3.mp3 --stills anh_ch3/ --preset documentary \
+      --wordts wordts.json            # hoặc --script ch3.txt (chưa có wordts: tự căn bằng PocketSphinx, tự đổi mp3 -> wav)
+  # tra giây của từ để điền t trong focus.json (không cần python -c):
+  python3 tools/build_chapter.py words  --ch 3 "fire" "last words"
   # (điền work/ch3/focus.json và work/ch3/pos.json bằng toạ độ đọc trên work/ch3/contact.jpg)
   # B2 check: áp điểm nhấn + lớp phủ + lint + 1 TẤM khung kiểm đúng lúc từng điểm nhấn/lớp phủ
   python3 tools/build_chapter.py check  --ch 3
-  # B3 render: --quick = 1280x720 @15fps (nhanh ~2 lần, để duyệt) | mặc định 1920x1080 @30fps (bản chính). Nên chạy nền.
+  # B3 render: --quick = 1280x720 @15fps (để duyệt) | mặc định 1920x1080 @30fps (bản chính). Nên chạy nền.
+  #   sửa focus.json / pos.json sau khi check thì render TỰ áp lại (không render nhầm bản cũ).
   python3 tools/build_chapter.py render --ch 3 --quick
 
 Thư mục làm việc: work/chX/ (res/stills, res/vo, res/fonts, spec*.json, focus.json, pos.json, contact.jpg, check.jpg, chX_*.mp4).
@@ -17,7 +21,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 T = lambda n: os.path.join(ROOT, "tools", n)
-ap = argparse.ArgumentParser(); ap.add_argument("stage", choices=["plan", "check", "render"])
+ap = argparse.ArgumentParser(); ap.add_argument("stage", choices=["plan", "words", "check", "render"])
+ap.add_argument("phrases", nargs="*", help="(words) cụm từ cần tra giây")
+ap.add_argument("--wordts"); ap.add_argument("--script")
 ap.add_argument("--ch", required=True); ap.add_argument("--xlsx"); ap.add_argument("--vo"); ap.add_argument("--stills")
 ap.add_argument("--preset"); ap.add_argument("--work", default="work"); ap.add_argument("--quick", action="store_true")
 ap.add_argument("--jobs", type=int, default=os.cpu_count() or 4)
@@ -53,6 +59,28 @@ def sheet(items, out, tw=640, cols=3, grid=True):
                 d.text((x + 2, y + 26 + gy * k + 2), str(gy), fill=(255, 255, 0), font=f2)
     S.save(out, quality=82); return out
 
+def apply_all():
+    """spec.json + focus.json + pos.json -> spec_full.json. Trả (spec cuối, các mốc cần xem, focus, dòng bật, dòng bỏ qua)."""
+    xlsx = json.load(open(CFG))["xlsx"]; cur = os.path.join(W, "spec.json")
+    F = {k: v for k, v in json.load(open(os.path.join(W, "focus.json"), encoding="utf-8")).items() if not k.startswith("_")}
+    times = []
+    if F:
+        json.dump(F, open(os.path.join(W, "_focus.json"), "w", encoding="utf-8"), ensure_ascii=False)
+        out = os.path.join(W, "spec_focus.json"); run([T("apply_focus.py"), cur, os.path.join(W, "_focus.json"), "--out", out, "--root", R]); cur = out
+        times += [(f"{sid} {b['kind']}", round((b["t"][0] + b["t"][1]) / 2, 2)) for sid, bs in F.items() for b in bs]
+    P = json.load(open(os.path.join(W, "pos.json"), encoding="utf-8"))
+    out = os.path.join(W, "spec_full.json"); msg = run([T("apply_overlays.py"), cur, xlsx, "--pos", os.path.join(W, "pos.json"), "--out", out, "--root", R]); cur = out
+    on = [l for l in msg.splitlines() if "bật" in l]; off = [l.strip() for l in msg.splitlines() if "bỏ qua" in l]
+    times += [(f"{k} {v.get('kind')}", round(v["t"][0] + 1.0, 2)) for k, v in P.items() if not any(k in o for o in off)]
+    return cur, times, F, on, off
+
+def stale():
+    """spec_full.json cũ hơn spec/focus/pos -> phải áp lại trước khi render."""
+    full = os.path.join(W, "spec_full.json")
+    if not os.path.exists(full): return True
+    src = [os.path.join(W, n) for n in ("spec.json", "focus.json", "pos.json")]
+    return any(os.path.exists(p) and os.path.getmtime(p) > os.path.getmtime(full) for p in src)
+
 if a.stage == "plan":
     for x in ("xlsx", "vo", "stills"):
         if not getattr(a, x): sys.exit(f"plan cần --{x}")
@@ -60,6 +88,15 @@ if a.stage == "plan":
     LOG = open(os.path.join(W, "build.log"), "a")
     shutil.copytree(os.path.join(ROOT, "fonts"), os.path.join(R, "fonts"), dirs_exist_ok=True)
     vo = os.path.join(R, "vo", os.path.basename(a.vo)); shutil.copy(a.vo, vo)
+    WT = os.path.join(W, "wordts.json"); wmsg = "wordts: không có (words/điểm nhấn phải tự tra)"
+    if a.wordts: shutil.copy(a.wordts, WT)
+    elif a.script: run([T("wordts.py"), "align", vo, a.script, WT])
+    if os.path.exists(WT):
+        p = subprocess.run([sys.executable, T("wordts.py"), "check", WT, a.xlsx, "--voice", vo], capture_output=True, text=True)
+        LOG.write(p.stdout + p.stderr)
+        ne = p.stdout.count("ERR "); nw = p.stdout.count("WARN")
+        wmsg = f"wordts: {ne} ERR, {nw} WARN" + (" (xem build.log)" if ne or nw else "")
+        for l in [l for l in p.stdout.splitlines() if l.startswith("ERR")][:5]: print("  " + l)
     small = []
     for p in sorted(glob.glob(os.path.join(a.stills, "*.png")) + glob.glob(os.path.join(a.stills, "*.jpg"))):
         name = os.path.splitext(os.path.basename(p))[0] + ".png"
@@ -81,21 +118,18 @@ if a.stage == "plan":
     json.dump({"xlsx": os.path.abspath(a.xlsx)}, open(CFG, "w"))
     items = [(f"{s['id']}  {s['start']:.1f}s", os.path.join(R, s["image"])) for s in S["scenes"] if os.path.exists(os.path.join(R, s["image"]))]
     sheet(items, os.path.join(W, "contact.jpg"))
+    print(wmsg)
     print(f"{tag}: {len(S['scenes'])} cảnh, {dur:.1f}s | ảnh nhỏ phải phóng lên 2560x1440 (zoom sâu sẽ mờ, nên upscale 4K): {len(small)} | THIẾU ẢNH: {miss or 'không'}")
     print(f"Xem 1 lần {W}/contact.jpg (lưới 320px) → điền {W}/focus.json + {W}/pos.json → chạy: build_chapter.py check --ch {a.ch}")
 
+elif a.stage == "words":
+    WT = os.path.join(W, "wordts.json")
+    if not os.path.exists(WT): sys.exit("chưa có work/.../wordts.json: chạy plan với --wordts hoặc --script")
+    if not a.phrases: sys.exit('cần cụm từ, vd: build_chapter.py words --ch 3 "fire" "last words"')
+    print(run([T("wordts.py"), "find", WT] + a.phrases).rstrip())
+
 elif a.stage == "check":
-    xlsx = json.load(open(CFG))["xlsx"]; spec = os.path.join(W, "spec.json"); cur = spec
-    F = {k: v for k, v in json.load(open(os.path.join(W, "focus.json"), encoding="utf-8")).items() if not k.startswith("_")}
-    times = []
-    if F:
-        json.dump(F, open(os.path.join(W, "_focus.json"), "w", encoding="utf-8"), ensure_ascii=False)
-        out = os.path.join(W, "spec_focus.json"); run([T("apply_focus.py"), cur, os.path.join(W, "_focus.json"), "--out", out, "--root", R]); cur = out
-        times += [(f"{sid} {b['kind']}", round((b["t"][0] + b["t"][1]) / 2, 2)) for sid, bs in F.items() for b in bs]
-    P = json.load(open(os.path.join(W, "pos.json"), encoding="utf-8"))
-    out = os.path.join(W, "spec_full.json"); msg = run([T("apply_overlays.py"), cur, xlsx, "--pos", os.path.join(W, "pos.json"), "--out", out, "--root", R]); cur = out
-    on = [l for l in msg.splitlines() if "bật" in l]; off = [l.strip() for l in msg.splitlines() if "bỏ qua" in l]
-    times += [(f"{k} {v.get('kind')}", round(v["t"][0] + 1.0, 2)) for k, v in P.items() if not any(k in o for o in off)]
+    cur, times, F, on, off = apply_all()
     lint = subprocess.run([sys.executable, T("lint_spec.py"), cur, "--root", R, "--max-gap", "12"], capture_output=True, text=True).stdout
     errs = [l for l in lint.splitlines() if l.startswith("ERR")]; warns = [l for l in lint.splitlines() if l.startswith("WARN")]
     LOG.write(lint)
@@ -109,7 +143,9 @@ elif a.stage == "check":
     if times: print(f"Xem 1 lần {W}/check.jpg → ổn thì: build_chapter.py render --ch {a.ch} --quick")
 
 else:
-    cur = next(p for p in (os.path.join(W, "spec_full.json"), os.path.join(W, "spec_focus.json"), os.path.join(W, "spec.json")) if os.path.exists(p))
+    if stale():
+        print("focus.json / pos.json đổi sau lần check cuối → áp lại trước khi render"); apply_all()
+    cur = os.path.join(W, "spec_full.json")
     S = json.load(open(cur, encoding="utf-8"))
     S["meta"].update({"width": 1280, "height": 720, "fps": 15} if a.quick else {"width": 1920, "height": 1080, "fps": 30})
     rs = os.path.join(W, "spec_render.json"); json.dump(S, open(rs, "w", encoding="utf-8"), ensure_ascii=False)

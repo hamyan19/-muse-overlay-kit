@@ -6,3 +6,6 @@ plan/
 _thumb_*.png
 analysis/
 qc/
+
+# trang mẫu sinh bằng tools/gallery.py (clip ~8MB, tạo lại khi cần)
+gallery/
