@@ -133,7 +133,7 @@ DEMOS = [
       el=[{"type": "counter_down", "t_in": 0.2, "t_out": 3.9, "run": [0.3, 2.4], "hit": 2.4, "from": 30, "to": 1, "power": 2.0,
            "labels": {"count": "NIGHTS", "end": "OF FUEL LEFT", "sub": "30 NIGHTS"}}], status=CHOT),
     D("day_ticker", G_TEXT, "Đếm ngày", "DAY 1…11 bật lần lượt.", "hunt",
-      el=[{"type": "day_ticker", "run": [0.3, 2.6], "from": 1, "to": 11, "x_start": 450, "step": 38, "y": 640}], status=KHONG),
+      el=[{"type": "day_ticker", "run": [0.3, 2.6], "from": 1, "to": 11, "x_start": 450, "step": 38, "y": 640}]),
     # ---------------- biểu đồ & sơ đồ
     D("timeline", G_DATA, "Trục thời gian", "Trục vẽ dần, mốc bật theo lời.", "hunt",
       el=[{"type": "timeline", "t_in": 0.2, "t_out": 3.9, "draw": [0.2, 1.3], "x0": 160, "x1": 1120, "y": 600, "events": [
