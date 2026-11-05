@@ -12,6 +12,8 @@ pos.json: {"<ID overlay>": {"scene":"CH2-S06", "t":[vào,ra], ...toạ độ the
   ĐƯỜNG ĐỨT      {"points":[[x,y],...]}
   LỚP PHỦ/CHỒNG  {"at":[x,y], "width":600, "file":"stills/CH2_L01.png"}   ảnh nét đứt L01 (cần ảnh)
   HIỆU ỨNG tuyết tự bật, không cần toạ độ
+  CON SỐ → số chạy {"to":15000, "from":0, "suffix":" YEARS", "label":"AGO", "pos":[640,200]}   (pos khung 1280×720, mặc định giữa trên)
+  CON SỐ có "đếm lùi" → {"from":30, "to":1, "count":"NIGHTS", "end":"OF FUEL LEFT"}            (luôn giữa khung)
 Mục toạ độ còn null thì BỎ QUA (in danh sách). Thời gian mặc định: vào = cột GIÂY, ra = vào + 3s (đường đứt 4s, ảnh 3s).
 
 RÀO SÁNG (phủ xong không được tối mò): ảnh phủ multiply chỉ phủ nét tối, strength <= 0.85, độ phủ TB <= 10% khung (engine tự hạ);
@@ -43,13 +45,18 @@ def kind_of(r):
     if "NHÃN" in L: return "tag"
     if "LỚP PHỦ" in L or "LỚP CHỒNG" in L: return "image"
     if "HIỆU ỨNG" in L and "tuyết" in eff: return "snow"
+    if "SỐ" in L: return "countdown" if "đếm lùi" in eff or "counter_down" in eff else "ticker"
     return "todo"
 
 def label_of(r):
     m = re.search(r"'([^']+)'", str(r.get("GHI CHÚ NỘI DUNG") or ""))
     return m.group(1) if m else None
 
-def dur_of(k): return {"route": 4.0, "image": 3.0, "snow": 12.0}.get(k, 3.0)
+def dur_of(k): return {"route": 4.0, "image": 3.0, "snow": 12.0, "ticker": 3.5, "countdown": 4.0}.get(k, 3.0)
+
+def num_of(r):
+    w = re.sub(r"[^\d]", "", str(r.get("TỪ KÍCH HOẠT") or ""))
+    return int(w) if w else None
 
 if a.template:
     T = {}
@@ -60,6 +67,8 @@ if a.template:
         elif k == "tag": d.update({"at": None, "text": label_of(r)})
         elif k == "route": d.update({"points": None})
         elif k == "image": d.update({"at": None, "width": 600, "file": None})
+        elif k == "ticker": d.update({"to": num_of(r), "from": 0, "suffix": "", "label": label_of(r), "pos": [640, 200]})
+        elif k == "countdown": d.update({"from": num_of(r), "to": 1, "count": None, "end": label_of(r)})
         T[r["ID"]] = d
     json.dump(T, open(a.template, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"{a.template}: {len(T)} mục — điền toạ độ ảnh nguồn rồi chạy lại với --pos"); sys.exit(0)
@@ -84,6 +93,18 @@ for r in rows:
     k = p.get("kind") or kind_of(r); sc = p.get("scene") or scene_of(r); ti, to = p["t"]
     if k == "snow":
         el = {"type": "particles", "kind": "snow", "t_in": ti, "t_out": to, "n": 70, "alpha": 0.4, "seed": 7}
+    elif k in ("ticker", "countdown"):
+        if p.get("to" if k == "ticker" else "from") is None: skipped.append((i, "thiếu số (to/from)")); continue
+        if overlap(ti, to) >= 2: skipped.append((i, "đã có 2 lớp phủ cùng lúc")); continue
+        run = [ti, round(ti + min(1.8, (to - ti) * 0.55), 2)]
+        if k == "ticker":
+            el = {"type": "ticker", "t_in": ti, "t_out": to, "run": run, "from": p.get("from", 0), "to": p["to"], "power": 2.0,
+                  "prefix": p.get("prefix", ""), "suffix": p.get("suffix", ""), "pos": p.get("pos", [640, 200]), "size": p.get("size", 100),
+                  "ref_w": 1280}
+            if p.get("label"): el["label"] = p["label"]
+        else:
+            el = {"type": "counter_down", "t_in": ti, "t_out": to, "run": run, "hit": run[1], "from": p["from"], "to": p.get("to", 1),
+                  "power": 2.0, "labels": {"count": p.get("count") or "", "end": p.get("end") or "", "sub": p.get("sub")}}
     else:
         need = {"arrow": ("from", "to"), "tag": ("at",), "route": ("points",), "image": ("at", "file")}.get(k)
         if need is None or any(not p.get(x) for x in need): skipped.append((i, f"thiếu toạ độ {need}")); continue

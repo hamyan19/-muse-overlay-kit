@@ -13,7 +13,8 @@ Dự án: "Surviving Winter in a House of Mammoth Bones" (Hook, Ch1–Ch9, Endin
 | Tô sáng vật thể (`spot`) | Được dùng, tối đa 2/chương, có rào sáng (dim ≤0.45, khung sau phủ ≥95/255) | An 26/10 |
 | Lớp phủ OVERLAYS | BẬT (mũi tên, nhãn, nét đứt, ảnh L01, tuyết) qua `apply_overlays.py`; phủ xong không được tối mò | An 26/10 |
 | Mũi tên OVERLAYS | To hơn mặc định ~40%, cam đậm, vẽ dần | ghi chú trong bảng mapping |
-| Số tự đếm (ticker) | Không dùng | mặc định tạm (ít hiệu ứng) |
+| Số chạy (`ticker`) + đếm lùi (`counter_down`) | **DÙNG**: dòng CON SỐ trong sheet OVERLAYS → điền `pos.json` (số chạy: `to`, `suffix`, `label`; đếm lùi: ghi "đếm lùi" ở HIỆU ỨNG ĐỀ XUẤT, điền `from`, `count`, `end`) | An 05/11 |
+| Bỏ hẳn | `highlight_box` (khung góc), `anchored_circle` (vòng tròn mốc), `typed_card` (thẻ gõ chữ), `question_card` (thẻ dấu hỏi), `strike_cards` (gạch bỏ đáp án). Không gợi ý, không dùng; `lint_spec` cảnh báo nếu còn | An 05/11 |
 | Nhạc nền | Không | An |
 | Duyệt | Cột DUYỆT giữ CHỜ; người dựng không tự ghi OK | luật cứng |
 | Dữ liệu chưa công bố | Voice, ảnh, script, bảng mapping: An gửi trong chat, không đưa lên repo công khai | An 26/10 |

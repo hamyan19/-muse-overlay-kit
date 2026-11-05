@@ -4,21 +4,21 @@ Toạ độ màn hình 1280x720. Toạ độ "src" = toạ độ trên ảnh ngu
 
 | type | Dùng khi | Tham số chính |
 |---|---|---|
-| `typed_card` | Hồ sơ/ngày giờ gõ từng chữ (mở đầu, "FILE") | `box`, `lines[{text,pos,size,font,color,start,cps}]`, `cursor_until` |
+| `typed_card` ⛔ | **Bỏ (An 05/11).** Hồ sơ/ngày giờ gõ từng chữ (mở đầu, "FILE") | `box`, `lines[{text,pos,size,font,color,start,cps}]`, `cursor_until` |
 | `badge_pop` | Con số/nhãn đập vào (3,000 m) | `text,pos,size,anchor,sub,sub_pos` |
 | `gauge` | Thang đo rơi/leo (độ cao, nhiệt độ) | `x,y0,y1,max,ticks,drop[t0,t1],power` |
-| `anchored_circle` | Khoanh một điểm trên ảnh, bám camera | `scene,src,r,draw[t0,t1],label{t_in,text}` |
-| `counter_down` | Đếm lùi 92→1 kiểu "chỉ một người", số cuối nổ vàng + chớp | `run,hit,from,to,power,labels{count,end,sub}` |
-| `ticker` | Số chạy bất kỳ (tiền, năm, mét) | `run,from,to,power,prefix,suffix,pos,size,label` |
+| `anchored_circle` ⛔ | **Bỏ (An 05/11).** Khoanh một điểm trên ảnh, bám camera | `scene,src,r,draw[t0,t1],label{t_in,text}` |
+| `counter_down` ✅ | **Dùng** (OVERLAYS, "đếm lùi"). Đếm lùi 92→1 kiểu "chỉ một người", số cuối nổ vàng + chớp | `run,hit,from,to,power,labels{count,end,sub}` |
+| `ticker` ✅ | **Dùng** (OVERLAYS CON SỐ). Số chạy bất kỳ (tiền, năm, mét) | `run,from,to,power,prefix,suffix,pos,size,label` |
 | `label` | Tiêu đề nhỏ + gạch chân | `text,pos,size,underline[x0,x1,y]` |
-| `strike_cards` | Gạch bỏ các đáp án ("không phải X, không phải Y") | `cards[{text,y,t_in,t_strike}]` |
-| `question_card` | Thẻ dấu "?" nhấp nháy | `box,glyph,size,pulse_hz` |
+| `strike_cards` ⛔ | **Bỏ (An 05/11).** Gạch bỏ các đáp án ("không phải X, không phải Y") | `cards[{text,y,t_in,t_strike}]` |
+| `question_card` ⛔ | **Bỏ (An 05/11).** Thẻ dấu "?" nhấp nháy | `box,glyph,size,pulse_hz` |
 | `day_ticker` | Đếm ngày DAY 1…11 | `run,from,to,x_start,step,y` |
 | `timeline` | Trục thời gian vẽ dần + mốc bật theo lời | `x0,x1,y,draw,events[{t,pos,label,sub}]` |
 | `spotlight` | Hạ sáng khung, chừa vòng sáng dẫn mắt (bám ảnh). **Rào sáng:** dim ≤0.45, sáng TB sau phủ ≥95/255, ảnh gốc <80 thì đừng dùng; ≤2 lần/chương (qua `apply_focus.py` kind `spot` tự canh) | `scene,src` hoặc `pos`, `r,dim,from_mult,soft` |
 | `image_overlay` | Ảnh phủ (L01 nét đứt đồ hiện đại) đặt lên vật thể, hiện dần rồi tan; multiply chỉ phủ nét tối. **Rào sáng:** strength ≤0.85, độ phủ TB ≤10% (engine tự hạ) | `file,scene,at,width,blend,strength,max_cover` (dùng qua `tools/apply_overlays.py`) |
 | `panel_reveal` | **Lộ dần từng ô**: ảnh chia 3–4 ô, mỗi ý mở một ô, hết ý là hình hoàn chỉnh; ô chưa mở phủ giấy sáng (không tối) | `scene, layout 3col/4col/3row/2x2 hoặc panels, reveal[t...], order, ghost, fade, line` |
-| `highlight_box` | Khung góc mở ra quanh vật thể + nhãn | `scene,src_box,label,color,width` |
+| `highlight_box` ⛔ | **Bỏ (An 05/11).** Khung góc mở ra quanh vật thể + nhãn | `scene,src_box,label,color,width` |
 | `stamp` | Dấu đóng "RECONSTRUCTION/CLASSIFIED" đập xuống + rung (nền tối mờ cho dễ đọc) | `text,pos,size,angle,color,opacity,fill` |
 | `lower_third` | Thanh tên/chú thích trượt vào | `title,sub,y` |
 | `flash` | Chớp trắng nhấn twist/cú đập | `dur,alpha,color` |
@@ -66,7 +66,7 @@ Preset ở trên chỉ đổi màu/khung. **Phong cách dựng thật sự nằm
 |---|---|---|
 | **Sổ tay điều tra** | `marker` circle/arrow khoanh chi tiết, `clipping` news, `photo_pin` ảnh phụ, `stamp` | Bí ẩn, điều tra, "chuyện gì thật sự đã xảy ra" |
 | **Album kỷ niệm** | `photo_pin` có caption ngày tháng, `clipping` note, `lower_third` tên người; preset `memory` | Hồi ức, gia đình, đoạn kết cảm động (55+) |
-| **Truyện tranh** | `speech_box` lời dẫn, `badge_pop`, `strike_cards`, `marker` arrow; preset `comic` | Ảnh hoạt hình, nhịp nhanh, giải thích cơ chế |
+| **Truyện tranh** | `speech_box` lời dẫn, `badge_pop`, `marker` arrow; preset `comic` | Ảnh hoạt hình, nhịp nhanh, giải thích cơ chế |
 | **Bản đồ / giải thích** | `route`, `marker` arrow + label, `ticker` số, `timeline`, `clipping` note quy tắc; preset `documentary` | Hành trình, địa lý, số liệu, "làm sao mà…" |
 
 **Luật:** mỗi chương chọn MỘT bộ chính (có thể mượn 1 phần tử của bộ khác); hai chương liền nhau không dùng cùng bộ. Mỗi cảnh tối đa 2 lớp chồng cùng lúc + phụ đề.
@@ -111,6 +111,6 @@ Chưa có footage? `python3 tools/make_fog_loop.py fog out.mp4` sinh clip sươn
 | Bão / cửa sổ máy bay | `rain` + `glow` màu xanh lạnh `flicker≥1` tại tia sét + `flash`/`shake` đúng khung sấm |
 | Rừng đêm / hang tối | `particles embers`/`dust` xanh + `glow` ma quái `pulse_hz≈0.3` + `sway` nhẹ |
 | Phòng / chân dung cũ | `glow` đèn `flicker 0.3` + `particles dust` + preset `newsreel` |
-| Bản đồ / sơ đồ | `parallax` rất nhẹ + `highlight_box`, `timeline` |
+| Bản đồ / sơ đồ | `parallax` rất nhẹ + `tag`, `timeline` |
 Chuyển động trong khung nên NHẸ (biên độ nhỏ, tốc độ chậm): mục tiêu là người xem "cảm" thấy sống động chứ không nhận ra hiệu ứng. Chạy `tools/analyze_video.py` để chắc chắn nền vẫn mượt.
 Ví dụ: `examples/demo_motion.json`.

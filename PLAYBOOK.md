@@ -26,8 +26,8 @@
 | Nền rung nhẹ khi zoom | crop/resize làm tròn pixel | dùng engine (render 2x + Lanczos) |
 | Số đếm "nhảy" | tuyến tính | `power` 2.0–2.4 + pop khi chạm đích |
 | Chuyển cảnh "cắt lời" | dissolve đè lên chữ đang đọc | đặt trong khoảng lặng (`wordts.py gaps`) |
-| Thẻ che chủ thể | đặt toạ độ tay | né vùng chủ thể; dùng `anchored_circle`/`highlight_box` cho thứ bám ảnh |
-| Cảnh "chết" 4–7s | chỉ có zoom | thêm `label`, `spotlight`, `timeline`, `strike_cards`... mỗi ≤3.5s |
+| Thẻ che chủ thể | đặt toạ độ tay | né vùng chủ thể; dùng `marker` / `tag` (có `scene`) cho thứ bám ảnh |
+| Cảnh "chết" 4–7s | chỉ có zoom | thêm `label`, `spotlight`, `timeline`, `ticker`... mỗi ≤3.5s |
 | Màu mỗi cảnh lệch nhau | không có hậu kỳ chung | `warm`, `vignette`, `grain` global |
 | Video quá nặng | CRF thấp | `--crf 24` |
 | Hình rung/đứng mà không rõ chỗ | — | `tools/analyze_video.py chuong.mp4 --out qa/` |

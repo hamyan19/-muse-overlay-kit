@@ -20,8 +20,8 @@ Thêm style hình mới: chép `styles/_MAU/STYLE.md`, điền đủ, có 2–3 
 | **Chữ theo lời** | `kinetic` | `kinetic`, `badge_pop`, `ticker` | 2–4s · cắt thẳng / flash | nhấn theo nhịp, whoosh | Số liệu, câu chốt, Hook | từ khoá bật đúng lúc nói |
 | **Sách truyện** | `storybook` | nhãn serif góc như chú thích tranh | 6–10s, đẩy rất chậm · dissolve 0.8s | piano/đàn dây, nền thưa | Ảnh minh hoạ, kể chậm | vân giấy, màu dịu, rất ít thẻ |
 | **Album kỷ niệm** | `memory` | `photo_pin` có ngày tháng, `clipping` note, `lower_third` tên | 6–10s, có `hold` · dissolve dài | nhạc hoài niệm, tiếng phòng/đồng hồ | Hồi ức, gia đình, kết cảm động (55+) | ảnh in viền kem, màu bạc; không badge |
-| **Truyện tranh** | `comic` | `speech_box`, `badge_pop`, `strike_cards`, `marker` arrow | 3–5s, pan theo hướng đọc · cắt thẳng | nhấn rõ, sfx hoạt hình nhẹ | Nhịp nhanh/vui, giải thích cơ chế | khung mực, chữ IN HOA đậm |
-| **Bản đồ / giải thích** | `documentary` | `route`, `timeline`, `ticker`, `highlight_box` | 4–7s · dissolve 0.3s | nền trung tính, ít nhạc | Hành trình, địa lý, "làm sao mà…" | màu trung tính, đồ hoạ là người kể |
+| **Truyện tranh** | `comic` | `speech_box`, `badge_pop`, `marker` arrow | 3–5s, pan theo hướng đọc · cắt thẳng | nhấn rõ, sfx hoạt hình nhẹ | Nhịp nhanh/vui, giải thích cơ chế | khung mực, chữ IN HOA đậm |
+| **Bản đồ / giải thích** | `documentary` | `route`, `timeline`, `ticker`, `tag` | 4–7s · dissolve 0.3s | nền trung tính, ít nhạc | Hành trình, địa lý, "làm sao mà…" | màu trung tính, đồ hoạ là người kể |
 
 Một video thường dùng 2–4 style dựng (ví dụ: Hook *Chữ theo lời* → kể chuyện *Điện ảnh* → giải thích *Bản đồ* → kết *Album kỷ niệm*).
 Trong **một** chương chỉ dùng một style dựng (được mượn 1 phần tử của style khác).

@@ -73,10 +73,12 @@ DEMOS = [
       el=[{"type": "image_overlay", "t_in": 0.4, "t_out": 3.2, "scene": "A", "file": "stills/G_L01.png", "at": [2180, 1130], "width": 560,
            "strength": 0.8}], status=CHOT, note="sheet OVERLAYS"),
     D("highlight_box", G_MARK, "Khung góc", "Khung góc mở ra quanh vật thể + nhãn.", "hide",
-      el=[{"type": "highlight_box", "t_in": 0.4, "t_out": 3.6, "scene": "A", "src_box": [1780, 820, 2380, 1180], "label": "STONE TOOLS"}]),
+      el=[{"type": "highlight_box", "t_in": 0.4, "t_out": 3.6, "scene": "A", "src_box": [1780, 820, 2380, 1180], "label": "STONE TOOLS"}], status=KHONG),
+
     D("anchored_circle", G_MARK, "Vòng tròn mốc", "Khoanh một điểm + nhãn, bám camera (kiểu điều tra).", "camp",
       el=[{"type": "anchored_circle", "t_in": 0.3, "t_out": 3.8, "scene": "A", "src": [1240, 1080], "r": 260, "draw": [0.35, 1.1],
-           "label": {"t_in": 1.0, "text": "THE ONLY HEAT SOURCE", "half_width": 230}}]),
+           "label": {"t_in": 1.0, "text": "THE ONLY HEAT SOURCE", "half_width": 230}}], status=KHONG),
+
     D("spotlight", G_MARK, "Đèn rọi", "Phần tử gốc của 'tô sáng vật thể' (dùng qua focus kind spot để có rào sáng).", "camp",
       el=[{"type": "spotlight", "t_in": 0.4, "t_out": 3.6, "scene": "A", "src": [680, 640], "r": 300, "from_mult": 1.7, "dim": 0.35, "soft": 110}]),
     D("photo_pin", G_MARK, "Ảnh polaroid", "Ảnh phụ (hoặc cận từ ảnh nguồn) dán băng keo, thả xuống.", "hunt",
@@ -100,7 +102,8 @@ DEMOS = [
     D("typed_card", G_TEXT, "Thẻ gõ chữ", "Hồ sơ / ngày giờ gõ từng chữ.", "camp",
       el=[{"type": "typed_card", "t_in": 0.1, "t_out": 3.8, "box": [36, 32, 520, 152], "cursor_until": 2.4, "lines": [
           {"text": "MAMMOTH-BONE HUT", "pos": [60, 70], "size": 36, "font": "mono", "color": "cream", "start": 0.25, "cps": 16},
-          {"text": "UKRAINE · 15,000 YEARS AGO", "pos": [60, 118], "size": 22, "font": "mono", "color": "yellow", "start": 1.3, "cps": 22}]}]),
+          {"text": "UKRAINE · 15,000 YEARS AGO", "pos": [60, 118], "size": 22, "font": "mono", "color": "yellow", "start": 1.3, "cps": 22}]}], status=KHONG),
+
     D("badge_pop", G_TEXT, "Số đập vào", "Con số / nhãn đập vào đúng lúc nói.", "hunt",
       el=[{"type": "badge_pop", "t_in": 0.6, "t_out": 3.8, "text": "−40 °C", "pos": [1180, 110], "size": 96, "anchor": "rm",
            "sub": "WINTER NIGHTS", "sub_pos": [1180, 176], "sub_size": 22}]),
@@ -113,20 +116,22 @@ DEMOS = [
            "sub": "RULE ONE", "angle": 3, "size": 28}]),
     D("strike_cards", G_TEXT, "Gạch bỏ đáp án", "\"Không phải X, không phải Y\" — gạch đúng thứ bị phủ định.", "hunt",
       el=[{"type": "strike_cards", "t_in": 0.3, "t_out": 3.9, "cards": [{"text": "THE COLD", "y": 290, "t_in": 0.3, "t_strike": 1.3},
-                                                                       {"text": "THE WOLVES", "y": 450, "t_in": 1.6, "t_strike": 2.7}]}]),
+                                                                       {"text": "THE WOLVES", "y": 450, "t_in": 1.6, "t_strike": 2.7}]}], status=KHONG),
+
     D("question_card", G_TEXT, "Thẻ dấu hỏi", "Thẻ \"?\" nhấp nháy cho câu hỏi mở.", "hunt",
-      el=[{"type": "question_card", "t_in": 0.3, "box": [490, 190, 790, 490]}]),
+      el=[{"type": "question_card", "t_in": 0.3, "box": [490, 190, 790, 490]}], status=KHONG),
+
     D("kinetic", G_TEXT, "Chữ bật theo lời", "Từ khoá bật to đúng lúc được nói (wordts.py kinetic sinh danh sách).", "camp",
       el=[{"type": "kinetic", "words": [{"text": "FIRE", "t_in": 0.4, "t_out": 1.7, "pos": [640, 340], "size": 150},
                                         {"text": "OR DEATH", "t_in": 1.9, "t_out": 3.6, "pos": [640, 360], "size": 130, "color": "yellow"}]}], preset="kinetic"),
     D("captions", G_TEXT, "Phụ đề theo lời", "Phụ đề theo mệnh đề, từ đã đọc sáng / chưa đọc mờ.", "hunt",
       el=[{"type": "captions", "wordts": "vo/G_wordts.json", "font": "serif", "size": 44, "y": 600, "karaoke": True}], preset="cinematic"),
-    D("ticker", G_TEXT, "Số chạy", "Số chạy tới đích (năm, mét, độ).", "hunt",
+    D("ticker", G_TEXT, "Số chạy", "Số chạy tới đích đúng lúc nói (năm, mét, độ). Dòng CON SỐ trong OVERLAYS.", "hunt",
       el=[{"type": "ticker", "t_in": 0.3, "t_out": 3.8, "run": [0.3, 2.4], "from": 0, "to": 15000, "suffix": " YEARS", "pos": [640, 250],
-           "size": 100, "label": "AGO"}], status=KHONG),
-    D("counter_down", G_TEXT, "Đếm lùi", "Đếm lùi kiểu \"chỉ còn một\", số cuối nổ + chớp.", "camp",
+           "size": 100, "label": "AGO"}], status=CHOT),
+    D("counter_down", G_TEXT, "Đếm lùi", "Đếm lùi kiểu \"chỉ còn một\", số cuối nổ + chớp. Ghi \"đếm lùi\" ở OVERLAYS.", "camp",
       el=[{"type": "counter_down", "t_in": 0.2, "t_out": 3.9, "run": [0.3, 2.4], "hit": 2.4, "from": 30, "to": 1, "power": 2.0,
-           "labels": {"count": "NIGHTS", "end": "OF FUEL LEFT", "sub": "30 NIGHTS"}}], status=KHONG),
+           "labels": {"count": "NIGHTS", "end": "OF FUEL LEFT", "sub": "30 NIGHTS"}}], status=CHOT),
     D("day_ticker", G_TEXT, "Đếm ngày", "DAY 1…11 bật lần lượt.", "hunt",
       el=[{"type": "day_ticker", "run": [0.3, 2.6], "from": 1, "to": 11, "x_start": 450, "step": 38, "y": 640}], status=KHONG),
     # ---------------- biểu đồ & sơ đồ

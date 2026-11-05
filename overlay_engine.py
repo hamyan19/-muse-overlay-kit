@@ -348,18 +348,20 @@ def el_counter_down(t, e):
     lay = new_layer(); d = ImageDraw.Draw(lay)
     hit = e["hit"]
     lb = e["labels"]
+    k = C.W / 1280.0      # bố cục thiết kế ở khung 1280×720 -> co giãn theo khung render (1080p không lệch, không nhỏ)
+    cx = C.W / 2
     if t < hit:
         u = A(t, e["run"][0], hit)
         v = int(round(e["from"] - (e["from"] - e["to"]) * u ** e.get("power", 2.2)))
-        text(d, (640, 330), str(v), "sans", 250, C.colors["white"], stroke=6)
-        text(d, (640, 490), lb["count"], "sans", 40, C.colors["cream"], stroke=3)
+        text(d, (cx, 330 * k), str(v), "sans", 250 * k, C.colors["white"], stroke=round(6 * k))
+        text(d, (cx, 490 * k), lb["count"], "sans", 40 * k, C.colors["cream"], stroke=round(3 * k))
     else:
         p = A(t, hit, hit + 0.30)
-        text(d, (640, 335), str(e["to"]), "sans", 300 * (1 + 0.35 * (1 - ss(p))),
-             C.colors["yellow"], stroke=7)
-        text(d, (640, 500), lb["end"], "sans", 44, C.colors["white"], stroke=3)
+        text(d, (cx, 335 * k), str(e["to"]), "sans", 300 * k * (1 + 0.35 * (1 - ss(p))),
+             C.colors["yellow"], stroke=round(7 * k))
+        text(d, (cx, 500 * k), lb["end"], "sans", 44 * k, C.colors["white"], stroke=round(3 * k))
         if lb.get("sub"):
-            text(d, (640, 560), lb["sub"], "mono", 24, C.colors["edge"])
+            text(d, (cx, 560 * k), lb["sub"], "mono", 24 * k, C.colors["edge"])
     lay = apply_alpha(lay, f)
     if e.get("flash", True) and hit <= t < hit + 0.23:
         fl = Image.new("RGBA", (C.W, C.H), (255, 255, 255, int(70 * (1 - A(t, hit, hit + 0.23)))))
@@ -632,13 +634,15 @@ def el_ticker(t, e):
     v = e["from"] + (e["to"] - e["from"]) * u
     s = f"{e.get('prefix', '')}{int(round(v)):,}{e.get('suffix', '')}"
     done = t >= b
-    size = e["size"] * (1 + 0.25 * (1 - ss(A(t, b, b + 0.25)))) if done else e["size"]
+    k = C.W / e["ref_w"] if e.get("ref_w") else 1.0      # ref_w: toạ độ viết cho khung rộng ref_w (apply_overlays ghi 1280)
+    pos = (e["pos"][0] * k, e["pos"][1] * k); base = e["size"] * k
+    size = base * (1 + 0.25 * (1 - ss(A(t, b, b + 0.25)))) if done else base
     lay = new_layer(); d = ImageDraw.Draw(lay)
-    text(d, e["pos"], s, "sans", size, color_of(e, "end_color", "yellow") if done else color_of(e, "color", "white"),
-         e.get("anchor", "mm"), stroke=5)
+    text(d, pos, s, "sans", size, color_of(e, "end_color", "yellow") if done else color_of(e, "color", "white"),
+         e.get("anchor", "mm"), stroke=max(2, round(5 * k)))
     if e.get("label"):
-        text(d, (e["pos"][0], e["pos"][1] + e["size"] * 0.75), e["label"], "sans", e.get("label_size", 34),
-             C.colors["cream"], e.get("anchor", "mm"), stroke=3)
+        text(d, (pos[0], pos[1] + base * 0.75), e["label"], "sans", e.get("label_size", 34) * k,
+             C.colors["cream"], e.get("anchor", "mm"), stroke=max(1, round(3 * k)))
     return apply_alpha(lay, f)
 
 def el_rain(t, e):

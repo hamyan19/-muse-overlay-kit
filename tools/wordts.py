@@ -123,12 +123,9 @@ def auto(wordts, gap):
     for c in clauses:
         text = " ".join(x[2] for x in c); sug = []
         for s, e, w, n in c:
-            if n in NEG or n.endswith("nt"): sug.append(f"PHỦ ĐỊNH '{w}' @{s:.2f} -> strike_cards")
-            elif re.fullmatch(r"\d[\d,]*", n) or n in NUMW: sug.append(f"SỐ '{w}' @{s:.2f} -> badge_pop")
+            if re.fullmatch(r"\d[\d,]*", n) or n in NUMW: sug.append(f"SỐ '{w}' @{s:.2f} -> ticker (số chạy) / counter_down (đếm lùi)")
             elif n in TIME: sug.append(f"MỐC THỜI GIAN '{w}' @{s:.2f} -> timeline/label")
-        sug += [f"TÊN RIÊNG '{w}' @{s:.2f} -> lower_third / highlight_box" for i, (s, e, w, n) in enumerate(c) if w[:1].isupper() and i > 0 and w.lower() != "i"]
-        if text.rstrip().endswith("?"): sug.append("CÂU HỎI -> question_card")
-        if re.search(r"\b(said|words were|wrote|ruled|called)\b", text, re.I): sug.append("TRÍCH DẪN -> label dẫn rồi typed_card")
+        sug += [f"TÊN RIÊNG '{w}' @{s:.2f} -> lower_third / tag" for i, (s, e, w, n) in enumerate(c) if w[:1].isupper() and i > 0 and w.lower() != "i"]
         print(f"{c[0][0]:7.2f} {c[-1][1]:6.2f}  {text}")
         for x in sug or ["(không có từ khoá) -> vẫn cần 1 sự kiện: label / spotlight / đổi nhịp camera"]: print(f"{'':16}• {x}")
 

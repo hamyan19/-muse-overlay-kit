@@ -240,7 +240,8 @@ Nếu tin nhắn thiếu mục nào trong phần 2, hỏi đúng mục đó rồ
 |---|---|
 | Style dựng | Khác chương liền trước (Ch2 = `storybook` → Ch3 `documentary`, Ch4 lại `storybook`…) |
 | Độ phân giải | Bản thử 1280×720; bản chính thức 1920×1080 khi An yêu cầu |
-| Số tự đếm (ticker) | Không dùng (An muốn ít hiệu ứng) |
+| Số chạy (ticker) + đếm lùi (counter_down) | Dùng, bật qua sheet OVERLAYS (xem `QUYET-DINH.md`) |
+| highlight_box, anchored_circle, typed_card, question_card, strike_cards | Bỏ hẳn (An 05/11) |
 | Nhạc nền | Không có |
 | Cột DUYỆT | Vẫn CHỜ; dựng bản thử với `--include-pending`, không ghi OK thay An |
 | Ảnh 1672×941 | Phóng Lanczos lên 2560×1440 và báo An |

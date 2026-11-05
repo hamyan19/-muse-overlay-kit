@@ -77,7 +77,7 @@ LEX = {
  "document":(["investigators","report","ruled","licence","license","law","court","evidence","record","official","cause","conditions","wrote","write"],
              "Tài liệu / hồ sơ / báo cũ / bàn làm việc", ["particles dust", "preset newsreel gợi ý"], ["paper/typewriter nhẹ"]),
  "map":     (["lima","pucallpa","pucalpa","route","miles","kilometers","andes","mountains","peru","peruvian","border"],
-             "Bản đồ / địa hình / tuyến bay", ["parallax nhẹ", "highlight_box / timeline overlay"], ["wind high altitude"]),
+             "Bản đồ / địa hình / tuyến bay", ["parallax nhẹ", "route / timeline overlay"], ["wind high altitude"]),
  "home":    (["home","house","christmas","school","graduated","graduation","december"],
              "Nhà / dịp lễ / bối cảnh gia đình", ["glow ấm (đèn)", "particles dust"], ["room tone / ambience ấm"]),
 }
@@ -130,17 +130,13 @@ for c in clauses:
     text = " ".join(x[2] for x in c)
     for k, (s, e, w, n) in enumerate(c):
         wl = w.lower().strip(".,;:?!\"“”")
-        if n in NEG or n.endswith("nt"):
-            events.append((s, w, "PHỦ ĐỊNH", "strike_cards", f"thẻ ghi đối tượng bị phủ định trong: “{text}”"))
-        elif re.fullmatch(r"\d[\d,]*", n) or n in NUMW:
-            events.append((s, w, "CON SỐ", "ticker / badge_pop", "số chạy tới đích đúng lúc nói"))
+        if re.fullmatch(r"\d[\d,]*", n) or n in NUMW:   # (phủ định/strike_cards: bỏ — An 05/11)
+            events.append((s, w, "CON SỐ", "số chạy (ticker)", "số chạy tới đích đúng lúc nói; muốn đếm ngược về 1 thì sửa HIỆU ỨNG thành: đếm lùi"))
         elif n in TIMEW:
             events.append((s, w, "MỐC THỜI GIAN", "timeline / label / stamp", "ngày/mốc thời gian"))
         elif w[:1].isupper() and k > 0 and wl not in ("i",):
-            events.append((s, w, "TÊN RIÊNG", "lower_third / highlight_box", f"nhãn tên: {wl.upper()}"))
-    if text.rstrip().endswith("?"): events.append((c[0][0], text.split()[0], "CÂU HỎI", "question_card", "dấu ? nhấp nháy"))
-    if re.search(r"\b(said|words were|wrote|ruled|called)\b", text, re.I):
-        events.append((c[0][0], text.split()[0], "TRÍCH DẪN/PHÁN QUYẾT", "label dẫn + typed_card", "nhãn dẫn rồi gõ chữ thường"))
+            events.append((s, w, "TÊN RIÊNG", "lower_third / tag", f"nhãn tên: {wl.upper()}"))
+    # câu hỏi (question_card), trích dẫn (typed_card): bỏ — An 05/11
 events.sort()
 
 # ---------------- 3b. QUÉT ÂM THANH THEO TỪ KHOÁ (tiếng một lần / hành động) — ngoài nền theo cảnh
